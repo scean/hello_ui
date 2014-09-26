@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.providers.downloads.ui"
+    android:sharedUserId="android.media" >
+
+    <uses-permission android:name="android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS" />
+    <uses-permission android:name="android.permission.ACCESS_ALL_DOWNLOADS" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.MODIFY_NETWORK_ACCOUNTING" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="com.xiaomi.permission.AUTH_SERVICE" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="com.xiaomi.xmsf.permission.PAYMENT" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <application
+        android:name=".GlobalApplication"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher_download"
+        android:label="@string/app_label"
+        android:process="android.process.mediaUI" >
+        <activity
+            android:name=".DownloadList"
+            android:configChanges="orientation|screenSize"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Light.Immersion"
+            android:uiOptions="splitActionBarWhenNarrow" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_DOWNLOADS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".DownloadSettingActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/preferences_title"
+            android:screenOrientation="portrait"
+            android:theme="@miui:style/Theme.Light" />
+        <activity
+            android:name="com.android.providers.downloads.ui.pay.XLSpeedUpActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@miui:style/Theme.Light" >
+        </activity>
+
+        <activity
+            android:name="com.xiaomi.account.openauth.AuthorizeActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/auth_activity_title"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" >
+            <intent-filter>
+                <action android:name="com.xiaomi.account.openauth.action.AUTH" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.xunlei.activity.XLAuthorizeActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/auth_activity_title"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/actionbar_theme" >
+        </activity>
+	    <activity
+			    android:name="com.xunlei.activity.XLUnbindActivity"
+			    android:label="@string/auth_activity_title"
+			    android:configChanges="keyboardHidden|orientation|screenSize"
+			    android:screenOrientation="portrait"
+			    android:windowSoftInputMode="stateHidden"
+			    android:theme="@style/actionbar_theme" >
+         </activity>
+        <activity android:name="com.android.providers.downloads.ui.notification.NotificationAcitivity" >
+        </activity>
+
+        <receiver android:name="com.android.providers.downloads.ui.notification.NotificationReveiver" >
+            <intent-filter>
+                <action android:name="com.downloads.notification.action.init" />
+                <action android:name="com.downloads.notification.action.xiaomi.login" />
+                <action android:name="com.downloads.notification.action.xiaomi.auth" />
+                <action android:name="com.downloads.notification.action.vip_expire" />
+                <action android:name="com.downloads.notification.action.goto.downloadlist" />
+                <action android:name="com.downloads.notification.action.auto.obtain" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

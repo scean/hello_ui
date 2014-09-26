@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/header_panel"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/distance_to_border"
+    android:paddingRight="@dimen/distance_to_border"
+    android:gravity="center_vertical" >
+    <TextView
+        android:id="@+id/header_title_container"
+        style="@miui:style/TextAppearance.WindowTitle"
+        android:layout_width="0dip"
+        android:layout_height="wrap_content"
+        android:text="@string/all_downloads"
+        android:layout_weight="1" />
+    <Button
+        android:id="@+id/option_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/option_button"
+        android:layout_gravity="center_vertical|right" />
+
+</LinearLayout>

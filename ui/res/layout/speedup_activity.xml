@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:id="@+id/top_part"
+        android:orientation="vertical"
+        android:gravity="center_horizontal" 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <!--头像-->
+        <RelativeLayout
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_marginTop="29dp"
+            android:layout_centerHorizontal="true">
+            <ImageView
+                android:id="@+id/img_vipthumb"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:adjustViewBounds="true"
+                android:gravity="center"
+                android:scaleType="fitXY"
+                android:src="@drawable/head_default" />
+            <ImageView
+                android:id="@+id/img_vipthumbhead"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:adjustViewBounds="true"
+                android:gravity="center"
+                android:scaleType="fitXY"
+                android:src="@drawable/head_top" />
+        </RelativeLayout>
+        
+        <TextView
+            android:id="@+id/text_vipname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="19dp"
+            android:textSize="14dip"
+            android:textAppearance="@miui:style/TextAppearance.List.Primary" />
+
+        <ImageView
+            android:id="@+id/image_vipinfo"
+            android:layout_width="35dp"
+            android:layout_height="11dp"
+            android:src="@drawable/isvip_01"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/text_wantvip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="19dp"
+            android:textSize="13dip"
+            android:textAppearance="@miui:style/TextAppearance.List.Primary"
+            android:textColor="#dd6003"
+            android:visibility="gone" />     
+        <TextView
+            android:id="@+id/text_vip_auto_speedup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:textAppearance="@miui:style/TextAppearance.List.Secondary"
+            android:text="@string/vip_auto_speedup"
+            android:textSize="12dp"
+            android:visibility="gone" />
+    </LinearLayout>
+    
+    <RelativeLayout
+        android:id="@+id/relativeLayout_main"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/top_part"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="0dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp" >
+        <TextView
+            android:id="@+id/text_gaosutongdao"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/xunlei_gaosu"
+            android:textAppearance="@miui:style/TextAppearance.List.Secondary"
+            android:textSize="12dp"
+             />
+        <ImageView
+            android:id="@+id/line1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text_gaosutongdao"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/decorate_line" />
+        <TextView
+            android:id="@+id/text_quick_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line1"
+            android:layout_marginTop="12dp"
+            android:textAppearance="@miui:style/TextAppearance.List.Primary"
+            />
+
+        <TextView
+            android:id="@+id/text_vipinfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/text_quick_msg"
+            android:layout_alignParentRight="true"
+            android:textSize="12dip"
+            android:textAppearance="@miui:style/TextAppearance.List.Secondary" />
+
+        <miui.widget.ProgressBar
+            android:id="@+id/progressBar1"
+            style="@miui:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="11dp"
+            android:layout_below="@+id/text_quick_msg"
+            android:layout_marginTop="6dp"
+            android:indeterminate="false" /> 
+
+        <TextView
+            android:id="@+id/text_quick_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progressBar1"
+            android:textAppearance="@miui:style/TextAppearance.List.Secondary"
+            android:layout_marginTop="6dp"
+            android:textSize="12dp" />
+
+        <ImageView
+            android:id="@+id/line2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progressBar1"
+            android:layout_marginTop="34dp"
+            android:src="@drawable/decorate_line" />
+
+
+
+        <!--ImageView
+            android:id="@+id/line3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/layout_choose"
+            android:layout_marginTop="1dp"
+            android:src="@drawable/decorate_line" / -->
+
+
+
+    </RelativeLayout>
+	<LinearLayout
+			android:id="@+id/layout_choose"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@id/relativeLayout_main"
+			android:layout_centerHorizontal="true"
+			android:layout_marginTop="0dp"
+			android:clickable="true"
+			android:gravity="center_vertical"
+			android:orientation="horizontal"
+			style="@miui:style/Widget.ListView.Item.SingleLine"
+			>
+		<TextView
+				android:id="@+id/text_quick1"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_below="@+id/text_quick_detail"
+				android:layout_weight=".8"
+				android:singleLine="true"
+				android:textAppearance="@miui:style/TextAppearance.PreferenceList"
+				/>
+		<miui.widget.SlidingButton
+				android:id="@+id/slide_choose"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				/>
+	</LinearLayout>
+	<TextView
+			android:id="@+id/text_paymsg"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_above="@+id/btn_pay"
+			android:layout_centerHorizontal="true"
+			android:gravity="center_horizontal"
+			android:maxLines="2"
+			android:textAppearance="@miui:style/TextAppearance.List.Secondary"
+			/>
+
+	<Button
+			android:id="@+id/btn_pay"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="18dp"
+			android:layout_marginLeft="18dp"
+			android:layout_marginRight="18dp"
+			android:text="@string/xunlei_brand"
+			style="@miui:style/Widget.Button.Warning" />
+</RelativeLayout>

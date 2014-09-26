@@ -1,0 +1,29 @@
+
+<resources>
+    <color name="filter_bar_unchecked_button_text_color">#80000000</color>
+    <color name="filter_bar_checked_button_text_color">#FF000000</color>
+    <color name="download_info_text_color">#80000000</color>
+    <color name="widget_background_color">#00000000</color>
+    
+    
+      <color name="miui_separator_color">#32000000</color>
+        <color name="blue_mormal">#FF0097E8</color>
+    <color name="blue_hover">#FF2BB5FF</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="white_half">#7FFFFFFF</color>
+    <color name="white_third">#55FFFFFF</color>
+    <color name="half_white">#8FFFFFFF</color>
+    <color name="setting_gray">#F1F1F1</color>
+<color name="black">#000000</color>
+    <color name="darker_white">#fdfcfc</color>
+    <color name="process_orange">#e76e02</color>
+    <!-- toast bg -->
+    <color name="xl_toast_bg_color">#ff1f222a</color>
+
+    <color name="focus_color">#aa000000</color>
+	<color name="action_background_color">#efeff0</color>
+    
+    
+    
+</resources>
+

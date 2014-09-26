@@ -1,0 +1,59 @@
+<resources>
+    <!-- Global Theme Styles -->
+    <eat-comment />
+
+    <style name="ActionBar.ShowCustom" parent="@miui:style/Widget.ActionBar">
+        <item name="android:displayOptions">showCustom</item>
+    </style>
+    <style name="ActionBar.TabBar" parent="@miui:style/Widget.ActionBar.TabBar">
+        <item name="android:background">@drawable/action_bar_bg_light</item>
+    </style>
+    <!-- Action bar tab view style for dark theme. -->
+    <style name="ActionBar.TabView" parent="miui:style/Widget.ActionBar.TabView">
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:background">@drawable/action_bar_tab_bg_light</item>
+    </style>
+    <style name="Filter.Text.style" parent="@*miui:style/TextAppearance.List.Primary">
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="ActionBar.ModeStyle" parent="@miui:Widget.ActionMode">
+        <item name="android:height">@dimen/tab_bar_height_for_pad</item>
+    </style>
+    <style name="Theme.Light.Immersion" parent="@miui:style/Theme.Light">
+        <item name="miui:immersionMenuEnabled">true</item>
+    </style>
+
+<style name="sc_TransparentTheme" parent="@android:style/Theme">
+        <item name="android:windowBackground">@color/focus_color</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+     <style name="TextAppearanceMainTitle">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">19dp</item>
+    </style>
+    <style name="AnimationActivity" mce_bogus="1" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+        <item name="android:taskOpenEnterAnimation">@null</item>
+        <item name="android:taskOpenExitAnimation">@null</item>
+        <item name="android:taskCloseEnterAnimation">@null</item>
+        <item name="android:taskCloseExitAnimation">@null</item>
+        <item name="android:taskToFrontEnterAnimation">@null</item>
+        <item name="android:taskToFrontExitAnimation">@null</item>
+        <item name="android:taskToBackEnterAnimation">@null</item>
+        <item name="android:taskToBackExitAnimation">@null</item>
+
+     </style>
+     <style name="ThemeActivity" mce_bogus="1" parent="@android:style/Theme.NoTitleBar">
+        <item name="android:windowAnimationStyle">@style/AnimationActivity</item>
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+</resources>

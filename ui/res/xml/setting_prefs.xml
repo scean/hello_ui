@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:key="CategoryCheckbox" >
+        <CheckBoxPreference android:key="xunlei_usage_permission"
+            android:defaultValue="true"
+            android:persistent="false"
+            android:title="@string/xunlei_switch"/>
+    </PreferenceCategory>
+    <Preference
+        style="?android:attr/preferenceInformationStyle"
+        android:key="pref_size_limit_info"
+        android:title="@string/pref_download_settings_title">
+    </Preference>
+</PreferenceScreen>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical" >
+    <LinearLayout
+        android:id="@+id/group_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/distance_to_border"
+        android:layout_marginRight="@dimen/distance_to_border"
+        android:layout_marginBottom="@dimen/distance_to_bottom"
+        android:orientation="vertical">
+        <RadioGroup
+            android:id="@+id/radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/filter_all"
+                android:button="@null"
+                android:gravity="center"
+                android:layout_height="@dimen/filter_tab_height"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:background="@drawable/filter_radio_button_left_selector"
+                android:textSize="@dimen/download_text_size"
+                android:textColor="@color/filter_bar_unchecked_button_text_color"
+                android:text="@string/all_fileter" />
+
+            <RadioButton
+                android:id="@+id/filter_apk"
+                android:button="@null"
+                android:gravity="center"
+                android:layout_height="@dimen/filter_tab_height"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:background="@drawable/filter_radio_button_middle_selector"
+                android:textSize="@dimen/download_text_size"
+                android:textColor="@color/filter_bar_unchecked_button_text_color"
+                android:text="@string/apk_filter" />
+
+            <RadioButton
+                android:id="@+id/filter_media"
+                android:button="@null"
+                android:gravity="center"
+                android:layout_height="@dimen/filter_tab_height"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:background="@drawable/filter_radio_button_middle_selector"
+                android:textSize="@dimen/download_text_size"
+                android:textColor="@color/filter_bar_unchecked_button_text_color"
+                android:text="@string/media_filter" />
+
+            <RadioButton
+                android:id="@+id/filter_doc"
+                android:button="@null"
+                android:gravity="center"
+                android:layout_height="@dimen/filter_tab_height"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:background="@drawable/filter_radio_button_middle_selector"
+                android:textSize="@dimen/download_text_size"
+                android:textColor="@color/filter_bar_unchecked_button_text_color"
+                android:text="@string/doc_filter" />
+
+            <RadioButton
+                android:id="@+id/filter_package"
+                android:button="@null"
+                android:gravity="center"
+                android:layout_height="@dimen/filter_tab_height"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:background="@drawable/filter_radio_button_middle_selector"
+                android:textSize="@dimen/download_text_size"
+                android:textColor="@color/filter_bar_unchecked_button_text_color"
+                android:text="@string/package_filter" />
+
+            <RadioButton
+                android:id="@+id/filter_other"
+                android:button="@null"
+                android:gravity="center"
+                android:layout_height="@dimen/filter_tab_height"
+                android:layout_width="0dip"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:background="@drawable/filter_radio_button_right_selector"
+                android:textSize="@dimen/download_text_size"
+                android:textColor="@color/filter_bar_unchecked_button_text_color"
+                android:text="@string/other_filter" />
+
+        </RadioGroup>
+    </LinearLayout>
+
+    <miui.view.ViewPager
+        android:id="@miui:id/view_pager"
+        android:layout_width="wrap_content"
+        android:layout_marginBottom="@dimen/distance_to_bottom"
+        android:layout_height="0dip"
+        android:layout_weight="1" />
+	
+	<LinearLayout
+	android:id="@+id/image_xl_area"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:gravity="center" >
+        <ImageView
+              android:id="@+id/image_xl_bottom"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:src="@drawable/xunlei_speedup" />
+    </LinearLayout>
+</LinearLayout>
+

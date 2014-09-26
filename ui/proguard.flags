@@ -1,0 +1,4 @@
+-verbose
+-keep class com.xunlei.** { *; }
+-dontwarn com.xiaomi.**
+-keep class com.xiaomi.** { *; }
