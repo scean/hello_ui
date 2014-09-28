@@ -2,7 +2,7 @@ package com.android.providers.downloads;
 
 public class XLConfig {
 
-    public static final boolean XUNLEI_LOG_PRINT = true;
+    public static final boolean XUNLEI_LOG_PRINT = false;
 
     public static final String PREF_NAME = "download_pref";
     public static final String PREF_KEY_XUNLEI_TOKEN = "xunlei_token";
