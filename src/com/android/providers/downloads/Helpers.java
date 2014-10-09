@@ -849,7 +849,7 @@ public class Helpers {
                     " xl error code = " + xlErrorCode + ", xl task id = " + xlTaskId +
                     ", use engine = " + useEngine + ", size = " + size + ", contribution = " + contribution +
                     "%, percent = " + percent + "%, time usage = " + timeUsage + ", in white list = " + inWhitelist +
-                    ", url = " + url + ", refer = " + refer + ", miui version = " + Build.VERSION.INCREMENTAL +
+                    ", refer = " + refer + ", miui version = " + Build.VERSION.INCREMENTAL +
                     ", xunlei version = " + xlVersion + ", net type = " + netType + ", package = " + pkgName +
                     ", xunlei switch = " + xunlei_switch);
         }
@@ -859,7 +859,7 @@ public class Helpers {
         trackData.put(TRACK_ID_USE_XUNLEI, Boolean.toString(useEngine));
         trackData.put(TRACK_ID_PTOP_CONTRIBUTION, Float.toString(contribution));
         trackData.put(TRACK_ID_IN_WHITELIST, Boolean.toString(inWhitelist));
-        trackData.put(TRACK_ID_URL, url);
+        //trackData.put(TRACK_ID_URL, url);
         trackData.put(TRACK_ID_REFER, refer);
         trackData.put(TRACK_ID_XL_VERSION, xlVersion);
         trackData.put(TRACK_ID_NET_TYPE, Integer.toString(netType));
