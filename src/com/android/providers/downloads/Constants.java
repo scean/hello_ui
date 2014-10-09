@@ -177,7 +177,7 @@ public class Constants {
     public static final boolean LOGV = LOCAL_LOGV && Log.isLoggable(TAG, Log.VERBOSE);
 
     /** Enable verbose logging for xunlei */
-    public static final boolean XL_LOG = true;
+    public static final boolean XL_LOG = false;
     /** Enable super-verbose logging */
     private static final boolean LOCAL_LOGVV = false;
     public static final boolean LOGVV = LOCAL_LOGVV && LOGV;
