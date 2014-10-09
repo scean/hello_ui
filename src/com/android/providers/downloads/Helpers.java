@@ -80,7 +80,7 @@ public class Helpers {
     public static int sMaxDownloadsCountPerDomain = DEFAULT_MAX_DOWNLOADS_COUNT_PER_DOMAIN;
     /**By default, allow download when any network connected*/
     public static boolean sDownloadOnlyOnWifi = false;
-	public static final boolean analyticsMark=true;
+	public static final boolean analyticsMark=false;
     public static HashMap<String, Integer> sDownloadsDomainCountMap = new HashMap<String, Integer>();
 
     /** Regex used to parse content-disposition headers */
