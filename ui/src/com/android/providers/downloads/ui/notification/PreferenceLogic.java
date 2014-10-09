@@ -276,7 +276,9 @@ public class PreferenceLogic {
     
     // 是否使用迅雷下载引擎
     public boolean getIsHaveUseXunleiDownload() {
-        if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) {
+        if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD)
+		//if(true)
+		{
             return false;
         } else {
             SharedPreferences mPreferces = getSharedPreference();

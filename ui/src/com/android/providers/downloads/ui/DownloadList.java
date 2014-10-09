@@ -607,9 +607,11 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         boolean netStatus = DownloadUtils.isNetworkAvailable(getApplicationContext());
 		
 
-		if (Build.IS_TABLET) {
+		if (Build.IS_TABLET || miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) 
+		//if(true)
+		{
             		
-        	}
+        }
 		else
 		{
 			int nVipMark = ConfigJSInstance.getInstance(getApplication()).getUseOpt();
@@ -809,11 +811,21 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 
                 View headPanel = titleBar.findViewById(R.id.header_panel);
                 actionBar.setTitle(R.string.all_downloads);
-                actionBar.setDisplayHomeAsUpEnabled(false);
-                actionBar.setDisplayShowHomeEnabled(true);
-                actionBar.setDisplayShowCustomEnabled(true);
-                actionBar.setHomeButtonEnabled(true);
-                setNoSpeedUpIcon(actionBar);
+				if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) 
+				//if (true)
+				{
+       				actionBar.setDisplayHomeAsUpEnabled(false);
+					actionBar.setDisplayShowHomeEnabled(false);
+					actionBar.setHomeButtonEnabled(false);
+				}
+				else
+				{
+					actionBar.setDisplayHomeAsUpEnabled(false);
+					actionBar.setDisplayShowHomeEnabled(true);
+					actionBar.setHomeButtonEnabled(true);
+					setNoSpeedUpIcon(actionBar);
+				}
+				actionBar.setDisplayShowCustomEnabled(true);
                 actionBar.setCustomView(titleBar, new LayoutParams(Gravity.RIGHT));
 
                 // Show tab labels

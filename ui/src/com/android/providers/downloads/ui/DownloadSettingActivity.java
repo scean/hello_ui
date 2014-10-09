@@ -45,6 +45,7 @@ import android.preference.Preference;
 import miui.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.PreferenceCategory;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -63,6 +64,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
 	private static final String PREF_KEY_SIZE_LIMIT = "pref_size_limit_info";
 	// checkbox
 	private CheckBoxPreference mXunleiUsagePref;
+	private PreferenceCategory mPreferenceCategory;
 	public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
 	public static final String PREF_KEY_CATEGORY = "CategoryCheckbox";
 	public static final String PREF_NAME = "download_pref";
@@ -136,6 +138,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
 
 		// setup checkbox
 		boolean xunlei_usage = PreferenceLogic.getInstance().getIsHaveUseXunleiDownload();
+		mPreferenceCategory = (PreferenceCategory) findPreference(PREF_KEY_CATEGORY);
 		mXunleiUsagePref = (CheckBoxPreference) findPreference(PREF_KEY_XUNLEI_USAGE_PERMISSION);
 		mXunleiUsagePref.setChecked(xunlei_usage);
 		mXunleiUsagePref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
@@ -152,7 +155,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
 							}).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
-									// mXunleiUsagePref.setChecked(true);
+
 										PreferenceLogic.getInstance().setIsHaveUseXunleiDownload(false);
 										DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, false);
 								}
@@ -172,6 +175,12 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
 				return true;
 			}
 		});// */
+		if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) 
+		//if (true) 
+		{
+			if(mPreferenceCategory != null)
+				mPreferenceCategory.removePreference(mXunleiUsagePref);
+		}
 	}
 
 	@Override

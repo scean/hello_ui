@@ -844,7 +844,7 @@ public class Helpers {
         // track
         Analytics tracker = Analytics.getInstance();
         Map <String,String> trackData = new HashMap<String, String>();
-        if (Constants.XL_LOG) {
+        if (STAT_LOG_ON) {
             Log.v(Constants.TAG, "track download event : error code = " + errorCode +
                     " xl error code = " + xlErrorCode + ", xl task id = " + xlTaskId +
                     ", use engine = " + useEngine + ", size = " + size + ", contribution = " + contribution +
@@ -1084,12 +1084,12 @@ public class Helpers {
         Analytics tracker = Analytics.getInstance();
         Map <String,String> trackData = new HashMap<String, String>();
         trackCommon(context, trackData, status, taskId, xlEnable, xmId, xlId, pkgName, product, productVersion, network);
-       // trackData.put("cid", Integer.toString(cid));
+		//trackData.put("cid", Integer.toString(cid));
         //trackData.put("gcid", Integer.toString(gcid));
         trackData.put("file_size", Long.toString(filesize));
-        trackData.put("source_url", url);
+        //trackData.put("source_url", url);
         trackData.put("file_name", filename);
-       // trackData.put("duration", Long.toString(duration));
+		// trackData.put("duration", Long.toString(duration));
         tracker.startSession(context);
         tracker.trackEvent("download_start_event", trackData);
         tracker.endSession();
