@@ -7,6 +7,7 @@
     </style>
     <style name="ActionBar.TabBar" parent="@miui:style/Widget.ActionBar.TabBar">
         <item name="android:background">@drawable/action_bar_bg_light</item>
+        <item name="android:paddingLeft">@dimen/distance_to_border</item>
     </style>
     <!-- Action bar tab view style for dark theme. -->
     <style name="ActionBar.TabView" parent="miui:style/Widget.ActionBar.TabView">
