@@ -550,6 +550,8 @@ public class DownloadAdapter extends CursorAdapter {
         view.setText(text);
         if (color != -1) {
             view.setTextColor(color);
+        } else {
+            view.setTextAppearance(mContext, miui.R.style.TextAppearance_List_Secondary);
         }
     }
 
