@@ -1,2 +1,16 @@
+-ignorewarnings
 -verbose
 -keep class com.xunlei.** { *; }
+#keep mipush
+-keep class com.miui.video.mipush.MediaPushMessageReceiver {*;}
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keepclasseswithmembernames class * {
+    private int mNativeContext;
+    private int mListenerContext;
+    private android.view.Surface mSurface;
+    public static final int *;
+}
