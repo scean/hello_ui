@@ -288,7 +288,11 @@ public class NotificationLogic {
     public GiveFlowUsedState getShowBeforeGivenFlowOutState() {
         refreshInfo();
         List<Integer> beforeUsedPercents = mConfigJSInfo.flow_guide_bar_before_used_percent_config;
-        Collections.sort(beforeUsedPercents);
+	    if (beforeUsedPercents == null) {
+		    return GiveFlowUsedState.NONE;
+	    }
+		    Collections.sort(beforeUsedPercents);
+
         if (null == mFlowInfo) {
             return GiveFlowUsedState.NONE;
         }
