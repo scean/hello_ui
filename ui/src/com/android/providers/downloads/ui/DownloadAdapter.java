@@ -242,11 +242,11 @@ public class DownloadAdapter extends CursorAdapter {
 				if (getSizeText().equals("")) {// show connect status when not get filesize				
 					info = mContext.getString(R.string.download_wait_connect);
 					setTextForViewAndColor(convertView, R.id.date_status_info,
-							info, 0xff808080);
+							info, -1);
 				} else if (currentspeed == 0 && DownloadManager.STATUS_RUNNING != status) {//waiting			
 					info = mContext.getString(R.string.download_pending);
 					setTextForViewAndColor(convertView, R.id.date_status_info,
-							info, 0xff808080);
+							info, -1);
 				} else {
 					long id = mCursor.getLong(mIdColumnId);
 					boolean blueFont = speedUpSet.contains(id);
@@ -262,13 +262,13 @@ public class DownloadAdapter extends CursorAdapter {
                     else    
                         speedtext=DownloadUtils.convertFileSize(currentspeed,0) + "/s";
 					
-					setTextForViewAndColor(convertView, R.id.date_status_info, speedtext, blueFont ? 0xff009bff : 0xff808080);
+					setTextForViewAndColor(convertView, R.id.date_status_info, speedtext, blueFont ? 0xff009bff : -1);
 				}               
 				//*/
 				
             } else {
                 info = mContext.getString(getStatusStringId());
-				setTextForViewAndColor(convertView, R.id.date_status_info, info,0xff808080);
+				setTextForViewAndColor(convertView, R.id.date_status_info, info, -1);
             }
 
             //setTextForView(convertView, R.id.date_status_info, info);
@@ -540,11 +540,17 @@ public class DownloadAdapter extends CursorAdapter {
         view.setVisibility(View.VISIBLE);
         view.setText(text);
     }
-    private void setTextForViewAndColor(View parent, int textViewId, String text,int color) {
+
+    /**
+     * @param color if color is -1, then need not set text color, otherwise should set text color.
+     */
+    private void setTextForViewAndColor(View parent, int textViewId, String text, int color) {
         TextView view = (TextView) parent.findViewById(textViewId);
         view.setVisibility(View.VISIBLE);
         view.setText(text);
-        view.setTextColor(color);
+        if (color != -1) {
+            view.setTextColor(color);
+        }
     }
 
     // CursorAdapter overrides
