@@ -46,7 +46,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteAbortException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.Binder;
@@ -62,6 +64,7 @@ import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.text.style.SuperscriptSpan;
 import android.util.Log;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -283,6 +286,8 @@ public final class DownloadProvider extends ContentProvider {
      * an updated version of the database.
      */
     private final class DatabaseHelper extends SQLiteOpenHelper {
+        
+        private SQLiteDatabase mSqldb;
         public DatabaseHelper(final Context context) {
             super(context, DB_NAME, null, DB_VERSION);
         }
@@ -295,9 +300,17 @@ public final class DownloadProvider extends ContentProvider {
             if (Constants.LOGVV) {
                 Log.v(Constants.TAG, "populating new database");
             }
+            mSqldb = db;
             onUpgrade(db, 0, DB_VERSION);
         }
-
+        
+        @Override
+        public void onDowngrade (SQLiteDatabase db, int oldV, int newV) {
+            if (Constants.LOGVV) {
+                Log.v(Constants.TAG, "db downgrade");
+            }
+        }
+        
         /**
          * Updates the database format when a content provider is used
          * with a database that was created with a different format.
@@ -328,7 +341,7 @@ public final class DownloadProvider extends ContentProvider {
                 upgradeTo(db, version);
             }
         }
-
+        
         /**
          * Upgrade database from (version - 1) to version.
          */
@@ -497,6 +510,18 @@ public final class DownloadProvider extends ContentProvider {
             }
         }
 
+        public void deleteDownloadsTable() {
+            try {
+                if (mSqldb != null) {
+                    mSqldb.execSQL("DROP TABLE " + DB_TABLE);
+                    mSqldb.execSQL("DROP TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
+                }
+            } catch (SQLException e) {
+                // TODO: handle exception
+                Log.e(Constants.TAG, "couldn't delete table in downloads database");
+            }
+        }
+        
         private void createHeadersTable(SQLiteDatabase db) {
             db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
             db.execSQL("CREATE TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE + "(" +
@@ -989,10 +1014,11 @@ public final class DownloadProvider extends ContentProvider {
 
         try{
         	 db = mOpenHelper.getReadableDatabase();
-        }catch(Exception e){
+        } catch (SQLiteException e){
         	e.printStackTrace();
+        	((DatabaseHelper)mOpenHelper).deleteDownloadsTable();
         	return null;
-        }
+        } 
 
         int match = sURIMatcher.match(uri);
         if (match == -1) {
