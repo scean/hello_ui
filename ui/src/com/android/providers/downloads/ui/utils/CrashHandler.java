@@ -31,7 +31,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 
     private Map<String, String> mDeviceInfo = new HashMap<String, String>();
 
-    private DateFormat mFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private DateFormat mFormatter = new SimpleDateFormat("yyMMdd");
 
     private CrashHandler() {
     }
@@ -51,15 +51,10 @@ public class CrashHandler implements UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(Thread thread, Throwable tx) {
-        if (!handleException(tx) && mDefaultHandler != null) {
+        handleException(tx);
+
+        if (mDefaultHandler != null) {
             mDefaultHandler.uncaughtException(thread, tx);
-        } else {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException ex) {
-            }
-            android.os.Process.killProcess(android.os.Process.myPid());
-            System.exit(1);
         }
     }
 
@@ -116,22 +111,24 @@ public class CrashHandler implements UncaughtExceptionHandler {
         pw.close();
         String result = writer.toString();
         sb.append(result);
+        sb.append("\n\n");
 
         try {
             String time = mFormatter.format(new Date());
-            String fileName = "crash-" + time + ".log";
+            String fileName = "crash_log_ui_" + time + ".log";
             if (AppConfig.LOG_DIR != null) {
                 String path = AppConfig.LOG_DIR;
                 File dir = new File(path);
                 if (!dir.exists()) {
                     dir.mkdirs();
                 }
-                FileOutputStream fos = new FileOutputStream(new File(path + fileName));
+                FileOutputStream fos = new FileOutputStream(new File(path, fileName), true);
                 fos.write(sb.toString().getBytes());
                 fos.close();
             }
             return fileName;
         } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
         return null;

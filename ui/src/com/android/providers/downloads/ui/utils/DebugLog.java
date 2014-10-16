@@ -25,7 +25,6 @@ public class DebugLog {
 	private static String TAG = "DebugLog";
 
 	private static String LOG_DIR = AppConfig.LOG_DIR;
-	private static String LOG_CURR_FILENAME = "debug_log.txt";
 
 	public static final boolean DEBUG = AppConfig.DEBUG;
 	public static final boolean LOGVV = true && DEBUG;
@@ -62,10 +61,6 @@ public class DebugLog {
 			instance = new DebugLog();
 		}
 		return instance;
-	}
-
-	public static void setLogFileName(String name) {
-	    LOG_CURR_FILENAME = name;
 	}
 
 	private DebugLog() {
@@ -385,9 +380,9 @@ public class DebugLog {
 
     private String composeFileName(String currentDay) {
         if (!TextUtils.isEmpty(currentDay)) {
-            return "debug_log_" + currentDay + ".txt";
+            return "debug_log_ui_" + currentDay + ".txt";
         }
-        return "debug_log.txt";
+        return "debug_log_ui.txt";
     }
 
     private String getCurrentDay() {
