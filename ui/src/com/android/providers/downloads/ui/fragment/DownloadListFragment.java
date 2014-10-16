@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.providers.downloads.ui;
+package com.android.providers.downloads.ui.fragment;
+
+import com.android.providers.downloads.ui.R;
+import com.android.providers.downloads.ui.activity.DownloadListActivity;
+import com.android.providers.downloads.ui.adapter.DownloadAdapter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,10 +33,11 @@ import java.util.Map;
 import java.util.Set;
 
 import miui.widget.EditableListViewWrapper;
+import miui.app.ProgressDialog;
+
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.DownloadManager;
-import miui.app.ProgressDialog;
 import android.app.Fragment;
 import android.content.ActivityNotFoundException;
 import android.content.ContentUris;
@@ -69,11 +74,13 @@ import android.widget.Toast;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+
 /**
  *  View showing a list of all downloads the Download Manager knows about.
  */
 public class DownloadListFragment extends Fragment{
-    static final String LOG_TAG = "DownloadList";
+    private static final String LOG_TAG = "DownloadList";
+
     static final String[] MIMETYPE_APK = {"application/vnd.android.package-archive", "application/apk-ota"};
     static final String[] MIMETYPE_MEDIA = {"audio/%", "image/%", "video/%"};
     static final String[] MIMETYPE_DOC = {"application/pdf", "application/vnd.oasis.opendocument%",
@@ -109,7 +116,7 @@ public class DownloadListFragment extends Fragment{
     // used to filter downloading and downloaded tasks
     private int mFilterPosition = 0;
     // used to filter all, apk, music, picture, document, video, zip, and others tasks.
-    private int mFilterIndex = DownloadList.FILTER_ALL;
+    private int mFilterIndex = DownloadListActivity.FILTER_ALL;
     private final static int FILTER_SUCCESSFUL = 1;
     private final static int FILTER_DOWNLOADING = 2;
 
@@ -311,19 +318,19 @@ public class DownloadListFragment extends Fragment{
         // set filter for mimetype
         String mimetypeSelection = null;
         switch (mFilterIndex) {
-            case DownloadList.FILTER_APK:
+            case DownloadListActivity.FILTER_APK:
                 mimetypeSelection = getMimetypeFilter(MIMETYPE_APK, "OR", "=");
                 break;
-            case DownloadList.FILTER_MEDIA:
+            case DownloadListActivity.FILTER_MEDIA:
                 mimetypeSelection = getMimetypeFilter(MIMETYPE_MEDIA, "OR", "LIKE");
                 break;
-            case DownloadList.FILTER_PACKAGE:
+            case DownloadListActivity.FILTER_PACKAGE:
                 mimetypeSelection = getMimetypeFilter(MIMETYPE_PACKAGE, "OR", "=");
                 break;
-            case DownloadList.FILTER_DOC:
+            case DownloadListActivity.FILTER_DOC:
                 mimetypeSelection = getMimetypeFilter(MIMETYPE_DOC, "OR", "LIKE");
                 break;
-            case DownloadList.FILTER_OTHER:
+            case DownloadListActivity.FILTER_OTHER:
                 mimetypeSelection = getMimetypeOther();
                 break;
         }

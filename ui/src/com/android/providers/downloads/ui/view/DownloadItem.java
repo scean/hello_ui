@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.providers.downloads.ui;
+package com.android.providers.downloads.ui.view;
+
+import com.android.providers.downloads.ui.R;
 
 import android.content.Context;
 import android.util.AttributeSet;

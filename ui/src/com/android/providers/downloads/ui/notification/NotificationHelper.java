@@ -30,7 +30,10 @@ import android.widget.RemoteViews;
 import android.content.SharedPreferences;
 import android.widget.Toast;
 
-import com.android.providers.downloads.ui.*;
+import com.android.providers.downloads.ui.app.AppConfig;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.utils.DateUtil;
 import com.android.providers.downloads.ui.notification.NotificationLogic.VipExpireStatus;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
@@ -38,8 +41,10 @@ import com.android.providers.downloads.ui.pay.AccountInfoInstance.AccountInfo;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.AccountListener;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.AddFlowInfo;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.FlowInfo;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
+
+import com.android.providers.downloads.ui.R;
+
 import miui.maml.util.AppIconsHelper;
 
 /**
@@ -52,6 +57,7 @@ import miui.maml.util.AppIconsHelper;
  * @date 2014年6月28日 下午9:08:01
  */
 public class NotificationHelper {
+    private static final String TAG = NotificationHelper.class.getSimpleName();
 
 	private static NotificationHelper instance;
 	private Context mContext;
@@ -112,7 +118,7 @@ public class NotificationHelper {
 		isVipAccount = AccountLogic.getInstance().isVipXunleiAccount(mContext);
 		boolean isUseServe = ConfigJSInstance.getInstance(mContext).getUseOpt() == ConfigJSInstance.Opt_NetALL;
 		
-		LogUtil.debugLog("NotificationReveiver"+isUsingXunleiDownload+isLogined+isAuthed+isVipAccount);
+		AppConfig.LOGD(TAG, "NotificationReveiver"+isUsingXunleiDownload+isLogined+isAuthed+isVipAccount);
 		
 		
 		// 正在下载的文件是否大于1M,用于判断有没有任务在下载 有网络
@@ -157,7 +163,7 @@ public class NotificationHelper {
 			@Override
 			public int OnFlowRtn(int ret, FlowInfo flow, String msg) {
 				if (flow != null && flow.historysend == 0) {
-					LogUtil.debugLog("NotificationReveiver flow.historysend"
+					AppConfig.LOGD(TAG, "NotificationReveiver flow.historysend"
 							+ flow.historysend);
 					showLoginFirstMonth();
 				}
@@ -189,7 +195,7 @@ public class NotificationHelper {
 			if (isAuthed && isVipAccount) {// 已绑定迅雷账号
 				showSpeedUpNotification();
 			} else {
-				LogUtil.debugLog("未绑定迅雷帐号");
+				AppConfig.LOGD(TAG, "未绑定迅雷帐号");
 				if (isUsingXunleiDownload) {
 					String token = PreferenceLogic.init(mContext).getToken();
 					AccountInfoInstance accoutnInstance = AccountInfoInstance
@@ -243,7 +249,7 @@ public class NotificationHelper {
 			AccountInfoInstance mAccountInfoInstance = AccountInfoInstance
 					.getInstance(mContext,
 							XLUtil.getStringPackagePreference(mContext));
-			LogUtil.debugLog("NotificationHelper.java showNotification() request flow");
+			AppConfig.LOGD(TAG, "NotificationHelper.java showNotification() request flow");
 			
 			mAccountInfoInstance.setAccountListener(new AccountListener() {
 
@@ -254,7 +260,7 @@ public class NotificationHelper {
 						int month = c.get(Calendar.MONTH);
 						boolean flag = ConfigJSInstance.getInstance(
 								mContext.getApplicationContext()).getUseOpt() == ConfigJSInstance.Opt_NetALL;
-						LogUtil.debugLog(" ret = "
+						AppConfig.LOGD(TAG, " ret = "
 								+ ret
 								+ "flow.historysend  =  "
 								+ flow.historysend
@@ -384,7 +390,7 @@ public class NotificationHelper {
 		// 开启迅雷加速
 		if (isUsingXunleiDownload) {
 			if (PreferenceLogic.getInstance().getFirstReceive()) {
-				LogUtil.debugLog("开启迅雷加速， 赠送流量提示:尊敬的迅雷会员，已为您开启手机下载加速服务！");
+				AppConfig.LOGD(TAG, "开启迅雷加速， 赠送流量提示:尊敬的迅雷会员，已为您开启手机下载加速服务！");
 				DownloadUtils.trackBehaviorEvent(mContext, "notice_flow_show",
 						0, 4);
 				showXiaomiNotification(
@@ -412,7 +418,7 @@ public class NotificationHelper {
 		PendingIntent mPendingIntent = null;
 		switch (logic.getShowBeforeGivenFlowOutState()) {
 		case NO_FLOW:
-			LogUtil.debugLog("判断流量使用: 无流量");
+			AppConfig.LOGD(TAG, "判断流量使用: 无流量");
 			mPendingIntent = AccountLogic.getInstance()
 					.getToVipExpirePendingIntent(mContext,
 							NotificationReveiver.NOTICE_FLOWSTARTUS_SHOW1);
@@ -424,7 +430,7 @@ public class NotificationHelper {
 			return true;
 		/*	
 		case OUT_LIMIT_FLOW:
-			LogUtil.debugLog("判断流量使用: 已80%或90%流量");
+			AppConfig.LOGD(TAG, "判断流量使用: 已80%或90%流量");
 			mPendingIntent = AccountLogic.getInstance()
 					.getToVipExpirePendingIntent(mContext,
 							NotificationReveiver.NOTICE_FLOWSTARTUS_SHOW0);
@@ -456,7 +462,7 @@ public class NotificationHelper {
 		switch (logic.isOutDateVip()) {
 
 		case TODAY:
-			LogUtil.errorLog("时间到期了 ，是今天");
+			AppConfig.LOGD(TAG, "时间到期了 ，是今天");
 			if (!PreferenceLogic.getInstance().getVipExpireTodayIsTip()) {
 				showXiaomiNotification(
 						logic.mConfigJSInfo.vip_guide_bar_expire_title,
@@ -472,7 +478,7 @@ public class NotificationHelper {
 		/*	
 		case OUTDATE:
 			if (!PreferenceLogic.getInstance().getVipExpireIsTip()) {
-				LogUtil.debugLog("判断Vip过期: 已过期");
+				AppConfig.LOGD(TAG, "判断Vip过期: 已过期");
 				DownloadUtils.trackBehaviorEvent(mContext,
 						"notice_VIPstatus_show", 3, 0);
 				showXiaomiNotification(
@@ -488,7 +494,7 @@ public class NotificationHelper {
 			return true;
 		case ONEDAY:
 			if (!PreferenceLogic.getInstance().getVipExpireOneIsTip()) {
-				LogUtil.debugLog("判断Vip过期: 1-3天");
+				AppConfig.LOGD(TAG, "判断Vip过期: 1-3天");
 				DownloadUtils.trackBehaviorEvent(mContext,
 						"notice_VIPstatus_show", 2, 0);
 				showXiaomiNotification(
@@ -504,7 +510,7 @@ public class NotificationHelper {
 			return true;
 		case FOURDAY:
 			if (!PreferenceLogic.getInstance().getVipExpireFourIsTip()) {
-				LogUtil.debugLog("判断Vip过期: 4-6天");
+				AppConfig.LOGD(TAG, "判断Vip过期: 4-6天");
 				DownloadUtils.trackBehaviorEvent(mContext,
 						"notice_VIPstatus_show", 1, 0);
 				showXiaomiNotification(
@@ -520,7 +526,7 @@ public class NotificationHelper {
 			return true;
 		case SEVENDAY:
 			if (!PreferenceLogic.getInstance().getVipExpireSevenIsTip()) {
-				LogUtil.debugLog("判断Vip过期: 7天");
+				AppConfig.LOGD(TAG, "判断Vip过期: 7天");
 				DownloadUtils.trackBehaviorEvent(mContext,
 						"notice_VIPstatus_show", 0, 0);
 				showXiaomiNotification(
@@ -535,7 +541,7 @@ public class NotificationHelper {
 
 			return true;
 		case MOREDAY:
-			LogUtil.debugLog("判断Vip过期: > 7天");
+			AppConfig.LOGD(TAG, "判断Vip过期: > 7天");
 			PreferenceLogic.getInstance().saveVipExpireIsTip(false);
 			PreferenceLogic.getInstance().saveVipExpireOneIsTip(false);
 			PreferenceLogic.getInstance().saveVipExpireFourIsTip(false);
@@ -550,7 +556,7 @@ public class NotificationHelper {
 
 	public void showXiaomiNotification(String textTip, String contextTip,
 			String btnText, PendingIntent pendingIntent) {
-		LogUtil.debugLog(textTip);
+		AppConfig.LOGD(TAG, textTip);
 		if (null == textTip)
 			return;
 
@@ -600,7 +606,7 @@ public class NotificationHelper {
 	 * @date 2014年6月23日 下午9:09:44
 	 */
 	public void cancelDownLoadNotification() {
-		LogUtil.debugLog("取消通知");
+		AppConfig.LOGD(TAG, "取消通知");
 		if (null == mNotifManager)
 			mNotifManager = (NotificationManager) mContext
 					.getSystemService(Context.NOTIFICATION_SERVICE);

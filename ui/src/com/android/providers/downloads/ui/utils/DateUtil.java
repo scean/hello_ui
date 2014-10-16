@@ -1,4 +1,4 @@
-package com.android.providers.downloads.ui.notification;
+package com.android.providers.downloads.ui.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

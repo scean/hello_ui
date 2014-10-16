@@ -11,7 +11,7 @@
  * <p>
  */
 
-package com.android.providers.downloads.ui.pay.util;
+package com.android.providers.downloads.ui.util;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

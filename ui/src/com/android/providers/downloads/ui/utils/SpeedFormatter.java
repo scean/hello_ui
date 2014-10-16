@@ -1,4 +1,4 @@
-package com.android.providers.downloads.ui;
+package com.android.providers.downloads.ui.utils;
 
 /*
  * Copyright (C) 2006 The Android Open Source Project
@@ -18,7 +18,7 @@ package com.android.providers.downloads.ui;
 import android.R.integer;
 import android.content.Context;
 import android.net.NetworkUtils;
-import com.android.providers.downloads.ui.DownloadUtils;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
 /*
  * Utility class to aid in formatting common values that are not covered
  * by the {@link java.util.Formatter} class in {@link java.util}

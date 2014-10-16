@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.android.providers.downloads.ui.pay.network;
+package com.android.providers.downloads.ui.network;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;

@@ -3,7 +3,6 @@ package com.android.providers.downloads.ui.pay;
 import java.util.ArrayList;
 import java.util.Currency;
 
-import com.android.providers.downloads.ui.pay.util.MyVolley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +10,9 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.view.WindowManager;
 
-import com.android.providers.downloads.ui.pay.util.XLUtil;
+import com.android.providers.downloads.ui.app.AppConfig;
+import com.android.providers.downloads.ui.utils.MyVolley;
+import com.android.providers.downloads.ui.utils.XLUtil;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -21,11 +22,9 @@ import com.android.volley.Response.Listener;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-
-
-
 public class ConfigJSInstance {
-    static String TAG=XLUtil.getTagString(ConfigJSInstance.class);
+    private static String TAG = ConfigJSInstance.class.getSimpleName();
+
     final static String mConfigJsUrl="http://pay.vip.xunlei.com/mi/js/app/3.0.js";
     final static String mSpeedupJSUrl="http://pay.vip.xunlei.com/mi/js/speedup/1.0.js";
     final static String CONFIGSRC_PREFERENCE="xl_configjsinfo_src";
@@ -307,9 +306,7 @@ public class ConfigJSInstance {
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // TODO Auto-generated method stub
-                    XLUtil.logError(TAG, error.getMessage());
-
+                    AppConfig.LOGD(TAG, error.getMessage());
                 }
             });
             req.setRetryPolicy(new DefaultRetryPolicy(
@@ -377,12 +374,9 @@ public class ConfigJSInstance {
                     }
                 }
             }, new ErrorListener() {
-
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // TODO Auto-generated method stub
-                    XLUtil.logError(TAG, error.getMessage());
-
+                    AppConfig.LOGD(TAG, error.getMessage());
                 }
             });
             req.setRetryPolicy(new DefaultRetryPolicy(

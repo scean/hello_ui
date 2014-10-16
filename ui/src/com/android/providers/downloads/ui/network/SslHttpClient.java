@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.providers.downloads.ui.pay.network;
+package com.android.providers.downloads.ui.network;
 
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.conn.ClientConnectionManager;

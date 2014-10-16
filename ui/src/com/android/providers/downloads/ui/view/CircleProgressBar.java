@@ -1,4 +1,4 @@
-package com.android.providers.downloads.ui;
+package com.android.providers.downloads.ui.view;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;

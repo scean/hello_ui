@@ -6,10 +6,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.android.providers.downloads.ui.DownloadList;
-import com.android.providers.downloads.ui.DownloadSettingActivity;
+import com.android.providers.downloads.ui.activity.DownloadListActivity;
+import com.android.providers.downloads.ui.activity.DownloadSettingActivity;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.utils.DateUtil;
 
 public class PreferenceLogic {
     private static PreferenceLogic instance;
@@ -66,9 +67,9 @@ public class PreferenceLogic {
         if (null == mSharedPreferences) {
              Context ct = null;
             try {
-                ct = mContext.createPackageContext(DownloadList.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
+                ct = mContext.createPackageContext(DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
                 mSharedPreferences = ct.getSharedPreferences(
-                        DownloadList.PREF_NAME, Context.MODE_MULTI_PROCESS);
+                        DownloadListActivity.PREF_NAME, Context.MODE_MULTI_PROCESS);
             } catch (Exception e) {
             }
         }

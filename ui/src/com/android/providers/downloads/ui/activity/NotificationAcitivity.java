@@ -1,4 +1,6 @@
-package com.android.providers.downloads.ui.notification;
+package com.android.providers.downloads.ui.activity;
+
+import com.android.providers.downloads.ui.app.AppConfig;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -8,9 +10,10 @@ import android.os.Bundle;
 import com.xunlei.auth.AuthManager;
 import com.xunlei.constant.Constants;
 
-import android.accounts.*;
 import miui.accounts.ExtraAccountManager;
 import miui.content.ExtraIntent;
+
+import com.android.providers.downloads.ui.notification.NotificationReveiver;
 
 /**
  * 中转Activity， 为授权跳转传的参数 Activity
@@ -38,7 +41,7 @@ public class NotificationAcitivity extends Activity {
 
     private void initData() {
         String action = getAction();
-        LogUtil.debugLog("NotificationAcitivity.initData.action="+action);
+        AppConfig.LOGD("NotificationAcitivity.initData.action=" + action);
         if (NotificationReveiver.ACTION_XIAOMI_LOGIN.equals(action)) {
             AccountManager accountManager = AccountManager.get(getApplicationContext());
             accountManager.addAccount(ExtraIntent.XIAOMI_ACCOUNT_TYPE,

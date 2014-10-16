@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.providers.downloads.ui;
+package com.android.providers.downloads.ui.adapter;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -25,9 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.android.providers.downloads.ui.notification.LogUtil;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
 
 import miui.os.Build;
 import android.app.DownloadManager;
@@ -41,9 +38,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-
-import com.android.providers.downloads.ui.DownloadUtils;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,6 +51,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.webkit.MimeTypeMap;
+
+import com.android.providers.downloads.ui.utils.DownloadUtils;
+import com.android.providers.downloads.ui.fragment.DownloadListFragment;
+import com.android.providers.downloads.ui.view.DownloadProgressBar;
+import com.android.providers.downloads.ui.view.DownloadItem;
+import com.android.providers.downloads.ui.R;
 
 /**
  * List adapter for Cursors returned by {@link DownloadManager}.
@@ -101,11 +101,11 @@ public class DownloadAdapter extends CursorAdapter {
         mTotalBytesColumnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
         mMediaTypeColumnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_MEDIA_TYPE);
         mDateColumnId =
-                cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP);
+            cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP);
         mFileNameColumnId =
-                cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_FILENAME);
+            cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_FILENAME);
         mCurrentBytesColumnId = cursor
-                .getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
+            .getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
         //mAllowedNetworkTypesColumnId = cursor.getColumnIndexOrThrow(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
         //mBypassSizeLimitColumnId = cursor.getColumnIndexOrThrow(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
         mCurrentDownloadSpeed = cursor.getColumnIndexOrThrow(DownloadManager.ExtraDownloads.COLUMN_DOWNLOADING_CURRENT_SPEED);
@@ -122,10 +122,10 @@ public class DownloadAdapter extends CursorAdapter {
         DownloadItem view = null;
         if (mStatusPosition == DownloadManager.STATUS_SUCCESSFUL && !Build.IS_TABLET) {
             view = (DownloadItem) LayoutInflater.from(mDownloadList.getActivity())
-                    .inflate(R.layout.download_list_finished_item_phone, null);
+                .inflate(R.layout.download_list_finished_item_phone, null);
         } else {
             view = (DownloadItem) LayoutInflater.from(mDownloadList.getActivity())
-                    .inflate(R.layout.download_list_item, null);
+                .inflate(R.layout.download_list_item, null);
         }
         return view;
     }
@@ -135,12 +135,12 @@ public class DownloadAdapter extends CursorAdapter {
     	if (!TextUtils.isEmpty(title)) {
             int dotIndex = title.lastIndexOf(".");
             boolean missingExtension = dotIndex < 0 || dotIndex < title.lastIndexOf('/')
-                    || dotIndex == (title.length() - 1);
+                || dotIndex == (title.length() - 1);
             if (missingExtension) {
 				if(!TextUtils.isEmpty(extension))
-				{
-					return title+"."+extension;
-				}
+                    {
+                        return title+"."+extension;
+                    }
 			}
         }
     	return title==null?"":title;
@@ -152,8 +152,8 @@ public class DownloadAdapter extends CursorAdapter {
         }
         final long downloadId = mCursor.getLong(mIdColumnId);
         ((DownloadItem) convertView).setData(downloadId, position,
-                mCursor.getString(mFileNameColumnId),
-                mCursor.getString(mMediaTypeColumnId));
+                                             mCursor.getString(mFileNameColumnId),
+                                             mCursor.getString(mMediaTypeColumnId));
 
         // Retrieve the icon for this download
         retrieveAndSetIcon(convertView);
@@ -180,36 +180,36 @@ public class DownloadAdapter extends CursorAdapter {
             DownloadProgressBar actionButton = (DownloadProgressBar) convertView.findViewById(R.id.action_button);
             setProgressBarStatus(actionButton, status);
             actionButton.setOnClickListener(new View.OnClickListener() {
-                long  id                  =     mCursor.getLong(mIdColumnId);
-                int   status              =     mCursor.getInt(mStatusColumnId);
-                //int   bypassValue         =     mCursor.getInt(mBypassSizeLimitColumnId);
-                int   bypassValue         =     0;
-                long  currentBytes        =     mCursor.getLong(mCurrentBytesColumnId);
-                long  totalBytes          =     mCursor.getLong(mTotalBytesColumnId);
-                @Override
-                public void onClick(View v) {
-                    if (DownloadManager.STATUS_PENDING == status || DownloadManager.STATUS_RUNNING == status) {
-                        mDownloadManager.pauseDownload(id);
-                    } else if (DownloadManager.STATUS_PAUSED == status) {
-                        if (!DownloadUtils.isNetworkAvailable(mContext)) {
-                            Toast.makeText(mContext, R.string.retry_after_network_available, Toast.LENGTH_SHORT).show();
-                        } else {
-                            // Start SizeLimitActivity if the following conditions are all satisfied
-                            //    1): Wi-Fi unavailable
-                            //    2): BypassSizeLimit is not set
-                            //    3): remain bytes are more than max download bytes in mobile
-                            long maxBytesValue = DownloadUtils.getRecommendedMaxBytesOverMobile(mContext);
-                            if ( !DownloadUtils.isWifiAvailable(mContext) && (bypassValue == 0) && ((totalBytes - currentBytes) > maxBytesValue) ) {
-                                DownloadUtils.notifyPauseDueToSize(mContext, id, false);
+                    long  id                  =     mCursor.getLong(mIdColumnId);
+                    int   status              =     mCursor.getInt(mStatusColumnId);
+                    //int   bypassValue         =     mCursor.getInt(mBypassSizeLimitColumnId);
+                    int   bypassValue         =     0;
+                    long  currentBytes        =     mCursor.getLong(mCurrentBytesColumnId);
+                    long  totalBytes          =     mCursor.getLong(mTotalBytesColumnId);
+                    @Override
+                    public void onClick(View v) {
+                        if (DownloadManager.STATUS_PENDING == status || DownloadManager.STATUS_RUNNING == status) {
+                            mDownloadManager.pauseDownload(id);
+                        } else if (DownloadManager.STATUS_PAUSED == status) {
+                            if (!DownloadUtils.isNetworkAvailable(mContext)) {
+                                Toast.makeText(mContext, R.string.retry_after_network_available, Toast.LENGTH_SHORT).show();
                             } else {
-                                mDownloadManager.resumeDownload(id);
+                                // Start SizeLimitActivity if the following conditions are all satisfied
+                                //    1): Wi-Fi unavailable
+                                //    2): BypassSizeLimit is not set
+                                //    3): remain bytes are more than max download bytes in mobile
+                                long maxBytesValue = DownloadUtils.getRecommendedMaxBytesOverMobile(mContext);
+                                if ( !DownloadUtils.isWifiAvailable(mContext) && (bypassValue == 0) && ((totalBytes - currentBytes) > maxBytesValue) ) {
+                                    DownloadUtils.notifyPauseDueToSize(mContext, id, false);
+                                } else {
+                                    mDownloadManager.resumeDownload(id);
+                                }
                             }
+                        } else if (DownloadManager.STATUS_FAILED == status) {
+                            mDownloadManager.restartDownload(id);
                         }
-                    } else if (DownloadManager.STATUS_FAILED == status) {
-                        mDownloadManager.restartDownload(id);
                     }
-                }
-            });
+                });
             if (mDownloadList.isEditable()) {
                 actionButton.setVisibility(View.GONE);
             } else {
@@ -229,11 +229,11 @@ public class DownloadAdapter extends CursorAdapter {
             actionButton.setProgress(progressAmount);
             String info;
             if (DownloadManager.STATUS_RUNNING == status
-                    || DownloadManager.STATUS_PENDING == status) {
+                || DownloadManager.STATUS_PENDING == status) {
                 /*
-                double percent = totalBytes != 0 ? 100 * currentBytes / totalBytes * 1.0 : 0;
-                info = String.format("%.1f%%", percent);
-				setTextForView(convertView, R.id.date_status_info, info);
+                  double percent = totalBytes != 0 ? 100 * currentBytes / totalBytes * 1.0 : 0;
+                  info = String.format("%.1f%%", percent);
+                  setTextForView(convertView, R.id.date_status_info, info);
 				//*/
 				///*
 				long currentspeed = mCursor.getLong(mCurrentDownloadSpeed);
@@ -242,11 +242,11 @@ public class DownloadAdapter extends CursorAdapter {
 				if (getSizeText().equals("")) {// show connect status when not get filesize				
 					info = mContext.getString(R.string.download_wait_connect);
 					setTextForViewAndColor(convertView, R.id.date_status_info,
-							info, -1);
+                                           info, -1);
 				} else if (currentspeed == 0 && DownloadManager.STATUS_RUNNING != status) {//waiting			
 					info = mContext.getString(R.string.download_pending);
 					setTextForViewAndColor(convertView, R.id.date_status_info,
-							info, -1);
+                                           info, -1);
 				} else {
 					long id = mCursor.getLong(mIdColumnId);
 					boolean blueFont = speedUpSet.contains(id);
@@ -257,10 +257,10 @@ public class DownloadAdapter extends CursorAdapter {
 						}
 					}
 					String speedtext = "";
-                   if(currentspeed >=1024*1024 && currentspeed < 10*1024*1024)
-                        speedtext = DownloadUtils.convertFileSize(currentspeed,1) + "/s";
+                    if(currentspeed >=1024*1024 && currentspeed < 10*1024*1024)
+                    speedtext = DownloadUtils.convertFileSize(currentspeed,1) + "/s";
                     else    
-                        speedtext=DownloadUtils.convertFileSize(currentspeed,0) + "/s";
+                    speedtext=DownloadUtils.convertFileSize(currentspeed,0) + "/s";
 					
 					setTextForViewAndColor(convertView, R.id.date_status_info, speedtext, blueFont ? 0xff009bff : -1);
 				}               
@@ -310,16 +310,16 @@ public class DownloadAdapter extends CursorAdapter {
         long currentBytes = mCursor.getLong(mCurrentBytesColumnId);
         long totalBytes = mCursor.getLong(mTotalBytesColumnId);
         
-     //   Log.i("DownloadList", "---------------------currentBytes = " + currentBytes);
+        //   Log.i("DownloadList", "---------------------currentBytes = " + currentBytes);
         String sizeText = "";
         if (totalBytes >= 0) {
             if ( mStatusPosition == DownloadManager.STATUS_SUCCESSFUL ) {
             	try{
-                sizeText = DownloadUtils.convertFileSize(totalBytes, 1);
-                if (!Build.IS_TABLET) { // for phone
-                    String info = getDateString() + " " + mResources.getString(getStatusStringId());
-                    sizeText = sizeText + " | " + info;
-                }
+                    sizeText = DownloadUtils.convertFileSize(totalBytes, 1);
+                    if (!Build.IS_TABLET) { // for phone
+                        String info = getDateString() + " " + mResources.getString(getStatusStringId());
+                        sizeText = sizeText + " | " + info;
+                    }
             	}catch(Exception e){
             		e.printStackTrace();
             	}
@@ -333,42 +333,42 @@ public class DownloadAdapter extends CursorAdapter {
 
     private int getStatusStringId() {
         switch (mCursor.getInt(mStatusColumnId)) {
-            case DownloadManager.STATUS_FAILED:
-                final int failReason = mCursor.getInt(mReasonColumnId);
-                switch (failReason) {
-                    case DownloadManager.ERROR_INSUFFICIENT_SPACE:
-                        return R.string.download_error_insufficient_space;
-                    default:
-                        return R.string.download_error;
-                }
+        case DownloadManager.STATUS_FAILED:
+            final int failReason = mCursor.getInt(mReasonColumnId);
+            switch (failReason) {
+            case DownloadManager.ERROR_INSUFFICIENT_SPACE:
+                return R.string.download_error_insufficient_space;
+            default:
+                return R.string.download_error;
+            }
 
-            case DownloadManager.STATUS_SUCCESSFUL:
-                return R.string.download_success;
+        case DownloadManager.STATUS_SUCCESSFUL:
+            return R.string.download_success;
 
-            case DownloadManager.STATUS_PENDING:
-                return R.string.download_pending;
+        case DownloadManager.STATUS_PENDING:
+            return R.string.download_pending;
 
-            case DownloadManager.STATUS_RUNNING:
+        case DownloadManager.STATUS_RUNNING:
+            return R.string.download_running;
+
+        case DownloadManager.STATUS_PAUSED:
+            final int reason = mCursor.getInt(mReasonColumnId);
+            switch(reason) {
+            case DownloadManager.PAUSED_BY_APP:
+                return R.string.paused_by_app;
+            case DownloadManager.PAUSE_INSUFFICIENT_SPACE:
+                return R.string.paused_insufficient_space;
+            case DownloadManager.PAUSED_QUEUED_FOR_WIFI:
+                return R.string.paused_queued_for_wifi;
+            case DownloadManager.PAUSED_WAITING_FOR_NETWORK:
+                return R.string.paused_waiting_for_network;
+            case DownloadManager.PAUSED_WAITING_TO_RETRY:
+                return R.string.paused_waiting_to_retry;
+            case DownloadManager.PAUSED_UNKNOWN:
+                return R.string.paused_unknown;
+            default:
                 return R.string.download_running;
-
-            case DownloadManager.STATUS_PAUSED:
-                final int reason = mCursor.getInt(mReasonColumnId);
-                switch(reason) {
-                    case DownloadManager.PAUSED_BY_APP:
-                        return R.string.paused_by_app;
-                    case DownloadManager.PAUSE_INSUFFICIENT_SPACE:
-                        return R.string.paused_insufficient_space;
-                    case DownloadManager.PAUSED_QUEUED_FOR_WIFI:
-                        return R.string.paused_queued_for_wifi;
-                    case DownloadManager.PAUSED_WAITING_FOR_NETWORK:
-                        return R.string.paused_waiting_for_network;
-                    case DownloadManager.PAUSED_WAITING_TO_RETRY:
-                        return R.string.paused_waiting_to_retry;
-                    case DownloadManager.PAUSED_UNKNOWN:
-                        return R.string.paused_unknown;
-                    default:
-                        return R.string.download_running;
-                }
+            }
         }
         throw new IllegalStateException("Unknown status: " + mCursor.getInt(mStatusColumnId));
     }
@@ -380,7 +380,7 @@ public class DownloadAdapter extends CursorAdapter {
         if (!TextUtils.isEmpty(filename)) {
             int dotIndex = filename.lastIndexOf(".");
             boolean missingExtension = dotIndex < 0 || dotIndex < filename.lastIndexOf('/')
-                    || dotIndex == (filename.length() - 1);
+                || dotIndex == (filename.length() - 1);
             if (!missingExtension) {
                 extension = filename.substring(dotIndex + 1);
             }
@@ -461,13 +461,13 @@ public class DownloadAdapter extends CursorAdapter {
         // if extension is not null, then get corresponding icon
         if (!TextUtils.isEmpty(extension)) {
             if (extension.equalsIgnoreCase("doc") || extension.equalsIgnoreCase("docx")
-                    || extension.equalsIgnoreCase("dot") || extension.equalsIgnoreCase("dotx")) {
+                || extension.equalsIgnoreCase("dot") || extension.equalsIgnoreCase("dotx")) {
                 resId = R.drawable.file_type_doc;
             } else if (extension.equalsIgnoreCase("xls") || extension.equalsIgnoreCase("xlsx")
-                    || extension.equalsIgnoreCase("xlt") || extension.equalsIgnoreCase("xltx")) {
+                       || extension.equalsIgnoreCase("xlt") || extension.equalsIgnoreCase("xltx")) {
                 resId = R.drawable.file_type_xls;
             } else if (extension.equalsIgnoreCase("ppt") || extension.equalsIgnoreCase("pptx")
-                    || extension.equalsIgnoreCase("pot") || extension.equalsIgnoreCase("potx")) {
+                       || extension.equalsIgnoreCase("pot") || extension.equalsIgnoreCase("potx")) {
                 resId = R.drawable.file_type_ppt;
             } else if (extension.equalsIgnoreCase("pps") || extension.equalsIgnoreCase("ppsx")) {
                 resId = R.drawable.file_type_pps;
@@ -571,21 +571,21 @@ public class DownloadAdapter extends CursorAdapter {
             return;
         }
         switch(status) {
-            case DownloadManager.STATUS_FAILED:
-                progressBar.setDownloadStatus(DownloadProgressBar.STATUS_FAILED);
-                break;
-            case DownloadManager.STATUS_PENDING:
-            case DownloadManager.STATUS_RUNNING:
-                progressBar.setDownloadStatus(DownloadProgressBar.STATUS_DOWNLOADING);
-                break;
-            case DownloadManager.STATUS_PAUSED:
-                final int reason = mCursor.getInt(mReasonColumnId);
-                if (reason == DownloadManager.PAUSED_BY_APP) {
-                    progressBar.setDownloadStatus(DownloadProgressBar.STATUS_PAUSE_BY_APP);
-                } else {
-                    progressBar.setDownloadStatus(DownloadProgressBar.STATUS_PAUSE);
-                }
-                break;
+        case DownloadManager.STATUS_FAILED:
+            progressBar.setDownloadStatus(DownloadProgressBar.STATUS_FAILED);
+            break;
+        case DownloadManager.STATUS_PENDING:
+        case DownloadManager.STATUS_RUNNING:
+            progressBar.setDownloadStatus(DownloadProgressBar.STATUS_DOWNLOADING);
+            break;
+        case DownloadManager.STATUS_PAUSED:
+            final int reason = mCursor.getInt(mReasonColumnId);
+            if (reason == DownloadManager.PAUSED_BY_APP) {
+                progressBar.setDownloadStatus(DownloadProgressBar.STATUS_PAUSE_BY_APP);
+            } else {
+                progressBar.setDownloadStatus(DownloadProgressBar.STATUS_PAUSE);
+            }
+            break;
         }
     }
 }

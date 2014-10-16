@@ -1,4 +1,4 @@
-package com.android.providers.downloads.ui;
+package com.android.providers.downloads.ui.utils;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -16,23 +16,24 @@ import android.provider.Settings;
 import android.util.Log;
 import android.accounts.Account;
 import android.app.DownloadManager;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiInfo;
 
+import com.android.providers.downloads.ui.R;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
-import miui.analytics.Analytics;
-import miui.accounts.ExtraAccountManager;
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.app.AppConfig;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import java.math.BigDecimal;
-import android.telephony.TelephonyManager;
-import android.text.TextUtils;
-
 import java.util.Map;
-import android.net.wifi.WifiManager;
-import android.net.wifi.WifiInfo;
+import java.math.BigDecimal;
+
+import miui.analytics.Analytics;
+import miui.accounts.ExtraAccountManager;
 import miui.provider.ExtraSettings;
 
 public class DownloadUtils {

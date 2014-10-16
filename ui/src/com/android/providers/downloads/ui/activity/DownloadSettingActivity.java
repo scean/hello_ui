@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package com.android.providers.downloads.ui;
-
+package com.android.providers.downloads.ui.activity;
 
 import com.android.providers.downloads.ui.notification.PreferenceLogic;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
+import com.android.providers.downloads.ui.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-//import android.app.DownloadManager;
 import android.app.DownloadManager;
 import android.content.ContentValues;
 import android.content.Context;
@@ -31,7 +31,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-//import android.widget.NumberPicker;
 import miui.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;

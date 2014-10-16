@@ -7,14 +7,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.android.providers.downloads.ui.DownloadList;
-import com.android.providers.downloads.ui.DownloadUtils;
+import com.android.providers.downloads.ui.app.AppConfig;
+import com.android.providers.downloads.ui.activity.DownloadListActivity;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
+import com.android.providers.downloads.ui.utils.XLUtil;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance.ConfigJSInfo;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance.SpeedupJSInfo;
-import com.android.providers.downloads.ui.pay.XLSpeedUpActivity;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
+import com.android.providers.downloads.ui.activity.XLSpeedUpActivity;
+
 
 /**
  * 消息中转类
@@ -26,6 +28,8 @@ import com.android.providers.downloads.ui.pay.util.XLUtil;
  * @date 2014年6月23日 下午9:11:49
  */
 public class NotificationReveiver extends BroadcastReceiver {
+    private static final String TAG = "NotificationReveiver";
+
 	public static final String PAGE_TYPE = "pageType";
 	public static final String ACTION_XIAOMI_LOGIN = "com.downloads.notification.action.xiaomi.login";
 	public static final String ACTION_XIAOMI_AUTH = "com.downloads.notification.action.xiaomi.auth";
@@ -69,7 +73,7 @@ public class NotificationReveiver extends BroadcastReceiver {
         ConfigJSInstance configInstance = ConfigJSInstance.getInstance(context.getApplicationContext());
         ConfigJSInfo configJsInfo = configInstance.getConfigJSInfo();
         SpeedupJSInfo speedupJsInfo = configInstance.getSpeedJSInfo();
-        LogUtil.debugLog("NotificationReveiver 初始化配置信息 configJsInfo is null " + (configJsInfo == null) + ",speedJsInfo is null " + (speedupJsInfo == null));
+        AppConfig.LOGD(TAG, "NotificationReveiver 初始化配置信息 configJsInfo is null " + (configJsInfo == null) + ",speedJsInfo is null " + (speedupJsInfo == null));
         if (null == configJsInfo || null == speedupJsInfo) {
             return;
         }
@@ -78,13 +82,13 @@ public class NotificationReveiver extends BroadcastReceiver {
             AccountInfoInstance.getInstance(context.getApplicationContext(), token);
         }
         String action = intent.getAction();
-        LogUtil.debugLog("NotificationReveiver.action=" + action);
+        AppConfig.LOGD(TAG, "NotificationReveiver.action=" + action);
         if (ACTION_DOWNLOAD_NOTIFICATION_INIT.equals(action)) {
             PreferenceLogic.init(context).saveToday();
             NotificationHelper.init(context.getApplicationContext());
         } else if (ACTION_XIAOMI_LOGIN.equals(action)) {
         	report(context,intent);
-            intent = new Intent(context, DownloadList.class);
+            intent = new Intent(context, DownloadListActivity.class);
             intent.putExtra(PAGE_TYPE, ACTION_XIAOMI_LOGIN);
 //          intent = new Intent(context, XLSpeedUpActivity.class);
 //          intent.putExtra(XLSpeedUpActivity.INTENT_FLAG, XLSpeedUpActivity.INTENT_FLAG_LET_LOGIN);
@@ -92,7 +96,7 @@ public class NotificationReveiver extends BroadcastReceiver {
             context.startActivity(intent);
             cancelNotification();
         } else if (ACTION_XIAOMI_AUTH.equals(action)) {
-            intent = new Intent(context, DownloadList.class);
+            intent = new Intent(context, DownloadListActivity.class);
             intent.putExtra(PAGE_TYPE, ACTION_XIAOMI_AUTH);
 //          intent = new Intent(context, XLSpeedUpActivity.class);
 //          intent.putExtra(XLSpeedUpActivity.INTENT_FLAG, XLSpeedUpActivity.INTENT_FLAG_LET_AUTH);
@@ -108,7 +112,7 @@ public class NotificationReveiver extends BroadcastReceiver {
             cancelNotification();
         } else if (ACTION_FORWARD_TO_DOWNLOADLIST.equals(action)) {
         	report(context ,intent);
-            intent = new Intent(context, DownloadList.class);
+            intent = new Intent(context, DownloadListActivity.class);
             intent.putExtra(PAGE_TYPE, ACTION_FORWARD_TO_DOWNLOADLIST);
 //          intent = new Intent(context, XLSpeedUpActivity.class);
 //          intent.putExtra(XLSpeedUpActivity.INTENT_FLAG, XLSpeedUpActivity.INTENT_FLAG_LET_AUTH);

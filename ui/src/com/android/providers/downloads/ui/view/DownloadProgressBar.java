@@ -1,9 +1,11 @@
-package com.android.providers.downloads.ui;
+package com.android.providers.downloads.ui.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
+import com.android.providers.downloads.ui.R;
 
 public class DownloadProgressBar extends LinearLayout {
     public final static int STATUS_DOWNLOADING = 0;

@@ -1,8 +1,6 @@
 package com.android.providers.downloads.ui.notification;
 
-import com.android.providers.downloads.ui.DownloadList;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance;
-import com.android.providers.downloads.ui.pay.XLSpeedUpActivity;
 import com.xunlei.auth.AuthManager;
 import com.xunlei.constant.Constants;
 

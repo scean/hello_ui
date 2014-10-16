@@ -1,14 +1,16 @@
 package com.android.providers.downloads.ui.pay;
 
-import com.android.providers.downloads.ui.pay.util.MyVolley;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.TreeMap;
 import java.util.Iterator;
 
-import com.android.providers.downloads.ui.pay.network.ExtHttpClientStack;
-import com.android.providers.downloads.ui.pay.network.SSLSocketFactoryEx;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
+import com.android.providers.downloads.ui.utils.DateUtil;
+import com.android.providers.downloads.ui.utils.MyVolley;
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.network.ExtHttpClientStack;
+import com.android.providers.downloads.ui.network.SSLSocketFactoryEx;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
@@ -24,8 +26,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 public class MiBiPay {
-
-    static String TAG=XLUtil.getTagString(MiBiPay.class);
+    private static String TAG = MiBiPay.class.getSimpleName();
 
     //static String mReportPrefix="http://dypay.vip.xunlei.com/mipay/order/?";
     static String mReportPrefix="https://payment.xunlei.com/mipay/order/?";
@@ -176,7 +177,6 @@ public class MiBiPay {
 		            pair2 = pair1.substring(0, pair1.lastIndexOf(")"));
 
 	            }catch (Exception e){
-		            XLUtil.printStackTrace(e);
 	            }
                 OrderInfo info =orderjsonparse(pair2);
 	            if(info.need_refresh ==1){
@@ -201,7 +201,7 @@ public class MiBiPay {
             @Override
             public void onErrorResponse(VolleyError error) {
                 // TODO Auto-generated method stub
-                XLUtil.logError(TAG, error.getMessage());
+                XLUtil.logDebug(TAG, error.getMessage());
 
                 int state =-1;
                 if(error.networkResponse !=null){
@@ -287,8 +287,7 @@ public class MiBiPay {
 		            pair1 = response.substring(response.indexOf("(") + 1);
 		            pair2 = pair1.substring(0, pair1.lastIndexOf(")"));
 
-	            }catch (Exception e){
-		            XLUtil.printStackTrace(e);
+	            } catch (Exception e){
 	            }
                 PrizeInfo info =Prizejsonparse(pair2);
                 if(info.ret ==0){
@@ -305,7 +304,7 @@ public class MiBiPay {
             @Override
             public void onErrorResponse(VolleyError error) {
                 // TODO Auto-generated method stub
-                XLUtil.logError(TAG, error.getMessage());
+                XLUtil.logDebug(TAG, error.getMessage());
                 int state =-1;
                 if(error.networkResponse !=null){
                     state =error.networkResponse.statusCode;

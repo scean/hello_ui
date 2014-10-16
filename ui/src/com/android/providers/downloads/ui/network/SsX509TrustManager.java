@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.providers.downloads.ui.pay.network;
+package com.android.providers.downloads.ui.network;
 
 import java.io.IOException;
 import java.io.InputStream;

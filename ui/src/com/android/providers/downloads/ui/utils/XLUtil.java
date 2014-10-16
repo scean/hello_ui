@@ -1,4 +1,6 @@
-package com.android.providers.downloads.ui.pay.util;
+package com.android.providers.downloads.ui.utils;
+
+import com.android.providers.downloads.ui.app.AppConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +10,6 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import android.content.Intent;
-import com.android.providers.downloads.ui.DownloadUtils;
-import com.android.providers.downloads.ui.pay.util.XLLog.LogLevel;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -27,76 +26,34 @@ import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-
-
 public class XLUtil {
-    private static final String TAG = getTagString(XLUtil.class);
-    public static final int mProductId = 10031;//xiaomi;
-    private static int mPartnerId = 0;
-    private static String mPeerId = null;
-    private static String mOSVersion = null;
-    //    private static String mSelfAppVersion = null;
-    private static String mIMEI = null;
-    public static String mAPNName = null;
-    public static int NETWORKTYPE = -1;
-    public static int NETWORKSUBTYPE = -1;
-    public static String SSID = null;
+    private static final String TAG = XLUtil.class.getSimpleName();
+
     public static final String PREF_NAME = "download_pref";
     public static final String PREF_KEY_XUNLEI_TOKEN = "xunlei_token";
     public static final String PREF_KEY_MIUI_NICKNAME = "miui_nickname";
     public static final String PREF_KEY_XIAOMI_ID = "xiaomi_id";
 	public static final String ACTION_INTENT_DOWNLOADLIST_BROADCAST = "com.process.media.broadcast.downloadlist";
 	public static final String ACTION_INTENT_FALSETOKEN_BROADCAST = "com.process.media.broadcast.falsetoken";
-    static {
-        if (Config.PRINT_LOG) {
-            XLLog.setLogTag(" com.xunlei.downloadplatforms.log ");
-            XLLog.setLogLevel(LogLevel.LOG_LEVEL_DEBUG);
-        } else {
-            XLLog.setLogLevel(LogLevel.LOG_LEVEL_OFF);
-        }
-        if (Config.LOG_WIRTE_FILE) {
-            setLogWriteFile(true);
-        }
-    }
-    //璁剧疆鏄惁鎵撳嵃鍒皊dcard
-    public static void setLogWriteFile(boolean flag) {
-        XLLog.setWriteFile(flag);
-    }
-    //鑾峰彇tag
+
+    public static final int mProductId = 10031;//xiaomi;
+    private static int mPartnerId = 0;
+    private static String mPeerId = null;
+    private static String mOSVersion = null;
+    // private static String mSelfAppVersion = null;
+    private static String mIMEI = null;
+    public static String mAPNName = null;
+    public static int NETWORKTYPE = -1;
+    public static int NETWORKSUBTYPE = -1;
+    public static String SSID = null;
+
     public static String getTagString(Class<?> cls) {
         return  cls.getSimpleName();
     }
 
-    // 鏃ュ織鎵撳嵃锛岄粯璁ゆ墦鍗癲ebug绾у埆鐨勬棩锟�?
     public static void logDebug(String tag, String content) {
-        if (Config.PRINT_LOG) {
-            XLLog.d(tag, content);
-        }
+        AppConfig.LOGD(tag, content);
     }
-
-    public static void logDebug(String tag, String content,boolean isPrint) {
-        if (isPrint) {
-            //            XLLog.d(tag, content);
-            Log.d(tag, content);
-        }
-    }
-
-    public static void logWarn(String tag, String content) {
-        if (Config.PRINT_LOG) {
-            XLLog.w(tag, content);
-        }
-    }
-
-    public static void logError(String tag, String content) {
-        if (Config.PRINT_LOG) {
-            XLLog.e(tag, content);
-        }
-    }
-	public static void printStackTrace(Exception e) {
-		if (Config.PRINT_LOG) {
-			e.printStackTrace();
-		}
-	}
 
     public static boolean ensureDir(String path) {
         logDebug(TAG, " ensureDir path : " + path);
@@ -106,7 +63,7 @@ public class XLUtil {
         boolean ret = false;
         File file = new File(path);
         logDebug(TAG, " ensureDir file.exists() : " + file.exists()
-                + " , file.isDirectory() : " + file.isDirectory());
+                 + " , file.isDirectory() : " + file.isDirectory());
         if (!file.exists() || !file.isDirectory()) {
             try {
                 ret = file.mkdirs();
@@ -166,7 +123,7 @@ public class XLUtil {
 
     public static boolean isSDCardExist() {
         return Environment.MEDIA_MOUNTED.equalsIgnoreCase(Environment
-                .getExternalStorageState());
+                                                          .getExternalStorageState());
     }
 
     // 鑾峰彇sdcard鍓╀綑绌洪棿澶у皬鍗曚綅鏄疢B
@@ -213,7 +170,7 @@ public class XLUtil {
     public static String getPeerid(final Context context) {
         if (null == mPeerId && null != context) {
             WifiManager wm = (WifiManager) context
-                    .getSystemService(Context.WIFI_SERVICE);
+                .getSystemService(Context.WIFI_SERVICE);
             if (null != wm && null != wm.getConnectionInfo()) {
                 String mac = wm.getConnectionInfo().getMacAddress();
                 mac += "004V";
@@ -224,7 +181,7 @@ public class XLUtil {
             }
         }
         XLUtil.logDebug(TAG, "getPeerid mPeerId : " + mPeerId + " , context : "
-                + context);
+                        + context);
         return mPeerId;
     }
 
@@ -245,15 +202,15 @@ public class XLUtil {
     // 鑾峰彇鑷繁鐨勭増鏈彿
     public static String getSelfAppVersion(final Context context) {
         /*if (null == mSelfAppVersion && null != context) {
-            try {
-                mSelfAppVersion = context.getPackageManager().getPackageInfo(
-                        context.getPackageName(), 0).versionName;
-            } catch (NameNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        return mSelfAppVersion;*/
+          try {
+          mSelfAppVersion = context.getPackageManager().getPackageInfo(
+          context.getPackageName(), 0).versionName;
+          } catch (NameNotFoundException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+          }
+          }
+          return mSelfAppVersion;*/
         return DownloadUtils.PRODUCT_VERSION;
     }
 
@@ -261,7 +218,7 @@ public class XLUtil {
     public static String getIMEI(final Context context) {
         if (null == mIMEI && null != context) {
             TelephonyManager tm = (TelephonyManager) context
-                    .getSystemService(Context.TELEPHONY_SERVICE);
+                .getSystemService(Context.TELEPHONY_SERVICE);
             if (null != tm) {
                 mIMEI = tm.getDeviceId();
             }
@@ -275,15 +232,15 @@ public class XLUtil {
     public static int getPartnerId(final Context context) {
         if (0 == mPartnerId && null != context) {
             /*try {
-                String partnerId =  context.getString(R.string.partner_id);
-                if (null != partnerId && partnerId.length() > 0) {
-                    mPartnerId = Integer.parseInt(partnerId, 16);
-                }
-                logDebug(TAG , "getPartnerId mPartnerId : " + mPartnerId + " , partnerId : " + partnerId);
-            } catch (Exception e) {
-                logError(TAG , " getPartnerId Error : " + e.getMessage());
-                mPartnerId = 0;
-            }*/
+              String partnerId =  context.getString(R.string.partner_id);
+              if (null != partnerId && partnerId.length() > 0) {
+              mPartnerId = Integer.parseInt(partnerId, 16);
+              }
+              logDebug(TAG , "getPartnerId mPartnerId : " + mPartnerId + " , partnerId : " + partnerId);
+              } catch (Exception e) {
+              logError(TAG , " getPartnerId Error : " + e.getMessage());
+              mPartnerId = 0;
+              }*/
         }
         return mPartnerId;
     }
@@ -292,7 +249,7 @@ public class XLUtil {
         boolean ret = false;
         if (null != context) {
             ConnectivityManager cm = (ConnectivityManager) context
-                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
             if (null != cm) {
                 NetworkInfo info = cm.getActiveNetworkInfo();
                 if (null != info && info.isConnectedOrConnecting()) {
@@ -322,7 +279,7 @@ public class XLUtil {
     public static int ratedDivide(long first, long second) {
         int res =0;
         if (second != 0) {
-             res =(int) (first*100/second);
+            res =(int) (first*100/second);
         }
         // show progress larger than 1
         if (first > 0) {
@@ -331,8 +288,8 @@ public class XLUtil {
         return res;
     }
     /*
-        20140607 to 2014/06/07
-     */
+      20140607 to 2014/06/07
+    */
     public static String convertDateToShowDate2(String str){
         if (isNullOrEmpty(str)) {
             return "";
@@ -389,7 +346,7 @@ public class XLUtil {
         long avgSpeed = 0;
         long deltaTime = endTime - startTime;
         if (0 == deltaTime) {
-            XLUtil.logWarn(TAG, "func getAverageDownloadSpeed, 0 == deltaTime");
+            XLUtil.logDebug(TAG, "func getAverageDownloadSpeed, 0 == deltaTime");
             return 0;
         }
         fileSize = fileSize / 1024; //杞垚KB
@@ -524,9 +481,9 @@ public class XLUtil {
 
 
     public static String getAPNName(Context ctx) {
-            ConnectivityManager conManager= (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo info = conManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE); 
-            String apnName = info.getExtraInfo(); 
+        ConnectivityManager conManager= (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = conManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE); 
+        String apnName = info.getExtraInfo(); 
 
         return apnName;
     }
@@ -578,10 +535,10 @@ public class XLUtil {
 		String language = getLanguageEnv();
 
 		if (language != null
-				&& (language.trim().equals("zh-CN") || language.trim().equals("zh-TW")))
-			return true;
+            && (language.trim().equals("zh-CN") || language.trim().equals("zh-TW")))
+        return true;
 		else
-			return false;
+        return false;
 	}
 	private static String getLanguageEnv() {
 		Locale l = Locale.getDefault();

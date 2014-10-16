@@ -13,14 +13,16 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.android.providers.downloads.ui.DownloadUtils;
+import com.android.providers.downloads.ui.app.AppConfig;
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
+import com.android.providers.downloads.ui.utils.DateUtil;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.AccountInfo;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.FlowInfo;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance.ConfigJSInfo;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance.SpeedupJSInfo;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
 
 /**
  * 此处写类描述
@@ -32,8 +34,8 @@ import com.android.providers.downloads.ui.pay.util.XLUtil;
  * @date 2014年6月17日 下午8:09:59
  */
 public class NotificationLogic {
+    private static String TAG = NotificationLogic.class.getSimpleName();
 
-    static String TAG = XLUtil.getTagString(NotificationLogic.class);
     private Context mContext;
     // 下载次数
     private int min_download_times = 3;
@@ -70,12 +72,11 @@ public class NotificationLogic {
         String token = PreferenceLogic.getInstance(ctx).getToken();
         mAccountJSInstance = AccountInfoInstance.getInstance(ctx, token);
         refreshInfo();
-        LogUtil.debugLog("NotificationLogic.token=" + token);
-        LogUtil.debugLog("NotificationLogic.mConfigJSInfo=" + (mConfigJSInfo == null));
-        LogUtil.debugLog("NotificationLogic.mSpeedupJSInfo=" + (mSpeedupJSInfo == null));
-        LogUtil.debugLog("NotificationLogic.mAccountInfo=" + (mAccountInfo == null));
-        LogUtil.debugLog("NotificationLogic.mFlowInfo=" + (mFlowInfo == null));
-
+        AppConfig.LOGD(TAG, "NotificationLogic.token=" + token);
+        AppConfig.LOGD(TAG, "NotificationLogic.mConfigJSInfo=" + (mConfigJSInfo == null));
+        AppConfig.LOGD(TAG, "NotificationLogic.mSpeedupJSInfo=" + (mSpeedupJSInfo == null));
+        AppConfig.LOGD(TAG, "NotificationLogic.mAccountInfo=" + (mAccountInfo == null));
+        AppConfig.LOGD(TAG, "NotificationLogic.mFlowInfo=" + (mFlowInfo == null));
     }
 
     private void refreshInfo() {
@@ -416,9 +417,9 @@ public class NotificationLogic {
             }
             String outofDate = XLUtil.convertDateToShowDate(mAccountInfo.expire);
             double diffDay = DateUtil.getDiffDays(curDate, outofDate) ;
-            LogUtil.errorLog("isOutDateVip curdata=" + curDate + "outofDate=" + outofDate + "diffday=" + diffDay);
+            AppConfig.LOGD(TAG, "isOutDateVip curdata=" + curDate + "outofDate=" + outofDate + "diffday=" + diffDay);
             List<Integer> vip_expire_config = mConfigJSInfo.vip_guide_bar_before_expire_expire_config;
-            XLUtil.logDebug(TAG, "isOutDateVip vip_expire_config=" + vip_expire_config);
+            AppConfig.LOGD(TAG, "isOutDateVip vip_expire_config=" + vip_expire_config);
             if (vip_expire_config == null || vip_expire_config.size() != 3) {
                 return VipExpireStatus.MOREDAY;
             }

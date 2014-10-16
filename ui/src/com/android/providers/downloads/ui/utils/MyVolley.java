@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.providers.downloads.ui.pay.util;
-
+package com.android.providers.downloads.ui.utils;
 
 import android.content.Context;
 
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
 import android.util.LruCache;
-import com.android.providers.downloads.ui.pay.network.ExtHttpClientStack;
-import com.android.providers.downloads.ui.pay.network.SSLSocketFactoryEx;
+import com.android.providers.downloads.ui.network.ExtHttpClientStack;
+import com.android.providers.downloads.ui.network.SSLSocketFactoryEx;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
-
-
 
 /**
  * Helper class that is used to provide references to initialized RequestQueue(s) and ImageLoader(s)

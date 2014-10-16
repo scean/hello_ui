@@ -1,7 +1,9 @@
-package com.android.providers.downloads.ui;
+package com.android.providers.downloads.ui.activity;
 
 import miui.app.Activity;
 import android.content.Context;
+
+import com.android.providers.downloads.ui.utils.DownloadUtils;
 
 public class BaseActivity extends Activity {
 	public static final int STATUS_ONLINE = 0;

@@ -1,4 +1,4 @@
-	/*
+/*
  * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.providers.downloads.ui;
+package com.android.providers.downloads.ui.activity;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -33,7 +33,8 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.view.*;
 import android.widget.*;
-import com.android.providers.downloads.ui.notification.LogUtil;
+
+import com.android.providers.downloads.ui.app.AppConfig;
 import com.android.providers.downloads.ui.notification.NotificationLogic;
 import com.android.providers.downloads.ui.notification.NotificationReveiver;
 import com.android.providers.downloads.ui.notification.PreferenceLogic;
@@ -43,13 +44,19 @@ import com.android.providers.downloads.ui.pay.AccountInfoInstance.AccountListene
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.AddFlowInfo;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.FlowInfo;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
-import com.android.providers.downloads.ui.pay.XLSpeedUpActivity;
-import com.android.providers.downloads.ui.pay.util.BackgroundThread;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
+import com.android.providers.downloads.ui.activity.XLSpeedUpActivity;
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
+import com.android.providers.downloads.ui.fragment.DownloadListFragment;
+
+import com.android.providers.downloads.ui.R;
+
 import com.xiaomi.account.openauth.AuthorizeActivity;
+
 import com.xunlei.auth.AuthManager;
 import com.xunlei.constant.Constants;
 import com.xunlei.listener.OnAuthResultListener;
+
 import miui.accounts.ExtraAccountManager;
 import miui.app.ActionBar;
 import miui.app.Activity;
@@ -58,25 +65,26 @@ import miui.os.Build;
 import miui.view.ViewPager;
 import miui.app.ProgressDialog;
 
-
 //import miui.widget.GuidePopupView;
 
 /**
  * View showing a list of all downloads the Download Manager knows about.
  */
-public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedChangeListener {
-    static final String LOG_TAG = "DownloadList";
+public class DownloadListActivity extends BaseActivity implements RadioGroup.OnCheckedChangeListener {
+    private static final String TAG = "DownloadListActivity";
+
+    public static final int FILTER_ALL = 0;
+    public static final int FILTER_APK = 1;
+    public static final int FILTER_MEDIA = 2;
+    public static final int FILTER_DOC = 3;
+    public static final int FILTER_PACKAGE = 4;
+    public static final int FILTER_OTHER = 5;
+    public static final int FILTER_SUM = 6;
 
     private ViewPager mViewPager;
     private int[] mTabTexts = { R.string.download_in_process, R.string.download_complete };
     private int mCurrentFilterIndex = 0;
-    static final int FILTER_ALL = 0;
-    static final int FILTER_APK = 1;
-    static final int FILTER_MEDIA = 2;
-    static final int FILTER_DOC = 3;
-    static final int FILTER_PACKAGE = 4;
-    static final int FILTER_OTHER = 5;
-    static final int FILTER_SUM = 6;
+
     private int[] mFilterIds = { R.id.filter_all, R.id.filter_apk, R.id.filter_media, R.id.filter_doc, R.id.filter_package, R.id.filter_other };
     private int[] mFilterStringIds = { R.string.all_fileter, R.string.apk_filter, R.string.media_filter, R.string.doc_filter, R.string.package_filter, R.string.other_filter };
     private RadioGroup mGroup;
@@ -110,10 +118,11 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     private boolean shouldDisabled=false;
 	private static boolean mThisActivityIsShowing =false;
 
+    private Handler mHandler = new Handler();
+
     @Override
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-	    BackgroundThread.instance().setGUIHandler(new Handler());
         setFinishOnTouchOutside(true);
         setOnLineEventId(DownloadUtils.DOWNLOADLIST_ONLINE_EVENT);
         setupViewPager();
@@ -139,7 +148,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
           		appPkgName = "android_home";
           	}
           }
-          DownloadUtils.trackEventStatus(DownloadList.this, "download_manager_show", appPkgName == null ? "" : appPkgName, 0, 0);
+          DownloadUtils.trackEventStatus(DownloadListActivity.this, "download_manager_show", appPkgName == null ? "" : appPkgName, 0, 0);
     }
 
     /**
@@ -147,15 +156,15 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
      *
      */
     private void clearToken() {
-        Account account = ExtraAccountManager.getXiaomiAccount(DownloadList.this);
-        XLUtil.logDebug(LOG_TAG, "clearToken --->account = " + account);
+        Account account = ExtraAccountManager.getXiaomiAccount(DownloadListActivity.this);
+        XLUtil.logDebug(TAG, "clearToken --->account = " + account);
         String mi_id  = XLUtil.getStringXiaomiIdPreference(getApplicationContext()); 
         
-        // XLUtil.logDebug(LOG_TAG, "mid: " + mi_id + " name:"+account.name);
+        // XLUtil.logDebug(TAG, "mid: " + mi_id + " name:"+account.name);
         // 褰撳墠娌″皬绫宠处鍙风櫥褰曟�侊紝鎴栬�呭皬绫宠处鍙蜂笌涓婁竴娆＄櫥褰曡处鍙蜂笉涓�鑷存椂锛屾竻闄oken
 
         if (account == null /*||!account.name.equals(mi_id)*/) {
-            //XLUtil.logDebug(LOG_TAG, "in mid ");
+            //XLUtil.logDebug(TAG, "in mid ");
             XLUtil.saveStringPackagePreferenc(getApplicationContext(), ""); // 澧欏埛token
             XLUtil.saveStringPackagePreferenc(getApplicationContext(), "xiaomi_id", "");
         }
@@ -196,9 +205,11 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
      */
     private void checkFromNotificationData() {
         String action = getAction();
-        if (null == action)
+        if (null == action) {
             return;
-        LogUtil.debugLog("NotificationAcitivity.initData.action=" + action);
+        }
+
+        AppConfig.LOGD(TAG, "NotificationAcitivity.initData.action=" + action);
         if (NotificationReveiver.ACTION_XIAOMI_LOGIN.equals(action)) {
             mLoginMark = true;
             new ParseThemeFileTask().execute("get miui account");
@@ -224,10 +235,10 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     }
 
     public void showAlertOpenXunleiDialog() {
-        Builder builder = new AlertDialog.Builder(DownloadList.this);
-        builder.setTitle(DownloadList.this.getResources().getString(R.string.download_list_open_xl_title));
-        builder.setMessage(DownloadList.this.getResources().getString(R.string.download_list_open_xl_message));
-        builder.setPositiveButton(DownloadList.this.getResources().getString(R.string.download_list_open_xl_ok), new DialogInterface.OnClickListener() {
+        Builder builder = new AlertDialog.Builder(DownloadListActivity.this);
+        builder.setTitle(DownloadListActivity.this.getResources().getString(R.string.download_list_open_xl_title));
+        builder.setMessage(DownloadListActivity.this.getResources().getString(R.string.download_list_open_xl_message));
+        builder.setPositiveButton(DownloadListActivity.this.getResources().getString(R.string.download_list_open_xl_ok), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 setXunleiUsagePermission(true);
@@ -236,7 +247,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
                 dialog.dismiss();
             }
         });
-        builder.setNegativeButton(DownloadList.this.getResources().getString(R.string.download_list_open_xl_cancel), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(DownloadListActivity.this.getResources().getString(R.string.download_list_open_xl_cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // TODO Auto-generated method stub
@@ -250,7 +261,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     public void OnMiuiLoginDeal() {
         // open xunlei mark
         boolean xunlei_usage = getXunleiUsagePermission();
-        XLUtil.logDebug(LOG_TAG, "OnMiuiLoginDeal --->xunlei_usage = " + xunlei_usage);
+        XLUtil.logDebug(TAG, "OnMiuiLoginDeal --->xunlei_usage = " + xunlei_usage);
         if (xunlei_usage == false) {
             // Toast.makeText(getApplicationContext(),
             // R.string.turn_off_xunlei_tips, Toast.LENGTH_SHORT).show();
@@ -263,28 +274,28 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             Toast.makeText(getApplicationContext(), R.string.retry_after_network_available, Toast.LENGTH_SHORT).show();
             return;
         }
-        XLUtil.logDebug(LOG_TAG, "OnMiuiLoginDeal --->netStatus = " + netStatus);
+        XLUtil.logDebug(TAG, "OnMiuiLoginDeal --->netStatus = " + netStatus);
         // if get xl_token fail pop AUTH workflow
-        Account account = ExtraAccountManager.getXiaomiAccount(DownloadList.this);
-        XLUtil.logDebug(LOG_TAG, "OnMiuiLoginDeal --->account = " + account);
+        Account account = ExtraAccountManager.getXiaomiAccount(DownloadListActivity.this);
+        XLUtil.logDebug(TAG, "OnMiuiLoginDeal --->account = " + account);
         if (account != null) {
             // MIUI API get Xl_token
             String xunlei_token = XLUtil.getStringPackagePreference(getApplicationContext());
-            XLUtil.logDebug(LOG_TAG, "OnMiuiLoginDeal --->xunlei_token = " + xunlei_token);
+            XLUtil.logDebug(TAG, "OnMiuiLoginDeal --->xunlei_token = " + xunlei_token);
             if (xunlei_token.equals("") == false) {
-                XLUtil.logDebug(LOG_TAG, "OnMiuiLoginDeal + xl_token ===  " + xunlei_token);
+                XLUtil.logDebug(TAG, "OnMiuiLoginDeal + xl_token ===  " + xunlei_token);
                 DownloadUtils.trackBehaviorEvent(getApplicationContext(), "speedup_show", 1, 0);
                 // Intent intent = new Intent(getApplication(), XLSpeedUpActivity.class);
                 // startActivityForResult(intent, 50);
             } else {
                 mTokenType = "AUTH_TYPE_FAKE";
                 mResuestType = Constants.AUTH_TYPE_FAKE; // Constants.AUTH_TYPE_FAKE;
-                AuthManager.getInstance().startProcessAuth(DownloadList.this, mResuestType);
-                XLUtil.logDebug(LOG_TAG, "OnMiuiLoginDeal ---> xl_token = null");
+                AuthManager.getInstance().startProcessAuth(DownloadListActivity.this, mResuestType);
+                XLUtil.logDebug(TAG, "OnMiuiLoginDeal ---> xl_token = null");
             }
 
         } else {
-            XLUtil.logDebug(LOG_TAG, "OnMiuiLoginDeal login fail ---> xl_token = null");
+            XLUtil.logDebug(TAG, "OnMiuiLoginDeal login fail ---> xl_token = null");
         }
         updateVipIconDisplay();
 
@@ -295,15 +306,15 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         boolean netStatus = DownloadUtils.isNetworkAvailable(getApplicationContext());
         int nVipMark = ConfigJSInstance.getInstance(getApplication()).getUseOpt();
         String xunlei_token = XLUtil.getStringPackagePreference(getApplicationContext());
-        Account account = ExtraAccountManager.getXiaomiAccount(DownloadList.this);
+        Account account = ExtraAccountManager.getXiaomiAccount(DownloadListActivity.this);
         NotificationLogic.VipExpireStatus vipstatus = mNotificationLogic.isOutDateVip();
-        XLUtil.logDebug(LOG_TAG, "hsh data: netStatus,xunlei_usage,xunlei_token,nVipMark,(vipstatus != NotificationLogic.VipExpireStatus.OUTDATE)" + netStatus + "," + xunlei_usage + ","
+        XLUtil.logDebug(TAG, "hsh data: netStatus,xunlei_usage,xunlei_token,nVipMark,(vipstatus != NotificationLogic.VipExpireStatus.OUTDATE)" + netStatus + "," + xunlei_usage + ","
                 + xunlei_token + "," + nVipMark + "," + vipstatus);
         if (netStatus && xunlei_usage && xunlei_token.equals("") == false && account != null && nVipMark == 3 && (vipstatus != NotificationLogic.VipExpireStatus.OUTDATE)) {
-            XLUtil.logDebug(LOG_TAG, "hsh R.drawable.fire");
+            XLUtil.logDebug(TAG, "hsh R.drawable.fire");
             setSpeedUpIcon(getActionBar());
         } else {
-            XLUtil.logDebug(LOG_TAG, "hsh R.drawable.no_login");
+            XLUtil.logDebug(TAG, "hsh R.drawable.no_login");
             setNoSpeedUpIcon(getActionBar());
         }
     }
@@ -315,15 +326,15 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    XLUtil.logDebug(LOG_TAG, "DownloadList result :  " + result);
-                    XLUtil.logDebug(LOG_TAG, "DownloadList auth res " + token);
+                    XLUtil.logDebug(TAG, "DownloadList result :  " + result);
+                    XLUtil.logDebug(TAG, "DownloadList auth res " + token);
                     if (result == AuthorizeActivity.RESULT_SUCCESS) {
 
-                        XLUtil.logDebug(LOG_TAG, "DownloadList auth = AuthorizeActivity.RESULT_SUCCESS" + token);
+                        XLUtil.logDebug(TAG, "DownloadList auth = AuthorizeActivity.RESULT_SUCCESS" + token);
                         XLUtil.saveStringPackagePreferenc(getApplicationContext(), token);
-                        XLUtil.logDebug(LOG_TAG, "jinghuang --->send getting token broadcast, mOnAuthResultListener test3");
+                        XLUtil.logDebug(TAG, "jinghuang --->send getting token broadcast, mOnAuthResultListener test3");
                         Intent intent = new Intent(ACTION_INTENT_DOWNLOADLIST_BROADCAST);
-                        DownloadList.this.sendBroadcast(intent);
+                        DownloadListActivity.this.sendBroadcast(intent);
                         AccountInfoInstance mAccount = AccountInfoInstance.getInstance(getApplicationContext(), XLUtil.getStringPackagePreference(getApplicationContext()));
                         mAccount.setAccountListener(mlisten);
                         mAccount.requestAccount();
@@ -348,31 +359,32 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 
         @Override
         public int OnAddFlowRtn(int ret, final AddFlowInfo addflow, String msg) {
-	        LogUtil.errorLog("list rtn =" + addflow.ret);
+            AppConfig.LOGD(TAG, "list rtn =" + addflow.ret);
 	        if (mTrueAuthMark) {
 		        mTrueAuthMark = false;
-		        XLUtil.logDebug(LOG_TAG, "downloadlist  OnAddFlowRtn mTrueAuthMark, ret ,msg, addflow.ret =" + mTrueAuthMark + "," + ret + "," + msg + "," + addflow.ret);
+		        XLUtil.logDebug(TAG, "downloadlist  OnAddFlowRtn mTrueAuthMark, ret ,msg, addflow.ret =" + mTrueAuthMark + "," + ret + "," + msg + "," + addflow.ret);
 		        return 0;
 	        }
-	        // TODO Auto-generated method stub
-	        XLUtil.logDebug(LOG_TAG, "downloadlist  OnAddFlowRtn  ret ,msg, addflow.ret =" + ret + "," + msg + "," + addflow.ret);
+
+	        XLUtil.logDebug(TAG, "downloadlist  OnAddFlowRtn  ret ,msg, addflow.ret =" + ret + "," + msg + "," + addflow.ret);
 	        if (ret == 0 && addflow.ret == 0) {
 		       // DownloadUtils.trackBehaviorEvent(getApplicationContext(), "get_flow_succ", 0, 0);
 
 		        if (addflow.need_auth == 1) {
 		        }
-		        BackgroundThread.instance().postGUI(new Runnable() {
+
+		        mHandler.post(new Runnable() {
 			        @Override
 			        public void run() {
 				        String size = ConfigJSInstance.getInstance(getApplication()).getSpeedJSInfo().free_flow + "MB";
-				        String src = String.format(DownloadList.this.getResources().getString(R.string.add_flow_success_msg), size);
+				        String src = String.format(DownloadListActivity.this.getResources().getString(R.string.add_flow_success_msg), size);
 				        showPopWindowsByText(src);
 				        setSpeedUpIcon(getActionBar());
 			        }
 		        });
 
 	        } else if (addflow.ret ==20){
-		       BackgroundThread.instance().postGUI(new Runnable() {
+		       mHandler.post(new Runnable() {
                   @Override
                   public void run() {
 //	                  showPopWindowsByText(DownloadList.this.getResources().getString(R.string.add_flow_fail_vip_msg));
@@ -380,7 +392,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
                   }
               });
              }else if (addflow.ret == 22) {
-		        BackgroundThread.instance().postGUI(new Runnable() {
+		        mHandler.post(new Runnable() {
 			        @Override
 			        public void run() {
 //				        showPopWindowsByText(DownloadList.this.getResources().getString(R.string.add_flow_fail_haveget_msg));
@@ -390,7 +402,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 
             } else if (addflow.ret != 0) {
                 if (addflow.ret == 5 || addflow.ret == 10 || addflow.ret == 500) {
-	                BackgroundThread.instance().postGUI(new Runnable() {
+	                mHandler.post(new Runnable() {
 		                @Override
 		                public void run() {
 			                showPopWindowsByText(addflow.msg);
@@ -426,21 +438,21 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     private void uploadApplyInformation() {
         Bundle bundle=new Bundle();
         bundle.putBoolean(ExtraAccountManager.EXTRA_SHOW_SYNC_SETTINGS, false);
-        AccountManager accountManager = AccountManager.get(DownloadList.this);
-        accountManager.addAccount(ExtraIntent.XIAOMI_ACCOUNT_TYPE, null, null, bundle, DownloadList.this, null, null);
+        AccountManager accountManager = AccountManager.get(DownloadListActivity.this);
+        accountManager.addAccount(ExtraIntent.XIAOMI_ACCOUNT_TYPE, null, null, bundle, DownloadListActivity.this, null, null);
     }
 
     private void execTokenGetOperation() {
-        XLUtil.logDebug(LOG_TAG, "execTokenGetOperation ---> jinghuang 1");
+        XLUtil.logDebug(TAG, "execTokenGetOperation ---> jinghuang 1");
         boolean xunlei_usage = getXunleiUsagePermission();
         if (xunlei_usage) {
-            XLUtil.logDebug(LOG_TAG, "execTokenGetOperation ---> jinghuang 2");
-            Account account = ExtraAccountManager.getXiaomiAccount(DownloadList.this);
+            XLUtil.logDebug(TAG, "execTokenGetOperation ---> jinghuang 2");
+            Account account = ExtraAccountManager.getXiaomiAccount(DownloadListActivity.this);
             if (account != null) {
-                XLUtil.logDebug(LOG_TAG, "execTokenGetOperation ---> jinghuang 3");
+                XLUtil.logDebug(TAG, "execTokenGetOperation ---> jinghuang 3");
                 String xunlei_token = XLUtil.getStringPackagePreference(getApplicationContext());
                 if (xunlei_token == null || xunlei_token.equals("")) {
-                    XLUtil.logDebug(LOG_TAG, "execTokenGetOperation ---> Account login but no token!");
+                    XLUtil.logDebug(TAG, "execTokenGetOperation ---> Account login but no token!");
                     askRequestToken();
                 }
             }
@@ -453,7 +465,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 		if (Build.IS_TABLET) {
 		 return;			            		
        }
-        DownloadUtils.trackBehaviorEvent(DownloadList.this, "download_manager_speedup_click", 0, 0);
+        DownloadUtils.trackBehaviorEvent(DownloadListActivity.this, "download_manager_speedup_click", 0, 0);
         // open xunlei mark
         boolean xunlei_usage = getXunleiUsagePermission();
         if (xunlei_usage == false) {
@@ -469,19 +481,19 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             return;
         }
         // if get xl_token fail pop AUTH workflow
-        Account account = ExtraAccountManager.getXiaomiAccount(DownloadList.this);
-        XLUtil.logDebug(LOG_TAG, "ExtraAccountManager.getXiaomiAccount =" + account);
+        Account account = ExtraAccountManager.getXiaomiAccount(DownloadListActivity.this);
+        XLUtil.logDebug(TAG, "ExtraAccountManager.getXiaomiAccount =" + account);
         NotificationLogic.VipExpireStatus vipstatus = mNotificationLogic.isOutDateVip();
         if (account != null) {
             // MIUI API get Xl_token
             String xunlei_token = XLUtil.getStringPackagePreference(getApplicationContext());
             if (xunlei_token.equals("") == false) {
-                XLUtil.logDebug(LOG_TAG, "DOWNLIST SHOW PAY PAGE + xl_token ===  " + xunlei_token);
+                XLUtil.logDebug(TAG, "DOWNLIST SHOW PAY PAGE + xl_token ===  " + xunlei_token);
                 DownloadUtils.trackBehaviorEvent(getApplicationContext(), "speedup_show", 0, 0);
                 Intent intent = new Intent(getApplication(), XLSpeedUpActivity.class);
                 startActivityForResult(intent, 50);
             } else if (vipstatus == NotificationLogic.VipExpireStatus.OUTDATE) {
-                XLUtil.logDebug(LOG_TAG, "request add flow " + xunlei_token);
+                XLUtil.logDebug(TAG, "request add flow " + xunlei_token);
                 AccountInfoInstance mAccount = AccountInfoInstance.getInstance(getApplicationContext(), XLUtil.getStringPackagePreference(getApplicationContext()));
                 mAccount.setAccountListener(mlisten);
                // DownloadUtils.trackBehaviorEvent(getApplicationContext(), "get_flow", 0, 0);
@@ -491,8 +503,8 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
                 mResuestType = Constants.AUTH_TYPE_FAKE; // Constants.AUTH_TYPE_FAKE;
                 // Constants.AUTH_TYPE_REAL
                 showXLDiolag();
-                AuthManager.getInstance().startProcessAuth(DownloadList.this, mResuestType);
-                XLUtil.logDebug(LOG_TAG, "AUTH_TYPE_FAKE ---> xl_token = null");
+                AuthManager.getInstance().startProcessAuth(DownloadListActivity.this, mResuestType);
+                XLUtil.logDebug(TAG, "AUTH_TYPE_FAKE ---> xl_token = null");
             }
 
         } else {
@@ -503,8 +515,8 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     }
 
     private void showXLDiolag() {
-        m_ProgressDialog = ProgressDialog.show(DownloadList.this, DownloadList.this.getResources().getString(R.string.download_list_intoAuthAlert),
-                DownloadList.this.getResources().getString(R.string.download_list_intoAuth), true, true);
+        m_ProgressDialog = ProgressDialog.show(DownloadListActivity.this, DownloadListActivity.this.getResources().getString(R.string.download_list_intoAuthAlert),
+                DownloadListActivity.this.getResources().getString(R.string.download_list_intoAuth), true, true);
         this.mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -557,7 +569,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 				//showPopWindowsByText("String.menu_title_settings");
 				if(!shouldDisabled)
                 {
-                     Intent intent = new Intent(DownloadList.this, DownloadSettingActivity.class);
+                     Intent intent = new Intent(DownloadListActivity.this, DownloadSettingActivity.class);
                      startActivity(intent);
                 }
 				break;
@@ -616,7 +628,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 		{
 			int nVipMark = ConfigJSInstance.getInstance(getApplication()).getUseOpt();
 	        String xunlei_token = XLUtil.getStringPackagePreference(getApplicationContext());
-	        Account account = ExtraAccountManager.getXiaomiAccount(DownloadList.this);
+	        Account account = ExtraAccountManager.getXiaomiAccount(DownloadListActivity.this);
 	        NotificationLogic.VipExpireStatus vipstatus = mNotificationLogic.isOutDateVip();
 
 	        if (netStatus && xunlei_usage && xunlei_token.equals("") == false && account != null && nVipMark == 3 && (vipstatus != NotificationLogic.VipExpireStatus.OUTDATE)) {
@@ -649,13 +661,13 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // AuthManager.getInstance().processAuthComplete(data, requestCode,
         // resultCode,Constants.AUTH_TYPE_REAL);
-        XLUtil.logDebug(LOG_TAG, "onActivityResult ---requestCode, requestCode ,  mTrueAuthMark" + requestCode + "," + resultCode + "," + mTrueAuthMark);
+        XLUtil.logDebug(TAG, "onActivityResult ---requestCode, requestCode ,  mTrueAuthMark" + requestCode + "," + resultCode + "," + mTrueAuthMark);
         if (requestCode == 50) {
             if (resultCode == 110) {
                 AccountInfoInstance mAccount = AccountInfoInstance.getInstance(getApplicationContext(), XLUtil.getStringPackagePreference(getApplicationContext()));
                 mTrueAuthMark = true;
                 mAccount.setAccountListener(mlisten);
-                XLUtil.logDebug(LOG_TAG, "onActivityResult --- requestCode 110  mTrueAuthMark" + mTrueAuthMark);
+                XLUtil.logDebug(TAG, "onActivityResult --- requestCode 110  mTrueAuthMark" + mTrueAuthMark);
                 //DownloadUtils.trackBehaviorEvent(getApplicationContext(), "get_flow", 0, 0);
                 mAccount.RequestAddFlowInfo(XLUtil.getStringPackagePreference(getApplicationContext()), true);
             } else if (resultCode == 120) {
@@ -666,7 +678,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         }
         if (requestCode > 9999) {
             AuthManager.getInstance().processAuthComplete(data, requestCode, resultCode, Constants.WAP_TYPE_V6);
-            XLUtil.logDebug(LOG_TAG, "onActivityResult --- requestCode > 9999 ");
+            XLUtil.logDebug(TAG, "onActivityResult --- requestCode > 9999 ");
         }
     }
 
@@ -712,7 +724,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
                     break;
 
                 case 23:// UI must MIUI account
-                    XLUtil.logDebug(LOG_TAG, "UI handler OnMiuiLoginDeal --->");
+                    XLUtil.logDebug(TAG, "UI handler OnMiuiLoginDeal --->");
                     OnMiuiLoginDeal();
                     break;
                 case 25:// have get vip service
@@ -935,23 +947,23 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             if (action.equals(ExtraAccountManager.LOGIN_ACCOUNTS_POST_CHANGED_ACTION)) {
                 // if get xl_token fail pop AUTH workflow
                 // login in
-                Account account = ExtraAccountManager.getXiaomiAccount(DownloadList.this);
+                Account account = ExtraAccountManager.getXiaomiAccount(DownloadListActivity.this);
                 if (account != null) {
-                    XLUtil.logDebug(LOG_TAG, "broadcast OnMiuiLoginDeal  mLoginMark--->" + mLoginMark);
+                    XLUtil.logDebug(TAG, "broadcast OnMiuiLoginDeal  mLoginMark--->" + mLoginMark);
                     if (mLoginMark) {
                         mLoginMark = false;
-                        XLUtil.logDebug(LOG_TAG, "jinghuang --->send getting token broadcast, LoginSucessReceiver test2");
+                        XLUtil.logDebug(TAG, "jinghuang --->send getting token broadcast, LoginSucessReceiver test2");
                         Intent bintent = new Intent(ACTION_INTENT_DOWNLOADLIST_BROADCAST);
-                        DownloadList.this.sendBroadcast(bintent);
+                        DownloadListActivity.this.sendBroadcast(bintent);
                         Message mess = mHandler.obtainMessage();
                         mUiHandler.sendEmptyMessageDelayed(23, 1000);
                     }
-                    XLUtil.logDebug(LOG_TAG, "miui login   :  sendmsg 23");
+                    XLUtil.logDebug(TAG, "miui login   :  sendmsg 23");
                 } else {
                     // login out
                     XLUtil.saveStringPackagePreferenc(getApplicationContext(), "");
                     XLUtil.saveStringPackagePreferenc(getApplicationContext(), "xiaomi_id", "");
-                    XLUtil.logDebug(LOG_TAG, "miui logout   :  clear token");
+                    XLUtil.logDebug(TAG, "miui logout   :  clear token");
                 }
             }
         }
@@ -966,8 +978,8 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         if (!isToast) {
             isToast = true;
             long time = System.currentTimeMillis();
-            LogUtil.errorLog("time = " + time);
-            Toast.makeText(DownloadList.this, msg, Toast.LENGTH_LONG).show();
+            AppConfig.LOGD(TAG, "time = " + time);
+            Toast.makeText(DownloadListActivity.this, msg, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -981,23 +993,18 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     }
 
     private void askRequestToken() {
-        XLUtil.logDebug(LOG_TAG, "jinghuang --->send getting token broadcast, askRequestToken test1");
+        XLUtil.logDebug(TAG, "jinghuang --->send getting token broadcast, askRequestToken test1");
         Intent intent = new Intent(ACTION_INTENT_DOWNLOADLIST_BROADCAST);
         this.sendBroadcast(intent);
     }
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        // TODO Auto-generated method stub
         if (item.getItemId() == android.R.id.home && !shouldDisabled) {
-			if (Build.IS_TABLET) {
-            		
+			if (!Build.IS_TABLET) {
+            	OnClickXlIcon();
+            	return true;	
         	}
-			else
-			{
-				OnClickXlIcon();
-            	return true;
-			}
         }
         return super.onOptionsItemSelected(item);
     }

@@ -1,4 +1,4 @@
-package com.android.providers.downloads.ui.notification;
+package com.android.providers.downloads.ui.utils;
 
 /**
  * 此处写类描述

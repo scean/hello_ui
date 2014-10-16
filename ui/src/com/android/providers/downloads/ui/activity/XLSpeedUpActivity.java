@@ -1,4 +1,4 @@
-package com.android.providers.downloads.ui.pay;
+package com.android.providers.downloads.ui.activity;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -15,10 +15,16 @@ import android.view.View.OnClickListener;
 import android.widget.*;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout.LayoutParams;
-import com.android.providers.downloads.ui.DownloadList;
-import com.android.providers.downloads.ui.DownloadUtils;
+import com.android.providers.downloads.ui.app.AppConfig;
+import com.android.providers.downloads.ui.activity.BaseActivity;
+import com.android.providers.downloads.ui.activity.DownloadListActivity;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
+import com.android.providers.downloads.ui.utils.MyVolley;
+import com.android.providers.downloads.ui.utils.XLUtil;
 import com.android.providers.downloads.ui.R;
-import com.android.providers.downloads.ui.notification.LogUtil;
+import com.android.providers.downloads.ui.pay.ConfigJSInstance;
+import com.android.providers.downloads.ui.pay.AccountInfoInstance;
+import com.android.providers.downloads.ui.pay.MiBiPay;
 import com.android.providers.downloads.ui.notification.NotificationLogic;
 import com.android.providers.downloads.ui.notification.NotificationLogic.GiveFlowUsedState;
 import com.android.providers.downloads.ui.notification.NotificationLogic.VipExpireStatus;
@@ -28,10 +34,6 @@ import com.android.providers.downloads.ui.pay.AccountInfoInstance.AddFlowInfo;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.FlowInfo;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance.ConfigJSInfo;
 import com.android.providers.downloads.ui.pay.MiBiPay.PayListener;
-import com.android.providers.downloads.ui.pay.util.BackgroundThread;
-import com.android.providers.downloads.ui.pay.util.MyVolley;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
-import com.android.providers.downloads.ui.BaseActivity;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
@@ -56,10 +58,11 @@ import java.util.regex.Pattern;
 
 //import miui.widget.SlidingButton.OnCheckedChangedListener;
 public class XLSpeedUpActivity extends BaseActivity {
+    private static final String TAG = XLSpeedUpActivity.class.getSimpleName();
 
-    static final String TAG = XLUtil.getTagString(XLSpeedUpActivity.class);
     public static final String ACTION_INTENT_DOWNLOADLIST_BROADCAST = "com.process.media.broadcast.downloadlist";
     public static final String ACTION_INTENT_XLSPEEDUPACTIVITY_BROADCAST = "com.android.providers.downloads.ui.pay.xlspeedupactivity_broadcast";
+
     TextView mvipclick;
     TextView mVipname;
     TextView mVipInfo;
@@ -93,26 +96,25 @@ public class XLSpeedUpActivity extends BaseActivity {
 	private boolean mGetAccountWhenAuthFinished = false;
 
 	OnUnbindResultListener mUnbindListener;
-	
+
+    Handler mHandler = new Handler();
+
 	private static final class StatInfo {
     	int data1;
     	int data2;
     	String key;
-    	
+
     	StatInfo() {
     		data1 = data2 = -1;
     	}
     }
-    
+
     private StatInfo mStatInfo;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // TODO Auto-generated method stub
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.speedup_activity);
-        BackgroundThread.instance().setGUIHandler(new Handler());
         setOnLineEventId(DownloadUtils.SPEEDUP_ONLINE_EVENT);
         // initBroadcast();
 //        askRequestToken();
@@ -138,9 +140,8 @@ public class XLSpeedUpActivity extends BaseActivity {
                 }
             }
         }, DelayFromCreateToResume);
-
     }
-    
+
     @Override
     protected void onStart()
     {
@@ -239,7 +240,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 			xunleiID = account.uid;
 		}
 
-		XLUtil.saveStringPackagePreferenc(getApplicationContext(),DownloadList.PREF_KEY_XUNLEI_USER_ID,xunleiID);
+		XLUtil.saveStringPackagePreferenc(getApplicationContext(),DownloadListActivity.PREF_KEY_XUNLEI_USER_ID,xunleiID);
 
 	}
 
@@ -291,7 +292,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 
             XLUtil.logDebug(TAG, "flow rtn" + ret_tmp + " " + flow_tmp_ret + "  " + msg_tmp);
             if (ret == 0) {
-                BackgroundThread.instance().postGUI(new Runnable() {
+                mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         // TODO Auto-generated method stub
@@ -305,7 +306,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 
         @Override
         public int OnAddFlowRtn(int ret, AddFlowInfo addflow, String msg) {
-            LogUtil.errorLog("speed rtn =" +addflow.ret);
+            AppConfig.LOGD(TAG, "speed rtn =" +addflow.ret);
             // TODO Auto-generated method stub
             final int ret_tmp = ret;
             final int flow_tmp_ret = addflow.ret;
@@ -316,7 +317,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 
                 if (addflow.need_auth == 1) {
                 }
-                BackgroundThread.instance().postGUI(new Runnable() {
+                mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         String head = XLSpeedUpActivity.this.getResources().getString(R.string.download_list_get_hightspeed_flow_sucess_head);
@@ -330,7 +331,7 @@ public class XLSpeedUpActivity extends BaseActivity {
             } else if (addflow.ret != 0) {
                 if (addflow.ret == 5 || addflow.ret == 10 || addflow.ret == 500) {
                     final String toastMsg = addflow.msg;
-                    BackgroundThread.instance().postGUI(new Runnable() {
+                    mHandler.post(new Runnable() {
                         @Override
                         public void run() {
                          //   showPopWindowsByText(toastMsg);
@@ -350,7 +351,7 @@ public class XLSpeedUpActivity extends BaseActivity {
             final String msg_tmp = msg;
             XLUtil.logDebug(TAG, "Account rtn " + ret_tmp + " " + flow_tmp_ret + "  " + msg_tmp);
 
-            BackgroundThread.instance().postGUI(new Runnable() {
+            mHandler.post(new Runnable() {
 
                 @Override
                 public void run() {
@@ -609,7 +610,7 @@ public class XLSpeedUpActivity extends BaseActivity {
                 if (!XLUtil.isNullOrEmpty(token)) {
                     mSetVipClickGoneFlag = 2;
                 }
-                BackgroundThread.instance().postGUI(new Runnable() {
+                mHandler.post(new Runnable() {
 
                     @Override
                     public void run() {
@@ -660,12 +661,11 @@ public class XLSpeedUpActivity extends BaseActivity {
                 }
             }, DelayGetAccountInfo);
             XLUtil.logDebug(TAG, "pay成功");
-            BackgroundThread.instance().postGUI(new Runnable() {
+            mHandler.post(new Runnable() {
 
                 @Override
                 public void run() {
-                    // TODO Auto-generated method stub
-                    LogUtil.errorLog("toast = " + R.string.download_list_get_hightspeed_flow_pay_ok);
+                    AppConfig.LOGD(TAG, "toast = " + R.string.download_list_get_hightspeed_flow_pay_ok);
                     Toast.makeText(getApplicationContext(), R.string.download_list_get_hightspeed_flow_pay_ok, Toast.LENGTH_SHORT).show();
                     openVipQuick();
                 }
@@ -696,7 +696,7 @@ public class XLSpeedUpActivity extends BaseActivity {
             if (ret == 0) {
                 mReRequestOrderFlag = 0;
             }
-            BackgroundThread.instance().postGUI(new Runnable() {
+            mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (!isProcessDialogShow()) {
@@ -717,16 +717,16 @@ public class XLSpeedUpActivity extends BaseActivity {
                 mReRequestOrderFlag--;
                 return 0;
             }
-            BackgroundThread.instance().postGUI(new Runnable() {
+            mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     stopProcessDialog();
                     if (ret != 0) {
                         if (ret == 116 || ret == 115) {
-                            LogUtil.errorLog("toast = " + result);
+                            AppConfig.LOGD(TAG, "toast = " + result);
                             Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
                         } else {
-                            LogUtil.errorLog("toast = " + XLSpeedUpActivity.this.getResources().getString(R.string.get_order_fail_msg));
+                            AppConfig.LOGD(TAG, "toast = " + XLSpeedUpActivity.this.getResources().getString(R.string.get_order_fail_msg));
                             Toast.makeText(getApplicationContext(), XLSpeedUpActivity.this.getResources().getString(R.string.get_order_fail_msg), Toast.LENGTH_SHORT).show();
                         }
                     }

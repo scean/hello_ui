@@ -3,24 +3,34 @@ package com.android.providers.downloads.ui;
 /**
  * Created by monkey on 14-9-22.
  */
-import com.android.providers.downloads.ui.pay.MiBiPay;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
-import miui.external.Application;
+
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.utils.CrashHandler;
 import com.android.providers.downloads.ui.GlobalApplicationDelegate;
-public class GlobalApplication extends miui.external.Application{
-	final String TAG =XLUtil.getTagString(GlobalApplication.class);
-	String mToken;
+import com.android.providers.downloads.ui.app.AppConfig;
+import com.android.providers.downloads.ui.pay.MiBiPay;
+
+import miui.external.Application;
+
+public class GlobalApplication extends miui.external.Application {
+	private final String TAG = GlobalApplication.class.getSimpleName();
+
+	private String mToken;
+
 	@Override
 	public miui.external.ApplicationDelegate onCreateApplicationDelegate() {
 		return new GlobalApplicationDelegate();
 	}
-	public void init(){
+
+	public void init() {
 		XLUtil.askRequestToken(getApplicationContext());
 		initToken();
 		askPrizesList();
-	}
-	public void uninit(){
 
+        CrashHandler.getInstance().init(this);
+	}
+
+	public void uninit() {
 	}
 
 	void askPrizesList() {
@@ -28,10 +38,11 @@ public class GlobalApplication extends miui.external.Application{
 		mibiPay.initWithContext(getApplicationContext(), null);
 		mibiPay.RequestPrize(0,3,mToken);
 	}
+
 	private void initToken(){
 		String xunlei_token = XLUtil.getStringPackagePreference(getApplicationContext());
-		XLUtil.logDebug(TAG, "initToken=" + xunlei_token + "\nmTken=" + mToken);
+        AppConfig.LOGD(TAG, "initToken=" + xunlei_token + "; mTken=" + mToken);
 		mToken = xunlei_token;
-		XLUtil.logDebug(TAG, "initToken() token=" + mToken);
+        AppConfig.LOGD(TAG, "initToken() token=" + mToken);
 	}
 }
