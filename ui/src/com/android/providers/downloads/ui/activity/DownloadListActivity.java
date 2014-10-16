@@ -118,8 +118,6 @@ public class DownloadListActivity extends BaseActivity implements RadioGroup.OnC
     private boolean shouldDisabled=false;
 	private static boolean mThisActivityIsShowing =false;
 
-    private Handler mHandler = new Handler();
-
     @Override
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);

@@ -55,6 +55,9 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledExecutorService;
 
 //import miui.widget.SlidingButton.OnCheckedChangedListener;
 public class XLSpeedUpActivity extends BaseActivity {
@@ -62,6 +65,8 @@ public class XLSpeedUpActivity extends BaseActivity {
 
     public static final String ACTION_INTENT_DOWNLOADLIST_BROADCAST = "com.process.media.broadcast.downloadlist";
     public static final String ACTION_INTENT_XLSPEEDUPACTIVITY_BROADCAST = "com.android.providers.downloads.ui.pay.xlspeedupactivity_broadcast";
+
+    private ScheduledExecutorService mPool = Executors.newSingleThreadScheduledExecutor();
 
     TextView mvipclick;
     TextView mVipname;
@@ -130,21 +135,20 @@ public class XLSpeedUpActivity extends BaseActivity {
 	    initUnbindListener();
         AuthManager.getInstance().addAuthListener(mOnAuthResultListener);
         // 领取流量，授权流程可能有问题，在页面启动后就去领取。
-        BackgroundThread.instance().postBackground(new Runnable() {
-            @Override
-            public void run() {
-                if (mAccountInstance != null) {
-                    XLUtil.logDebug(TAG, "request add flow1:" + mToken);
-                   // DownloadUtils.trackBehaviorEvent(getApplicationContext(), "get_flow", 0, 0);
-                    mAccountInstance.RequestAddFlowInfo(XLUtil.getStringPackagePreference(getApplicationContext()), false);
+        mPool.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    if (mAccountInstance != null) {
+                        XLUtil.logDebug(TAG, "request add flow1:" + mToken);
+                        // DownloadUtils.trackBehaviorEvent(getApplicationContext(), "get_flow", 0, 0);
+                        mAccountInstance.RequestAddFlowInfo(XLUtil.getStringPackagePreference(getApplicationContext()), false);
+                    }
                 }
-            }
-        }, DelayFromCreateToResume);
+            }, DelayFromCreateToResume, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    protected void onStart()
-    {
+    protected void onStart() {
     	super.onStart();
     	Intent i = getIntent();
     	int cmd = i.getIntExtra("cmd", -1);
@@ -152,7 +156,7 @@ public class XLSpeedUpActivity extends BaseActivity {
     		return;
     	DownloadUtils.trackBehaviorEvent(getApplicationContext(), "speedup_show", 1, 0);
     }
-    
+
 	private void initUnbindListener() {
 		if(mUnbindListener != null){
 			return;
@@ -368,14 +372,14 @@ public class XLSpeedUpActivity extends BaseActivity {
 //                askRequestToken();
 	            XLUtil.askRequestTokenFake(getApplicationContext());
                 initToken();
-                BackgroundThread.instance().postBackground(new Runnable() {
+                mPool.schedule(new Runnable() {
                     @Override
                     public void run() {
                         mAccountInstance.requestAccount();
 	                    XLUtil.logDebug(TAG,"XLSpeedUpActivity onAccountRtn request flow mReInitViewFlag="+mReInitViewFlag);
                         mAccountInstance.requestFlow(methodName);
                     }
-                }, DelayGetNextAccountInfo);
+                    }, DelayGetNextAccountInfo, TimeUnit.MILLISECONDS);
                 mReInitViewFlag--;
             }
             
@@ -590,7 +594,7 @@ public class XLSpeedUpActivity extends BaseActivity {
                 XLUtil.logDebug(TAG, "auth  mAuthFlag" + mAuthFlag);
                 mAccountInstance.RequestAddFlowInfo(mToken, true);
 //                DownloadUtils.trackBehaviorEvent(getApplicationContext(), "bind_account_succ", 1, 0);
-                BackgroundThread.instance().postBackground(new Runnable() {
+                mPool.schedule(new Runnable() {
 
                     @Override
                     public void run() {
@@ -603,7 +607,7 @@ public class XLSpeedUpActivity extends BaseActivity {
                         
                         mGetAccountWhenAuthFinished = true;
                     }
-                }, DelayGetAccountInfo);
+                }, DelayGetAccountInfo, TimeUnit.MILLISECONDS);
 
                 XLUtil.logDebug(TAG, "auth success token:" + mToken);
 
@@ -649,7 +653,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 	        final String methodName =TAG+"_"+"OnSuccessPay";
             mRtnResult = 120;
             PaySuccessReport();
-            BackgroundThread.instance().postBackground(new Runnable() {
+            mPool.schedule(new Runnable() {
 
                 @Override
                 public void run() {
@@ -659,7 +663,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 	                XLUtil.logDebug(TAG,"XLSpeedUpActivity OnSuccessPay request flow ");
                     mAccountInstance.requestFlow(methodName);
                 }
-            }, DelayGetAccountInfo);
+                }, DelayGetAccountInfo, TimeUnit.MILLISECONDS);
             XLUtil.logDebug(TAG, "pay成功");
             mHandler.post(new Runnable() {
 
@@ -706,14 +710,14 @@ public class XLSpeedUpActivity extends BaseActivity {
             });
 
             if (mReRequestOrderFlag > 0) {
-                BackgroundThread.instance().postBackground(new Runnable() {
+                mPool.schedule(new Runnable() {
                     @Override
                     public void run() {
                         if (mpay != null) {
                             mpay.RequestOrder(month, 3, "mi", "", mToken);
                         }
                     }
-                }, DelayGetOrderInfo);
+                    }, DelayGetOrderInfo, TimeUnit.MILLISECONDS);
                 mReRequestOrderFlag--;
                 return 0;
             }
@@ -1441,7 +1445,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 		    }
 	    }
 
-        BackgroundThread.instance().postBackground(new Runnable() {
+        mPool.schedule(new Runnable() {
 
             @Override
             public void run() {
@@ -1454,7 +1458,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 	            XLUtil.logDebug(TAG,"XLSpeedUpActivity onResume request flow ");
                 mAccountInstance.requestFlow(methodName);
             }
-        }, DelayGetAccountInfo);
+            }, DelayGetAccountInfo, TimeUnit.MILLISECONDS);
         AccountInfo account = mAccountInstance.getAccountInfo();
         FlowInfo flow = mAccountInstance.getFlowInfo();
         if (account.result != 200 && flow.ret != 0) {
@@ -1469,7 +1473,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        // TODO Auto-generated method stub
+        super.onDestroy();
         XLUtil.logDebug(TAG, "speedactivity ondestroy");
         setResult(mRtnResult);
         if (mpay != null) {
@@ -1482,7 +1486,7 @@ public class XLSpeedUpActivity extends BaseActivity {
         AuthManager.getInstance().removeAuthListener(mOnAuthResultListener);
         mAccountInstance.removeAccountListener(mAccountListen);
         unregisterReceiver(mLoginReceiver);
-        super.onDestroy();
+        mPool.shutdown();
     }
 
     static class TigerDialog extends Dialog {
