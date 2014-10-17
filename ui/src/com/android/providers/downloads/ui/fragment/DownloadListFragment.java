@@ -365,7 +365,10 @@ public class DownloadListFragment extends Fragment{
             }
         }
         mDateSortedCursor = createTheTabCursor( getFilterStatusViaPosition() );
-        registerCursor();
+
+        if (hasCursors() && !mIsDateSortedCursorRegistered) {
+            registerCursor();
+        }
     }
 
     private View setupViews() {
@@ -518,7 +521,7 @@ public class DownloadListFragment extends Fragment{
     public void onResume() {
         mFragmentStatus = 1;
         super.onResume();
-        if (hasCursors() && ! mIsDateSortedCursorRegistered) {
+        if (hasCursors() && !mIsDateSortedCursorRegistered) {
             registerCursor();
         }
         // exit action mode
