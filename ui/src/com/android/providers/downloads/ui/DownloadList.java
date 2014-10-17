@@ -1,4 +1,4 @@
-	/*
+/*
  * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,7 @@ import android.app.AlertDialog.Builder;
 import android.app.DownloadManager;
 //import android.app.ProgressDialog;
 import android.content.*;
+import android.content.res.Configuration;
 import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -68,7 +69,9 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     static final String LOG_TAG = "DownloadList";
 
     private ViewPager mViewPager;
-    private int[] mTabTexts = { R.string.download_in_process, R.string.download_complete };
+    private final int[] TAB_TEXTS = { R.string.download_in_process, R.string.download_complete };
+    private final int[] FILTER_IDS = { R.id.filter_all, R.id.filter_apk, R.id.filter_media, R.id.filter_doc, R.id.filter_package, R.id.filter_other };
+    private final int[] FILTER_STRING_IDS = { R.string.all_fileter, R.string.apk_filter, R.string.media_filter, R.string.doc_filter, R.string.package_filter, R.string.other_filter };
     private int mCurrentFilterIndex = 0;
     static final int FILTER_ALL = 0;
     static final int FILTER_APK = 1;
@@ -77,8 +80,6 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     static final int FILTER_PACKAGE = 4;
     static final int FILTER_OTHER = 5;
     static final int FILTER_SUM = 6;
-    private int[] mFilterIds = { R.id.filter_all, R.id.filter_apk, R.id.filter_media, R.id.filter_doc, R.id.filter_package, R.id.filter_other };
-    private int[] mFilterStringIds = { R.string.all_fileter, R.string.apk_filter, R.string.media_filter, R.string.doc_filter, R.string.package_filter, R.string.other_filter };
     private RadioGroup mGroup;
     public static final String PREF_NAME = "download_pref";
     public static final String PREF_KEY_FILTER_BAR_VISIBILITY = "filter_bar_visible";
@@ -140,6 +141,11 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
           	}
           }
           DownloadUtils.trackEventStatus(DownloadList.this, "download_manager_show", appPkgName == null ? "" : appPkgName, 0, 0);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig); 
     }
 
     /**
@@ -214,10 +220,10 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         super.onRestoreInstanceState(savedInstanceState);
         // reset button's text, when locale language changed.
         if (mGroup != null) {
-            for (int i = 0; i < mFilterIds.length; i++) {
-                RadioButton button = (RadioButton) mGroup.findViewById(mFilterIds[i]);
+            for (int i = 0; i < FILTER_IDS.length; i++) {
+                RadioButton button = (RadioButton) mGroup.findViewById(FILTER_IDS[i]);
                 if (button != null) {
-                    button.setText(mFilterStringIds[i]);
+                    button.setText(FILTER_STRING_IDS[i]);
                 }
             }
         }
@@ -778,9 +784,9 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             // add downloading and downloaded tabs
             actionBar.setFragmentViewPagerMode(this, getFragmentManager());
 
-            for (int i = 0; i < mTabTexts.length; i++) {
-                String tabText = getString(mTabTexts[i]);
-                String tag = String.valueOf(mTabTexts[i]);
+            for (int i = 0; i < TAB_TEXTS.length; i++) {
+                String tabText = getString(TAB_TEXTS[i]);
+                String tag = String.valueOf(TAB_TEXTS[i]);
                 Bundle bundle = getFragmentBundleFromTabPos(i);
                 Tab tab = actionBar.newTab();
                 tab.setText(tabText);
@@ -796,6 +802,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             if (Build.IS_TABLET) {
                 // set background color of action bar.
                 actionBar.setBackgroundDrawable(getResources().getDrawable(R.color.widget_background_color));
+                this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                 // custom view aligns right.
 				/*
 				 * actionBar.setCustomView(titleBar, new
@@ -805,7 +812,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 				 * @Override public void onClick(View v) { mFilterBarVisible =
 				 * !mFilterBarVisible; setFilterBarVisible(mFilterBarVisible);
 				 * // if filter bar is invisible, set filter index with
-				 * FILTER_ALL mGroup.check(mFilterIds[FILTER_ALL]); } });
+				 * FILTER_ALL mGroup.check(FILTER_IDS[FILTER_ALL]); } });
 				 */
             } else {// set custom view in action bar.
 
@@ -852,7 +859,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
                 */
             }
         }
-        mGroup.check(mFilterIds[0]);
+        mGroup.check(FILTER_IDS[0]);
         mViewPager = (ViewPager) findViewById(miui.R.id.view_pager);
         // Can drag horizontally
         mViewPager.setDraggable(true);
@@ -884,7 +891,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     public void onCheckedChanged(RadioGroup group, int checkedId) {
         RadioButton rb;
         for (int i = 0; i < FILTER_SUM; i++) {
-            if (mFilterIds[i] == checkedId) {
+            if (FILTER_IDS[i] == checkedId) {
                 mCurrentFilterIndex = i;
                 continue;
             }
