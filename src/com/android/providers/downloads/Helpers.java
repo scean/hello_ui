@@ -80,7 +80,7 @@ public class Helpers {
     public static int sMaxDownloadsCountPerDomain = DEFAULT_MAX_DOWNLOADS_COUNT_PER_DOMAIN;
     /**By default, allow download when any network connected*/
     public static boolean sDownloadOnlyOnWifi = false;
-	public static final boolean analyticsMark=false;
+	public static final boolean analyticsMark=true;
     public static HashMap<String, Integer> sDownloadsDomainCountMap = new HashMap<String, Integer>();
 
     /** Regex used to parse content-disposition headers */
@@ -126,7 +126,7 @@ public class Helpers {
     
     private static final String STAT_TAG_TASKSTATUS = "DownloadUtils.Stat.TaskStatus";
     
-    private static final boolean STAT_LOG_ON = false;
+    private static final boolean STAT_LOG_ON = true;
     
     private static final String STAT_TAG_ONLINESTATUS = "DownloadUtils.Stat.OnLineStatus";
 
@@ -974,7 +974,7 @@ public class Helpers {
         //trackData.put("device", device);
        // trackData.put("imsi", imsi);
       //  trackData.put("imei", imei);
-        trackData.put("mac", mac);
+       // trackData.put("mac", mac);
         trackData.put("network_type", Integer.toString(XLUtil.getNetwrokType(context)));
         trackData.put("time", time);
         
@@ -1194,7 +1194,7 @@ public class Helpers {
 //        trackData.put("device", device);
 //        trackData.put("imsi", imsi);
        // trackData.put("imei", imei);
-        trackData.put("mac", mac);
+       // trackData.put("mac", mac);
         trackData.put("network_type", Integer.toString(network));
         trackData.put("time", time);
     }

@@ -43,7 +43,7 @@ public class DownloadUtils {
     private static final String TRACK_ID_XL_SWITCH_TRIGER = "xunlei_usage_switch_triger";
     private static final String LOG_TAG = "com.android.providers.downloads.ui.DownloadUtils";
 	public static final String PRODUCT_VERSION="1.0.0.1";
-	public static final boolean analyticsMark=false;
+	public static final boolean analyticsMark = true;
     // ��ƷҪ��λ��ʹ��һ���ֽ�
 	
     public static final int DOWNLOADLIST_ONLINE_EVENT = 10000;
@@ -55,7 +55,7 @@ public class DownloadUtils {
     public static final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads";
     private static final String STAT_TAG_ONLINESTATUS = "DownloadUtils.Stat.OnLineStatus";
     public static final String PRODUCT_NAME = "MIUI V6 Download";
-    private static final boolean STAT_LOG_ON = false;
+    private static final boolean STAT_LOG_ON = true;
     private static final String STAT_TAG_BEHAVIOR = "DownloadUtils.Stat.Behavior";
     
     private static final long BASE_B = 1L; // ת��Ϊ�ֽڻ���
@@ -304,7 +304,7 @@ public class DownloadUtils {
          //trackData.put("xunlei_id", xlId);
          
         // trackData.put("imei", imei);
-         trackData.put("mac", mac);
+        // trackData.put("mac", mac);
          //trackData.put("ip", ip);
          trackData.put("network_type", Integer.toString(network));
          trackData.put("event_data1", Integer.toString(event1));
@@ -397,7 +397,7 @@ public class DownloadUtils {
         //trackData.put("application_name", "");
       //  trackData.put("imsi", imsi);
         //trackData.put("imei", imei);
-        trackData.put("mac", mac);
+       // trackData.put("mac", mac);
         trackData.put("network_type", String.valueOf(network));
         trackData.put("time", time);
         trackData.put("online_event_status", String.valueOf(status));
