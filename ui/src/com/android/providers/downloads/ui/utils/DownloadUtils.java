@@ -45,11 +45,11 @@ public class DownloadUtils {
 	public static final String PRODUCT_VERSION="1.0.0.1";
 	public static final boolean analyticsMark=false;
     // ��ƷҪ��λ��ʹ��һ���ֽ�
-	
+
     public static final int DOWNLOADLIST_ONLINE_EVENT = 10000;
     public static final int SETTING_ONLINE_EVENT = 10003;
     public static final int SPEEDUP_ONLINE_EVENT = 10004;
-    
+
     public static final String PREF_NAME = "download_pref";
     public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
     public static final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads";
@@ -57,7 +57,7 @@ public class DownloadUtils {
     public static final String PRODUCT_NAME = "MIUI V6 Download";
     private static final boolean STAT_LOG_ON = false;
     private static final String STAT_TAG_BEHAVIOR = "DownloadUtils.Stat.Behavior";
-    
+
     private static final long BASE_B = 1L; // ת��Ϊ�ֽڻ���
     private static final long BASE_KB = 1024; // ת��ΪKB
     private static final long BASE_MB = 1024 * 1024; // ת��ΪM�Ļ���
@@ -68,6 +68,7 @@ public class DownloadUtils {
     public static final String UNIT_MB = "MB";
     public static final String UNIT_GB = "GB";
     public static final String UNIT_TB = "TB";
+
     public static String convertFileSize(long file_size, int precision) {
         long int_part = 0;
         double fileSize = file_size;
@@ -223,6 +224,7 @@ public class DownloadUtils {
         }
         return maxBytesValue;
     }
+
     /**
      * track xunlei usage switch event
      */
@@ -256,7 +258,7 @@ public class DownloadUtils {
                 network = networkInfo.getType();
             }
         }
-        
+
         String xlId = "";
 
         String xmId = "";
@@ -268,15 +270,14 @@ public class DownloadUtils {
         tracker.startSession(context);
         tracker.trackEvent("download_xunlei_event_" + behavior, trackData);
         tracker.endSession();
-        
+
         traceLog(STAT_TAG_BEHAVIOR, behavior, trackData);
     }
-    
+
     /**
      * track  behavior for common
      */
-    static void trackCommon(Context context, Map<String, String> trackData,String product, String productVersion, String xmId, String xlId,String pkgName,String ip,int network,int event1,int event2)
-    {
+    private static void trackCommon(Context context, Map<String, String> trackData,String product, String productVersion, String xmId, String xlId,String pkgName,String ip,int network,int event1,int event2) {
 		if(analyticsMark)
 			return;
     	 if (trackData == null) return;
@@ -302,7 +303,7 @@ public class DownloadUtils {
 
          //trackData.put("xiaomi_id", xmId);
          //trackData.put("xunlei_id", xlId);
-         
+
          trackData.put("imei", imei);
          trackData.put("mac", mac);
          //trackData.put("ip", ip);
@@ -314,7 +315,7 @@ public class DownloadUtils {
          if (!TextUtils.isEmpty(pkgName)) {
          	trackData.put("application_name", pkgName);
          }*/
-         
+
          if (pkgName != null)
         	 trackData.put("application_name", pkgName);
     }
@@ -323,7 +324,7 @@ public class DownloadUtils {
      */
     public static void trackBehaviorEvent(Context context,String behavior ,int event1,int event2) {
 		if(analyticsMark)
-			return;	
+			return;
         int network = -1;
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager != null) {
@@ -335,27 +336,27 @@ public class DownloadUtils {
         // do track
         Analytics tracker = Analytics.getInstance();
         Map <String,String> trackData = new HashMap<String, String>();
-        
+
         String packageName = "";	// this name means the place where app downloading
         String product = "MIUI V6 Download";
         String productVersion = PRODUCT_VERSION; //synchronize this with DownloadService
         String xmId = "";
         String xlId = "";
-        
+
         trackCommon(context, trackData, product, productVersion, xmId, xlId, packageName, "", network, event1, event2);
         tracker.startSession(context);
         tracker.trackEvent("download_xunlei_event_" + behavior, trackData);
         tracker.endSession();
-        
+
         traceLog(STAT_TAG_BEHAVIOR, behavior, trackData);
     }
-    
+
     /*
      * 注意此处的xlEnable和xlVipEnable字面意思和实际含义是反的
      */
     public static void trackOnlineStatus(Context context, int status, boolean xlEnable, boolean xlVipEnable, int eventId) {
 		if(analyticsMark)
-			return;	
+			return;
         int network = -1;
         ConnectivityManager connectivityManager = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -368,7 +369,7 @@ public class DownloadUtils {
         }
         String xlId = "";
         String xmId = "";
-		
+
         String imsi = "";
         String imei = "";
         TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -383,7 +384,7 @@ public class DownloadUtils {
         }
         String time = Long.toString(System.currentTimeMillis() / 1000);
         String MIUIVersion = Build.VERSION.INCREMENTAL;
-        
+
         Map <String,String> trackData = new HashMap<String, String>();
         trackData.put("online_event", String.valueOf(eventId));
         trackData.put("product_name", PRODUCT_NAME);
@@ -391,7 +392,7 @@ public class DownloadUtils {
         trackData.put("phone_type", android.os.Build.MODEL);
         trackData.put("system_version", android.os.Build.VERSION.RELEASE);
         trackData.put("miui_version", MIUIVersion);
-        
+
         //trackData.put("xiaomi_id", xmId);
         //trackData.put("xunlei_id", xlId);
         //trackData.put("application_name", "");
@@ -408,12 +409,12 @@ public class DownloadUtils {
         tracker.startSession(context);
         tracker.trackEvent("download_xunlei_online_status", trackData);
         tracker.endSession();
-        
+
         traceLog(STAT_TAG_ONLINESTATUS, "download_xunlei_online_status", trackData);
     }
-    
-    static void traceLog(String tag, String behavior, Map<String, String> trackData) {
-  	  if (STAT_LOG_ON) {
+
+    private static void traceLog(String tag, String behavior, Map<String, String> trackData) {
+        if (STAT_LOG_ON) {
     		StringBuffer buffer = new StringBuffer();
     		for (Map.Entry<String, String> entry : trackData.entrySet()) {
     			buffer.append(entry.getKey());
@@ -423,8 +424,8 @@ public class DownloadUtils {
     		}
     		Log.d(tag, "event = " + behavior + ", data = " + buffer.toString());
     	}
-  }
-    
+    }
+
     public static void trackOnlineStatus(Context context, int status) {
 		if(analyticsMark)
 			return;
@@ -436,13 +437,13 @@ public class DownloadUtils {
                 network = networkInfo.getType();
             }
         }
-        
+
         String packageName = "";	// this name means the place where app downloading
         String product = "MIUI V6 Download";
         String productVersion = PRODUCT_VERSION; //synchronize this with DownloadService
         String xmId = "";
         String xlId = "";
-        
+
         // do track
         Analytics tracker = Analytics.getInstance();
         Map <String,String> trackData = new HashMap<String, String>();
@@ -450,76 +451,61 @@ public class DownloadUtils {
         tracker.startSession(context);
         tracker.trackEvent("download_xunlei_online_event", trackData);
         tracker.endSession();
-        
+
         traceLog(STAT_TAG_ONLINESTATUS, "download_xunlei_online_status", trackData);
     }
+
     /**
      * 是否传入的值为刚好整，比如10.1传回false,10.0传回true
      * @return
      */
-    public static boolean isNumGood(double value)
-    {
-    	/*if(value-(int)value!=0)
-    	{
-    		return false;
-    	}else
-    	{
-    		return true;
-    	}*/
-	String strValue=String.valueOf(value);
-	int pos=strValue.indexOf('.');
-	if(pos==-1)
-	{
-		return true;
-	}else
-	{
-		if(strValue.charAt(pos+1)=='0')
-		{
-			return true;
-		}
-		return false;
-	}
+    public static boolean isNumGood(double value) {
+        String strValue = String.valueOf(value);
+        int pos = strValue.indexOf('.');
+
+        if (pos != -1 && pos < strValue.length() - 1 && strValue.charAt(pos + 1) != '0') {
+            return false;
+        }
+        return true;
     }
-    
-    public static String formatUnit(String unit)
-    {
-    	if(unit==null||unit.equals(""))
-    	{
+
+    public static String formatUnit(String unit) {
+        if (TextUtils.isEmpty(unit)) {
+            return unit;
+        }
+
+    	if(unit.endsWith("b") || unit.endsWith("B")) {
     		return unit;
-    	}
-    	if(unit.endsWith("b")||unit.endsWith("B"))
-    	{
-    		return unit;
-    	}else {
-			return unit+"B";
+    	} else {
+			return unit + "B";
 		}
     }
-    
-    public static boolean isInternationalBuilder(){
+
+    public static boolean isInternationalBuilder() {
         boolean res = false;
         if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) {
-            res =true;
+            res = true;
         }
-        return  res;
+        return res;
     }
-    
+
     public static boolean getXunleiUsagePermission(Context ctx) {
         // get DownloadProvider's context
         if (isInternationalBuilder()) {
             return false;
         }
 
-            Context ct = null;
+        Context ct = null;
         try {
             ct = ctx.createPackageContext(DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
         } catch (Exception e) {
             return false;
         }
         SharedPreferences xPreferences = ct.getSharedPreferences(PREF_NAME, Context.MODE_MULTI_PROCESS);
-        boolean xunlei_usage = xPreferences.getBoolean(PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
-        return xunlei_usage;
+        boolean xunleiUsage = xPreferences.getBoolean(PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
+        return xunleiUsage;
     }
-    
+
     public static boolean getXunleiVipSwitchStatus(Context ctx) {
         SharedPreferences xPreferences = ctx.getSharedPreferences(
                 "com.android.providers.downloads.ui_preferences",
