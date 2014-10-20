@@ -972,8 +972,8 @@ public class Helpers {
         trackData.put("system_version", android.os.Build.VERSION.RELEASE);
         trackData.put("miui_version", MIUIVersion);
         //trackData.put("device", device);
-        trackData.put("imsi", imsi);
-        trackData.put("imei", imei);
+       // trackData.put("imsi", imsi);
+      //  trackData.put("imei", imei);
         trackData.put("mac", mac);
         trackData.put("network_type", Integer.toString(XLUtil.getNetwrokType(context)));
         trackData.put("time", time);
@@ -1193,7 +1193,7 @@ public class Helpers {
         trackData.put("miui_version", MIUIVersion);
 //        trackData.put("device", device);
 //        trackData.put("imsi", imsi);
-        trackData.put("imei", imei);
+       // trackData.put("imei", imei);
         trackData.put("mac", mac);
         trackData.put("network_type", Integer.toString(network));
         trackData.put("time", time);
