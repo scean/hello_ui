@@ -47,19 +47,13 @@ public class PreferenceLogic {
         mContext = context;
     }
 
-    public static PreferenceLogic init(Context context) {
-        if (null == instance) {
-            instance = new PreferenceLogic(context);
+    public static PreferenceLogic getInstance(Context context) {
+        synchronized (PreferenceLogic.class) {
+            if (instance == null) {
+                instance = new PreferenceLogic(context);
+            }
         }
         return instance;
-    }
-
-    public static PreferenceLogic getInstance() {
-        return instance;
-    }
-
-    public static PreferenceLogic getInstance(Context context) {
-        return init(context);
     }
 
     @SuppressLint("WorldWriteableFiles")

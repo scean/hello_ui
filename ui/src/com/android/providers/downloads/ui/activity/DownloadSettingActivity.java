@@ -136,7 +136,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
 		mLimitedSizePref.setSummary(getMaxBytesSummary());
 
 		// setup checkbox
-		boolean xunlei_usage = PreferenceLogic.getInstance().getIsHaveUseXunleiDownload();
+		boolean xunlei_usage = PreferenceLogic.getInstance(this).getIsHaveUseXunleiDownload();
 		mPreferenceCategory = (PreferenceCategory) findPreference(PREF_KEY_CATEGORY);
 		mXunleiUsagePref = (CheckBoxPreference) findPreference(PREF_KEY_XUNLEI_USAGE_PERMISSION);
 		mXunleiUsagePref.setChecked(xunlei_usage);
@@ -155,7 +155,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
 
-										PreferenceLogic.getInstance().setIsHaveUseXunleiDownload(false);
+										PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(false);
 										DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, false);
 								}
 							}).setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -168,7 +168,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
 					dialog.show();
 				} else {
 					mXunleiUsagePref.setChecked(checked);
-						PreferenceLogic.getInstance().setIsHaveUseXunleiDownload(checked);
+						PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(checked);
 						DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, checked);
 				}
 				return true;

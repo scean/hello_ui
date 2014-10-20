@@ -877,11 +877,11 @@ public class DownloadListActivity extends BaseActivity implements RadioGroup.OnC
     }
 
     private boolean getXunleiUsagePermission() {
-        return PreferenceLogic.getInstance().getIsHaveUseXunleiDownload();
+        return PreferenceLogic.getInstance(this).getIsHaveUseXunleiDownload();
     }
 
     private void setXunleiUsagePermission(boolean value) {
-        PreferenceLogic.getInstance().setIsHaveUseXunleiDownload(value);
+        PreferenceLogic.getInstance(this).setIsHaveUseXunleiDownload(value);
         
         if (value) {
         	DownloadUtils.trackBehaviorEvent(getApplicationContext(), "xunlei_open", 0, 0);
