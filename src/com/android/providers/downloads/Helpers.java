@@ -126,7 +126,7 @@ public class Helpers {
     
     private static final String STAT_TAG_TASKSTATUS = "DownloadUtils.Stat.TaskStatus";
     
-    private static final boolean STAT_LOG_ON = true;
+    private static final boolean STAT_LOG_ON = false;
     
     private static final String STAT_TAG_ONLINESTATUS = "DownloadUtils.Stat.OnLineStatus";
 

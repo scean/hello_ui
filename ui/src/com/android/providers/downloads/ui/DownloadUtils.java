@@ -54,7 +54,7 @@ public class DownloadUtils {
     public static final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads";
     private static final String STAT_TAG_ONLINESTATUS = "DownloadUtils.Stat.OnLineStatus";
     public static final String PRODUCT_NAME = "MIUI V6 Download";
-    private static final boolean STAT_LOG_ON = true;
+    private static final boolean STAT_LOG_ON = false;
     private static final String STAT_TAG_BEHAVIOR = "DownloadUtils.Stat.Behavior";
     
     private static final long BASE_B = 1L; // ת��Ϊ�ֽڻ���
