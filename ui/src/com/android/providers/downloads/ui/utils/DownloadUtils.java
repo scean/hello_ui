@@ -43,7 +43,7 @@ public class DownloadUtils {
     private static final String TRACK_ID_XL_SWITCH_TRIGER = "xunlei_usage_switch_triger";
     private static final String LOG_TAG = "com.android.providers.downloads.ui.DownloadUtils";
 	public static final String PRODUCT_VERSION="1.0.0.1";
-	public static final boolean analyticsMark = true;
+	public static final boolean analyticsMark = false;
     // ��ƷҪ��λ��ʹ��һ���ֽ�
 	
     public static final int DOWNLOADLIST_ONLINE_EVENT = 10000;
