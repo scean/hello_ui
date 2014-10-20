@@ -36,13 +36,16 @@ import com.android.providers.downloads.ui.pay.ConfigJSInstance.SpeedupJSInfo;
 public class NotificationLogic {
     private static String TAG = NotificationLogic.class.getSimpleName();
 
+    // 场景1
+    public static final int NOTIFICATION_SCENCE_1 = 1;
+    // 场景2
+    public static final int NOTIFICATION_SCENCE_2 = 2;
+
     private Context mContext;
     // 下载次数
     private int min_download_times = 3;
-
     // 下载文件大小
     private int min_file_size = 30 * 1024; // 30M *1024
-
     // 加速提醒周期：N 天
     private int remind_cycle = 1;
 
@@ -60,16 +63,15 @@ public class NotificationLogic {
     public AccountInfo mAccountInfo;
     // 流量信息
     public FlowInfo mFlowInfo;
-    // 场景1
-    public static final int NOTIFICATION_SCENCE_1 = 1;
-    // 场景2
-    public static final int NOTIFICATION_SCENCE_2 = 2;
+
+    private PreferenceLogic mPreferenceLogic;
 
     public NotificationLogic(Context ctx) {
         this.mContext = ctx;
 
+        mPreferenceLogic = PreferenceLogic.getInstance(ctx);
         mConfigJSInstance = ConfigJSInstance.getInstance(ctx);
-        String token = PreferenceLogic.getInstance(ctx).getToken();
+        String token = mPreferenceLogic.getToken();
         mAccountJSInstance = AccountInfoInstance.getInstance(ctx, token);
         refreshInfo();
         AppConfig.LOGD(TAG, "NotificationLogic.token=" + token);
@@ -113,7 +115,7 @@ public class NotificationLogic {
         boolean bool = false;
         try {
             String curDate = DateUtil.getDate();
-            String remindDate = PreferenceLogic.getInstance().getRemindCycleDate(scence);
+            String remindDate = mPreferenceLogic.getRemindCycleDate(scence);
             if (!remindDate.equals("") && DateUtil.getDiffDays(remindDate, curDate) < remind_cycle) {
                 bool = true;
             }
@@ -304,7 +306,7 @@ public class NotificationLogic {
         long accountUsedFlow = mFlowInfo.org_used_capacity;// 从会员信息中获取(接口获取)
         
 //      获得当前月是否弹流量用完通知
-        boolean isShown = PreferenceLogic.getInstance().isBeforeGivenFlowOutShown("NO_FLOW");
+        boolean isShown = mPreferenceLogic.isBeforeGivenFlowOutShown("NO_FLOW");
         if (isShown) {
         	return GiveFlowUsedState.NONE;
 		}
@@ -313,9 +315,9 @@ public class NotificationLogic {
         Calendar c = Calendar.getInstance();
         int day = c.get(Calendar.DAY_OF_MONTH);
 //      获得当前月弹流量即将用户通知是那天
-        int saveDay = PreferenceLogic.getInstance().getBeforeGivenFlowDay();
+        int saveDay = mPreferenceLogic.getBeforeGivenFlowDay();
 //      当前月是否弹流量即将用完通知
-        boolean isShown1 = PreferenceLogic.getInstance().isBeforeGivenFlowOutShown("OUT_LIMIT_FLOW");
+        boolean isShown1 = mPreferenceLogic.isBeforeGivenFlowOutShown("OUT_LIMIT_FLOW");
         
 //      如果本月本天已弹出通知则直接返回
         if (isShown1 && day == saveDay) {
@@ -325,7 +327,7 @@ public class NotificationLogic {
         XLUtil.logDebug(TAG, "getShowBeforeGivenFlowOutState isShown=" + isShown+isShown1+ saveDay);
         
         if (accountUsedFlow >= accountTotalFreeFlow) {
-            PreferenceLogic.getInstance().saveBeforeGivenFlowOut("NO_FLOW", true);
+            mPreferenceLogic.saveBeforeGivenFlowOut("NO_FLOW", true);
             XLUtil.logDebug(TAG, "NO_FLOW");
             return GiveFlowUsedState.NO_FLOW;
         }
@@ -337,8 +339,8 @@ public class NotificationLogic {
         
         for (int i = beforeUsedPercents.size() - 1; i >= 0; i--) {
             if ((!isShown1) && usedPercent >= beforeUsedPercents.get(i)) {
-                PreferenceLogic.getInstance().saveBeforeGivenFlowOut("OUT_LIMIT_FLOW", true);
-                PreferenceLogic.getInstance().saveBeforeGivenFlowDay(day);
+                mPreferenceLogic.saveBeforeGivenFlowOut("OUT_LIMIT_FLOW", true);
+                mPreferenceLogic.saveBeforeGivenFlowDay(day);
                 XLUtil.logDebug(TAG, "OUT_LIMIT_FLOW");
                 return GiveFlowUsedState.OUT_LIMIT_FLOW;
             }

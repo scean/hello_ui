@@ -63,8 +63,7 @@ public class NotificationReveiver extends BroadcastReceiver {
     public static final int NOTICE_FLOW_SHOW3 = 11;
     /***领取流量通知条展示,登录小米账号绑定迅雷会员账号**/
     public static final int NOTICE_FLOW_SHOW4 = 12;
-    
-    
+
     @Override
     public void onReceive(Context context, Intent intent) {
         /*
@@ -77,14 +76,14 @@ public class NotificationReveiver extends BroadcastReceiver {
         if (null == configJsInfo || null == speedupJsInfo) {
             return;
         }
-        String token = PreferenceLogic.init(context).getToken();
+        String token = PreferenceLogic.getInstance(context).getToken();
         if (null != token) {
             AccountInfoInstance.getInstance(context.getApplicationContext(), token);
         }
         String action = intent.getAction();
         AppConfig.LOGD(TAG, "NotificationReveiver.action=" + action);
         if (ACTION_DOWNLOAD_NOTIFICATION_INIT.equals(action)) {
-            PreferenceLogic.init(context).saveToday();
+            PreferenceLogic.getInstance(context).saveToday();
             NotificationHelper.init(context.getApplicationContext());
         } else if (ACTION_XIAOMI_LOGIN.equals(action)) {
         	report(context,intent);

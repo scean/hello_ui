@@ -61,7 +61,7 @@ public class AccountLogic {
      */
     public boolean isAuthed(Context context) {
         if (isLogined(context)) {
-            String token = PreferenceLogic.init(context).getToken();
+            String token = PreferenceLogic.getInstance(context).getToken();
             return !TextUtils.isEmpty(token);
         }
         return false;
@@ -78,7 +78,7 @@ public class AccountLogic {
      */
     public boolean isVipXunleiAccount(Context context) {
         boolean bool = false;
-        String token = PreferenceLogic.init(context).getToken();
+        String token = PreferenceLogic.getInstance(context).getToken();
         AccountInfoInstance accoutnInstance = AccountInfoInstance.getInstance(context, token);
         if (accoutnInstance != null && accoutnInstance.getAccountInfo() != null
                 && accoutnInstance.getAccountInfo().isvip == 1) {
@@ -87,8 +87,8 @@ public class AccountLogic {
         return bool;
     }
 
-    public boolean isUsingXunleiDownload() {
-        return PreferenceLogic.getInstance().getIsHaveUseXunleiDownload();
+    public boolean isUsingXunleiDownload(Context context) {
+        return PreferenceLogic.getInstance(context).getIsHaveUseXunleiDownload();
     }
 
     public boolean isXunleiAccountExpired() {
