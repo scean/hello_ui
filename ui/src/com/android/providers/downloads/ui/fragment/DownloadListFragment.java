@@ -110,7 +110,6 @@ public class DownloadListFragment extends Fragment{
     private int mNotificationClassColumnId;
     private int mNotificationExtrasColumnId;
     private boolean mNotificationColumnsInitialized = false;
-	private boolean dlgDeletemark =false;
     private static int STATUS_NONE = -1;
     private static String INSTANCE_STATE_FILTER_POSITION = "FILTER_POSITION";
     // used to filter downloading and downloaded tasks
@@ -770,18 +769,9 @@ public class DownloadListFragment extends Fragment{
         }
 
 		View checkBoxView = View.inflate(getActivity(), R.layout.dialog_content_view, null);
-		CheckBox checkBox = (CheckBox) checkBoxView.findViewById(R.id.checkbox);
-		checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				dlgDeletemark = isChecked;
-				// Save to shared preferences
-			}
-		});
+		final CheckBox checkBox = (CheckBox) checkBoxView.findViewById(R.id.checkbox);
 		checkBox.setText(getActivity().getResources().getString(R.string.dialog_confirm_delete_checkbox_message));
 
-		
         String message = downloadIds.length > 1 ? getString(
                 R.string.dialog_confirm_delete_downloads_message, downloadIds.length)
                 : getString(R.string.dialog_confirm_delete_the_download_item_message);
@@ -791,7 +781,6 @@ public class DownloadListFragment extends Fragment{
                 .setIconAttribute(android.R.attr.alertDialogIcon)
 				.setTitle(R.string.delete_download).setMessage(message)
                 .setNegativeButton(android.R.string.cancel, null)
-				.setView(checkBoxView)
                 .setPositiveButton(R.string.download_list_open_xl_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -799,9 +788,12 @@ public class DownloadListFragment extends Fragment{
                             mode.finish();
                         }
                         mSelectedIds.clear();
-                        doDeleteDownloads(dlgDeletemark, downloadIds);
+                        doDeleteDownloads(mFilterPosition == FILTER_SUCCESSFUL ? checkBox.isChecked() : true, downloadIds);
                     }
         });
+        if (mFilterPosition == FILTER_SUCCESSFUL) {
+            dialog.setView(checkBoxView);
+        }
         dialog.show();
     }
 
