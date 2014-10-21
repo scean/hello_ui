@@ -1,6 +1,12 @@
 -ignorewarnings
 -verbose
 -keep class com.xunlei.** { *; }
+#keep jars
+-keep class org.**{*;}
+-keep class com.sun.tools.**{*;}
+-keep class com.miui.video.response.**{*;}
+-keep class com.miui.video.type.**{*;}
+-keep class com.milink.**{*;}
 #keep mipush
 -keep class com.miui.video.mipush.MediaPushMessageReceiver {*;}
 
