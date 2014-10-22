@@ -45,8 +45,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
+import java.util.HashMap;
 
 import libcore.io.IoUtils;
+
 import android.app.DownloadManager.ExtraDownloads;
 import android.content.ContentValues;
 import android.content.Context;
@@ -70,6 +73,16 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.webkit.MimeTypeMap;
+
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.client.params.HttpClientParams;
+
 import miui.os.Build;
 
 import com.android.providers.downloads.notification.NotificationHelper;
@@ -498,10 +511,9 @@ public class DownloadThread implements Runnable {
      * handle the response, and transfer the data to the destination file.
      */
     private void executeDownload(State state) throws StopRequestException {
-        
         state.resetBeforeExecute();
         setupDestinationFile(state);
-        
+
 		// do start track
         /*
 		int network = XLUtil.getNetwrokType(mContext);
@@ -509,7 +521,7 @@ public class DownloadThread implements Runnable {
 		if (!mIsNewTask) {
 			status = 107;
 		}
-		
+
 		Helpers.trackDownloadStart(mContext, status, (int) mTaskId,
 				1 == state.mXlTaskOpenMark,!getVipSwitchStatus(), "", "", state.mPackage,
 				        XLConfig.PRODUCT_NAME, XLConfig.PRODUCT_VERSION,
@@ -526,32 +538,46 @@ public class DownloadThread implements Runnable {
         while (state.mRedirectionCount++ < Constants.MAX_REDIRECTS) {
             // Open connection and follow any redirects until we have a useful
             // response with body.
-            HttpURLConnection conn = null;
+
            try {
-                checkConnectivity(false);
-                conn = (HttpURLConnection) state.mUrl.openConnection();
-                conn.setInstanceFollowRedirects(false);
-                if (1 == state.mXlTaskOpenMark) {
-                	conn.setConnectTimeout(5000);
-                    conn.setReadTimeout(5000);
-                } else {
-                	conn.setConnectTimeout(DEFAULT_TIMEOUT );
-                    conn.setReadTimeout(DEFAULT_TIMEOUT );
-                }
+               checkConnectivity(false);
 
-                addRequestHeaders(state, conn);
+               DefaultHttpClient client = new DefaultHttpClient();
+               HttpGet httpGet = new HttpGet(state.mUrl.toString());
 
-                final int responseCode = conn.getResponseCode();
+               HttpParams params = client.getParams();
+               HttpClientParams.setRedirecting(params, false);
+               if (1 == state.mXlTaskOpenMark) {
+                   HttpConnectionParams.setConnectionTimeout(params, 5000);
+                   HttpConnectionParams.setSoTimeout(params, 5000);
+               } else {
+                   HttpConnectionParams.setConnectionTimeout(params, DEFAULT_TIMEOUT);
+                   HttpConnectionParams.setSoTimeout(params, DEFAULT_TIMEOUT);
+               }
 
-                switch (responseCode) {
+               addRequestHeaders(state, httpGet);
+
+               HttpResponse httpResponse = client.execute(httpGet);
+               HttpEntity entity = httpResponse.getEntity();
+               final int responseCode = httpResponse.getStatusLine().getStatusCode();
+
+               Header[] headers = httpResponse.getAllHeaders();
+               Map<String, String> headerMap = new HashMap<String, String>();
+               if (headers != null) {
+                   for (Header header : headers) {
+                       headerMap.put(header.getName() == null ? "" : header.getName().trim(), header.getValue() == null ? "" : header.getValue().trim());
+                   }
+               }
+
+               switch (responseCode) {
                     case HTTP_OK:
                         if (state.mContinuingDownload) {
                             throw new StopRequestException(
                                     STATUS_CANNOT_RESUME, "Expected partial, but received OK");
                         }
-                        processResponseHeaders(state, conn);
-                       
-                        transferData(state, conn);
+                        processResponseHeaders(state, headerMap);
+
+                        transferData(state, entity);
                         return;
 
                     case HTTP_PARTIAL:
@@ -559,14 +585,14 @@ public class DownloadThread implements Runnable {
                             throw new StopRequestException(
                                     STATUS_CANNOT_RESUME, "Expected OK, but received partial");
                         }
-                        transferData(state, conn);
+                        transferData(state, entity);
                         return;
 
                     case HTTP_MOVED_PERM:
                     case HTTP_MOVED_TEMP:
                     case HTTP_SEE_OTHER:
                     case HTTP_TEMP_REDIRECT:
-                        final String location = conn.getHeaderField("Location");
+                        final String location = headerMap.get("Location");
                         state.mUrl = new URL(state.mUrl, location);
                         if (responseCode == HTTP_MOVED_PERM) {
                             // Push updated URL back to database
@@ -576,42 +602,26 @@ public class DownloadThread implements Runnable {
 
                     case HTTP_REQUESTED_RANGE_NOT_SATISFIABLE:
                     	if (1 == state.mXlTaskOpenMark) {
-                    		transferData(state, conn);
+                    		transferData(state, entity);
                     	} else {
                     		throw new StopRequestException(
                                     STATUS_CANNOT_RESUME, "Requested range not satisfiable");
                     	}
 
                     case HTTP_UNAVAILABLE:
-                        parseRetryAfterHeaders(state, conn);
+                        parseRetryAfterHeaders(state, headerMap);
                         throw new StopRequestException(
-                                HTTP_UNAVAILABLE, conn.getResponseMessage());
+                                HTTP_UNAVAILABLE, "http unavailable.");
 
                     case HTTP_INTERNAL_ERROR:
                         throw new StopRequestException(
-                                HTTP_INTERNAL_ERROR, conn.getResponseMessage());
-
+                                HTTP_INTERNAL_ERROR, "http internal error.");
                     default:
-                        StopRequestException.throwUnhandledHttpError(
-                                responseCode, conn.getResponseMessage());
+                        StopRequestException.throwUnhandledHttpError(responseCode, "unhandled http error.");
                 }
             } catch (IOException e) {
-                // Trouble with low-level sockets
                 throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
-
             } finally {
-				if (conn != null) {
-					try {
-						InputStream xn = conn.getInputStream();
-						 if(xn !=null) xn.close();
-					} catch (IOException e2) {
-						// TODO: handle exception
-						e2.printStackTrace();
-					} catch (Exception e3) {
-						e3.printStackTrace();
-					}
-					conn.disconnect();
-				}
             }
         }
 
@@ -621,7 +631,7 @@ public class DownloadThread implements Runnable {
     /**
      * Transfer data from the given connection to the destination file.
      */
-    private void transferData(State state, HttpURLConnection conn) throws StopRequestException {
+    private void transferData(State state, HttpEntity entity) throws StopRequestException {
         DrmManagerClient drmClient = null;
         InputStream in = null;
         OutputStream out = null;
@@ -629,7 +639,7 @@ public class DownloadThread implements Runnable {
         try {
         	if (0 == state.mXlTaskOpenMark) {
         		try {
-                    in = conn.getInputStream();
+                    in = entity.getContent();
                 } catch (IOException e) {
                     throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
                 }
@@ -662,8 +672,6 @@ public class DownloadThread implements Runnable {
         	} else {
         		transferData_xl(state);
         	}
-            
-
         } finally {
         	XLUtil.logDebug(Constants.TAG, "jinghuang ---> finally in transferData!");
         	if (0 == state.mXlTaskOpenMark) {
@@ -1285,12 +1293,12 @@ public class DownloadThread implements Runnable {
      * Prepare target file based on given network response. Derives filename and
      * target size as needed.
      */
-    private void processResponseHeaders(State state, HttpURLConnection conn)
+    private void processResponseHeaders(State state, Map<String, String> headers)
             throws StopRequestException {
         // TODO: fallocate the entire file if header gave us specific length
 
     	//Log.i("DownloadManager-jinghuang", "---> processResponseHeaders called");
-        readResponseHeaders(state, conn);
+        readResponseHeaders(state, headers);
         // update header values into database
         updateDatabaseFromHeaders(state);
         state.mFilename = Helpers.generateSaveFile(
@@ -1349,21 +1357,25 @@ public class DownloadThread implements Runnable {
     /**
      * Read headers from the HTTP response and store them into local state.
      */
-    private void readResponseHeaders(State state, HttpURLConnection conn)
+    private void readResponseHeaders(State state, Map<String, String> headers)
             throws StopRequestException {
-        state.mContentDisposition = conn.getHeaderField("Content-Disposition");
-        state.mContentLocation = conn.getHeaderField("Content-Location");
+        state.mContentDisposition = headers.get("Content-Disposition");
+        state.mContentLocation = headers.get("Content-Location");
 
         if (state.mMimeType == null) {
-            state.mMimeType = Intent.normalizeMimeType(conn.getContentType());
+            state.mMimeType = Intent.normalizeMimeType(headers.get("Content-Type"));
         }
 
-        state.mHeaderETag = conn.getHeaderField("ETag");
-        state.mHeaderIfRangeId = conn.getHeaderField("Last-Modified");    // be careful in here - added by xunlei
-        state.mHeaderAcceptRanges = conn.getHeaderField("Accept-Ranges");
-        final String transferEncoding = conn.getHeaderField("Transfer-Encoding");
+        state.mHeaderETag = headers.get("ETag");
+        state.mHeaderIfRangeId = headers.get("Last-Modified");    // be careful in here - added by xunlei
+        state.mHeaderAcceptRanges = headers.get("Accept-Ranges");
+        final String transferEncoding = headers.get("Transfer-Encoding");
         if (transferEncoding == null) {
-            state.mContentLength = getHeaderFieldLong(conn, "Content-Length", -1);    // get file size form http content
+            try {
+                state.mContentLength = Long.parseLong(headers.get("Content-Length"));
+            } catch (Exception e) {
+                state.mContentLength = -1;
+            }
         } else {
             Log.i(TAG, "Ignoring Content-Length since Transfer-Encoding is also defined");
             state.mContentLength = -1;
@@ -1380,8 +1392,13 @@ public class DownloadThread implements Runnable {
         }
     }
 
-    private void parseRetryAfterHeaders(State state, HttpURLConnection conn) {
-        state.mRetryAfter = conn.getHeaderFieldInt("Retry-After", -1);
+    private void parseRetryAfterHeaders(State state, Map<String, String> headers) {
+        try {
+            state.mRetryAfter = Integer.parseInt(headers.get("Retry-After"));
+        } catch (Exception e) {
+            state.mRetryAfter = -1;
+        }
+
         if (state.mRetryAfter < 0) {
             state.mRetryAfter = 0;
         } else {
@@ -1480,30 +1497,41 @@ public class DownloadThread implements Runnable {
     /**
      * Add custom headers for this download to the HTTP request.
      */
-    private void addRequestHeaders(State state, HttpURLConnection conn) {
+    private void addRequestHeaders(State state, HttpGet request) {
         for (Pair<String, String> header : mInfo.getHeaders()) {
-            conn.addRequestProperty(header.first, header.second);
+            request.setHeader(header.first, header.second);
         }
 
         // Only splice in user agent when not already defined
-        if (conn.getRequestProperty("User-Agent") == null) {
-            conn.addRequestProperty("User-Agent", userAgent());
+        Header[] headers = request.getAllHeaders();
+        boolean hasUserAgent = false;
+        if (headers != null) {
+            for (Header header : headers) {
+                if ("User-Agent".equals(header.getName())) {
+                    hasUserAgent = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasUserAgent) {
+            request.setHeader("User-Agent", userAgent());
         }
 
         // Defeat transparent gzip compression, since it doesn't allow us to
         // easily resume partial downloads.
         if (0 == state.mXlTaskOpenMark) {
-		    conn.setRequestProperty("Accept-Encoding", "identity");
+            request.setHeader("Accept-Encoding", "identity");
 		}
 
         if (state.mContinuingDownload) {
             if (state.mHeaderETag != null) {
-                conn.addRequestProperty("If-Match", state.mHeaderETag);
+                request.setHeader("If-Match", state.mHeaderETag);
             }
             if (state.mHeaderIfRangeId != null) {
-                conn.addRequestProperty("If-Range", state.mHeaderIfRangeId);
+                request.setHeader("If-Range", state.mHeaderIfRangeId);
             }
-            conn.addRequestProperty("Range", "bytes=" + state.mCurrentBytes + "-");
+            request.setHeader("Range", "bytes=" + state.mCurrentBytes + "-");
         }
     }
 
