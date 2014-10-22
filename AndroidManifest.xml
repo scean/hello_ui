@@ -131,6 +131,9 @@
           android:enabled="true"
           android:exported="true"
           android:name="com.xiaomi.mipush.sdk.PushMessageHandler" />
+        <service 
+            android:enabled="true"
+            android:name="com.xiaomi.mipush.sdk.MessageHandleService"/>
 		<receiver
           android:exported="true"
           android:name="com.xiaomi.push.service.receivers.NetworkStatusReceiver" >

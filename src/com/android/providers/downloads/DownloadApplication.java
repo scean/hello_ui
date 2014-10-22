@@ -12,7 +12,7 @@ public class DownloadApplication extends miui.external.Application {
     }
 	public void initToken()
 	{
-		com.xiaomi.mipush.sdk.Constants.useOfficial();
+		//com.xiaomi.mipush.sdk.Constants.useOfficial();
 		MiPushClient.registerPush(this, APP_ID, APP_KEY);
 		TokenHelper.getInstance().initWithContext(this.getApplicationContext());
 	}
