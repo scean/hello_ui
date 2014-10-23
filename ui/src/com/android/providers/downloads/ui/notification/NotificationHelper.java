@@ -460,79 +460,59 @@ public class NotificationHelper {
                                                  "notice_VIPstatus_show", 2, 0);
 			}
 			return true;
-            /*	
-                case OUTDATE:
-                if (!PreferenceLogic.getInstance().getVipExpireIsTip()) {
-				AppConfig.LOGD(TAG, "判断Vip过期: 已过期");
-				DownloadUtils.trackBehaviorEvent(mContext,
-                "notice_VIPstatus_show", 3, 0);
-				showXiaomiNotification(
-                logic.mConfigJSInfo.vip_guide_bar_expire_title,
-                logic.mConfigJSInfo.vip_guide_bar_expire_content,
-                "",
-                AccountLogic.getInstance().getToVipExpirePendingIntent(
-                mContext,
-                NotificationReveiver.NOTICE_VIPSTARTUS_SHOW3));
-				PreferenceLogic.getInstance().saveVipExpireIsTip(true);
-                }
-
-                return true;
-                case ONEDAY:
-                if (!PreferenceLogic.getInstance().getVipExpireOneIsTip()) {
-				AppConfig.LOGD(TAG, "判断Vip过期: 1-3天");
-				DownloadUtils.trackBehaviorEvent(mContext,
-                "notice_VIPstatus_show", 2, 0);
-				showXiaomiNotification(
-                logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
-                logic.mConfigJSInfo.vip_guide_bar_before_expire_content,
-                "",
-                AccountLogic.getInstance().getToVipExpirePendingIntent(
-                mContext,
-                NotificationReveiver.NOTICE_VIPSTARTUS_SHOW2));
-				PreferenceLogic.getInstance().saveVipExpireOneIsTip(true);
-                }
-
-                return true;
-                case FOURDAY:
-                if (!PreferenceLogic.getInstance().getVipExpireFourIsTip()) {
-				AppConfig.LOGD(TAG, "判断Vip过期: 4-6天");
-				DownloadUtils.trackBehaviorEvent(mContext,
-                "notice_VIPstatus_show", 1, 0);
-				showXiaomiNotification(
-                logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
-                logic.mConfigJSInfo.vip_guide_bar_before_expire_content,
-                "",
-                AccountLogic.getInstance().getToVipExpirePendingIntent(
-                mContext,
-                NotificationReveiver.NOTICE_VIPSTARTUS_SHOW1));
-				PreferenceLogic.getInstance().saveVipExpireFourIsTip(true);
-                }
-
-                return true;
-                case SEVENDAY:
-                if (!PreferenceLogic.getInstance().getVipExpireSevenIsTip()) {
-				AppConfig.LOGD(TAG, "判断Vip过期: 7天");
-				DownloadUtils.trackBehaviorEvent(mContext,
-                "notice_VIPstatus_show", 0, 0);
-				showXiaomiNotification(
-                logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
-                logic.mConfigJSInfo.vip_guide_bar_before_expire_content,
-                "",
-                AccountLogic.getInstance().getToVipExpirePendingIntent(
-                mContext,
-                NotificationReveiver.NOTICE_VIPSTARTUS_SHOW0));
-				PreferenceLogic.getInstance().saveVipExpireSevenIsTip(true);
-                }
-
-                return true;
-                case MOREDAY:
-                AppConfig.LOGD(TAG, "判断Vip过期: > 7天");
-                PreferenceLogic.getInstance().saveVipExpireIsTip(false);
-                PreferenceLogic.getInstance().saveVipExpireOneIsTip(false);
-                PreferenceLogic.getInstance().saveVipExpireFourIsTip(false);
-                PreferenceLogic.getInstance().saveVipExpireSevenIsTip(false);
-                return false;
-            //*/	
+			/*
+			 * case OUTDATE: if
+			 * (!PreferenceLogic.getInstance().getVipExpireIsTip()) {
+			 * LogUtil.debugLog("判断Vip过期: 已过期");
+			 * DownloadUtils.trackBehaviorEvent(mContext,
+			 * "notice_VIPstatus_show", 3, 0); showXiaomiNotification(
+			 * logic.mConfigJSInfo.vip_guide_bar_expire_title,
+			 * logic.mConfigJSInfo.vip_guide_bar_expire_content, "",
+			 * AccountLogic.getInstance().getToVipExpirePendingIntent( mContext,
+			 * NotificationReveiver.NOTICE_VIPSTARTUS_SHOW3));
+			 * PreferenceLogic.getInstance().saveVipExpireIsTip(true); }
+			 * 
+			 * return true; case ONEDAY: if
+			 * (!PreferenceLogic.getInstance().getVipExpireOneIsTip()) {
+			 * LogUtil.debugLog("判断Vip过期: 1-3天");
+			 * DownloadUtils.trackBehaviorEvent(mContext,
+			 * "notice_VIPstatus_show", 2, 0); showXiaomiNotification(
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_content, "",
+			 * AccountLogic.getInstance().getToVipExpirePendingIntent( mContext,
+			 * NotificationReveiver.NOTICE_VIPSTARTUS_SHOW2));
+			 * PreferenceLogic.getInstance().saveVipExpireOneIsTip(true); }
+			 * 
+			 * return true; case FOURDAY: if
+			 * (!PreferenceLogic.getInstance().getVipExpireFourIsTip()) {
+			 * LogUtil.debugLog("判断Vip过期: 4-6天");
+			 * DownloadUtils.trackBehaviorEvent(mContext,
+			 * "notice_VIPstatus_show", 1, 0); showXiaomiNotification(
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_content, "",
+			 * AccountLogic.getInstance().getToVipExpirePendingIntent( mContext,
+			 * NotificationReveiver.NOTICE_VIPSTARTUS_SHOW1));
+			 * PreferenceLogic.getInstance().saveVipExpireFourIsTip(true); }
+			 * 
+			 * return true; case SEVENDAY: if
+			 * (!PreferenceLogic.getInstance().getVipExpireSevenIsTip()) {
+			 * LogUtil.debugLog("判断Vip过期: 7天");
+			 * DownloadUtils.trackBehaviorEvent(mContext,
+			 * "notice_VIPstatus_show", 0, 0); showXiaomiNotification(
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_content, "",
+			 * AccountLogic.getInstance().getToVipExpirePendingIntent( mContext,
+			 * NotificationReveiver.NOTICE_VIPSTARTUS_SHOW0));
+			 * PreferenceLogic.getInstance().saveVipExpireSevenIsTip(true); }
+			 * 
+			 * return true; //
+			 */
+		case MOREDAY:
+			PreferenceLogic.getInstance().saveVipExpireIsTip(false);
+			PreferenceLogic.getInstance().saveVipExpireOneIsTip(false);
+			PreferenceLogic.getInstance().saveVipExpireFourIsTip(false);
+			PreferenceLogic.getInstance().saveVipExpireSevenIsTip(false);
+			return false;
 		default:
 			return false;
 		}
