@@ -508,12 +508,8 @@ public class NotificationHelper {
 			 * return true; //
 			 */
 		case MOREDAY:
-			if(null != PreferenceLogic.getInstance())
-			{
-				PreferenceLogic.getInstance().saveVipExpireIsTip(false);
-				PreferenceLogic.getInstance().saveVipExpireOneIsTip(false);
-				PreferenceLogic.getInstance().saveVipExpireFourIsTip(false);
-				PreferenceLogic.getInstance().saveVipExpireSevenIsTip(false);
+			if (null != PreferenceLogic.getInstance()) {
+				PreferenceLogic.getInstance().saveVipExpireTodayIsTip(false);
 			}
 			return false;
 		default:
