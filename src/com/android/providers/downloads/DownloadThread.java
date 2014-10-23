@@ -73,12 +73,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.webkit.MimeTypeMap;
+import android.net.http.AndroidHttpClient;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.client.params.HttpClientParams;
@@ -539,10 +539,12 @@ public class DownloadThread implements Runnable {
             // Open connection and follow any redirects until we have a useful
             // response with body.
 
+           AndroidHttpClient client = null;
            try {
                checkConnectivity(false);
 
-               DefaultHttpClient client = new DefaultHttpClient();
+               String userAgent = userAgent();
+               client = AndroidHttpClient.newInstance(userAgent);
                HttpGet httpGet = new HttpGet(state.mUrl.toString());
 
                HttpParams params = client.getParams();
@@ -622,6 +624,9 @@ public class DownloadThread implements Runnable {
             } catch (IOException e) {
                 throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
             } finally {
+               if (client != null) {
+                   client.close();
+               }
             }
         }
 
