@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 
 import com.android.providers.downloads.ui.auth.Constants;
 import com.android.providers.downloads.ui.auth.UnbindManager;
+import com.android.providers.downloads.ui.utils.XLUtil;
 import com.xiaomi.account.openauth.AuthorizeActivity;
 
 
@@ -37,7 +38,7 @@ public class XLUnbindActivity extends BaseActivity {
 
 		@Override
 		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-			Log.e("XLUnbindActivity", "onReceivedSslError=" + error.getUrl());
+			XLUtil.logDebug("XLUnbindActivity", "onReceivedSslError=" + error.getUrl());
 			
 			handler.proceed();
 		}
@@ -45,8 +46,8 @@ public class XLUnbindActivity extends BaseActivity {
 		@Override
 		public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
 			super.onPageStarted(view, url, favicon);
-			
-			Log.e("XLUnbindActivity", "onPageStarted url=" + url);
+
+			XLUtil.logDebug("XLUnbindActivity", "onPageStarted url=" + url);
 		}
 		@Override
 		public void onPageFinished(WebView view, String url) {
@@ -57,14 +58,14 @@ public class XLUnbindActivity extends BaseActivity {
 
 			}
 
-			Log.e("XLUnbindActivity", "onPageFinished url=" + url);
+			XLUtil.logDebug("XLUnbindActivity", "onPageFinished url=" + url);
 		}
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			/*String start = "https://open-api-auth.xunlei.com/platform?";
 			
 			if (url.startsWith(start)) {
-				Log.e("XLUnbindActivity", "shouldOverrideUrlLoading url=" + url);
+				XLUtil.logDebug("XLUnbindActivity", "shouldOverrideUrlLoading url=" + url);
 				view.loadUrl(url.replace(start, "https://125.39.36.126/platform?"));
 				return true;
 			}*/
@@ -99,7 +100,7 @@ public class XLUnbindActivity extends BaseActivity {
 		String token = intent.getStringExtra("token");
 		String from = intent.getStringExtra("from");
 		mXLWebView.loadUrl(HOME_URL+ from+"&token="+token);
-		Log.e("XLUnbindActivity", "loadUrl=" + HOME_URL+ from+"&token="+token);
+		XLUtil.logDebug("XLUnbindActivity", "loadUrl=" + HOME_URL+ from+"&token="+token);
 		
 //		if(Constants.CURRENT_MIUI_V ==6){
 //			ActionBar actionBar = getActionBar();
@@ -115,7 +116,7 @@ public class XLUnbindActivity extends BaseActivity {
 	@JavascriptInterface
 	public void onSuccess(int flag, int result)
 	{
-		Log.e("XLUnbindActivity", "result=" + result);
+		XLUtil.logDebug("XLUnbindActivity", "result=" + result);
 		
 		finish();
 		UnbindManager manager = UnbindManager.getInstance();
@@ -124,7 +125,7 @@ public class XLUnbindActivity extends BaseActivity {
 	@JavascriptInterface
 	public void onDealMiLoginFrame(String src) {
 		if (src != null && mXLWebView != null) {
-			Log.e("XLUnbindActivity", "onDealMiLoginFrame=" + src);
+			XLUtil.logDebug("XLUnbindActivity", "onDealMiLoginFrame=" + src);
 			mXLWebView.loadUrl("javascript:void(document.getElementById('miniLoginFrame').src='https://account.xiaomi.com/pass/static/repeatpass_wap.html?inframe=true&onetimeEncode=true&_locale=zh_CN&callback=https%3A%2F%2Fopen.account.xiaomi.com%2Fsts%2FcheckPassword%3Fthirdqs%3DclientId%253D2882303761517159179%2526xmUserId%253D545127359%2526callback%253Dhttps%25253A%25252F%25252Fopen-api-auth.xunlei.com%25252Fplatform%25253Fm%25253DUnbind%252526op%25253DvaliateResult%26sid%3Doauthopenapi%26sign%3DIb3horUmfhQFoQV2LgZ1BLPKbRg%253D%26checkPwd%3Dtrue&sid=oauthopenapi&qs=&sign=vKjJmmKte4y5I1jpZh4TmO2C8ec%3D&hidden=&userId=545127359&nickName=545127359&_dc=1411300099152')");
 
 			/*int idxu = src.lastIndexOf("&userId=");
@@ -138,7 +139,7 @@ public class XLUnbindActivity extends BaseActivity {
 
 				if (idxn + 10 == idxd) { // nickname is null
 					src = nickFirst + uid + dcLast;
-					Log.e("XLUnbindActivity", "onDealMiLoginFrame=" + "javascript:void(document.getElementById('miniLoginFrame').src='" + src + "')");
+					XLUtil.logDebug("XLUnbindActivity", "onDealMiLoginFrame=" + "javascript:void(document.getElementById('miniLoginFrame').src='" + src + "')");
 					mXLWebView.loadUrl("javascript:void(document.getElementById('miniLoginFrame').src='" + src + "')");
 				}
 			}*/

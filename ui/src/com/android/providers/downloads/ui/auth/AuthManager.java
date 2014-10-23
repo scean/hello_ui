@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.android.providers.downloads.ui.activity.XLAuthorizeActivity;
+import com.android.providers.downloads.ui.utils.XLUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,7 +59,7 @@ public class AuthManager {
 	// 添加授权结束监听器
 	public void addAuthListener(OnAuthResultListener onAuthResultListener) {
 
-		Log.e("JF", "addAL:" + onAuthResultListener.getClass().getName());
+		XLUtil.logDebug("JF", "addAL:" + onAuthResultListener.getClass().getName());
 
 		if (onAuthResultListener != null && !mAuthResultListeners.contains(onAuthResultListener)) {
 			mAuthResultListeners.add(onAuthResultListener);
@@ -68,28 +69,28 @@ public class AuthManager {
 
 	// 移除授权结束监听器
 	public void removeAuthListener(OnAuthResultListener onAuthResultListener) {
-		Log.e("JF", "remove:" + onAuthResultListener.getClass().getName());
+		XLUtil.logDebug("JF", "remove:" + onAuthResultListener.getClass().getName());
 		if (onAuthResultListener != null) {
 			mAuthResultListeners.remove(onAuthResultListener);
 		}
 		for (int i = 0; i < mAuthResultListeners.size(); i++) {
 			OnAuthResultListener o = mAuthResultListeners.get(i);
-			Log.e("JF", o.getClass().getName());
+			XLUtil.logDebug("JF", o.getClass().getName());
 		}
 	}
 
 	// 处理授权结束结果
 	public void processOnAuthResultBack(int result, String token) {
-		// Log.e("jiangfeiXl", "processOnAuthResultBack|" + "处理授权结束结果");
+		// XLUtil.logDebug("jiangfeiXl", "processOnAuthResultBack|" + "处理授权结束结果");
 		if (!mAuthResultListeners.isEmpty()) {
 
-			Log.e("JF", "处理授权结束结果:token=" + token + ";result=" + result);
+			XLUtil.logDebug("JF", "处理授权结束结果:token=" + token + ";result=" + result);
 
 			for (OnAuthResultListener onAuthResultListener : mAuthResultListeners) {
 				if (onAuthResultListener == null) {
 					continue;
 				}
-				Log.e("JF", onAuthResultListener.getClass().getName());
+				XLUtil.logDebug("JF", onAuthResultListener.getClass().getName());
 				onAuthResultListener.onAuthResult(result, token);
 			}
 		}
@@ -100,9 +101,9 @@ public class AuthManager {
 	public void startProcessAuth(Activity activity, int authType, int secondStep) {
 		this.secondStep = secondStep;
 		time = System.currentTimeMillis();
-		Log.e("jiangfeiXl", "startProcessAuthElse 开始处理Auth流程|" + authType + time + ":secondStep" + secondStep);
+		XLUtil.logDebug("jiangfeiXl", "startProcessAuthElse 开始处理Auth流程|" + authType + time + ":secondStep" + secondStep);
 		if (activity == null || (authType != Constants.AUTH_TYPE_FAKE && authType != Constants.AUTH_TYPE_REAL)) {
-			Log.e("jiangfeiXl", "startProcessAuth|" + authType);
+			XLUtil.logDebug("jiangfeiXl", "startProcessAuth|" + authType);
 			processOnAuthResultBack(AuthorizeActivity.RESULT_FAIL, null);
 		} else {
 			getXiaoMiCode(activity, authType);
@@ -112,9 +113,9 @@ public class AuthManager {
 	// 开始处理Auth流程
 	public void startProcessAuth(Activity activity, int authType) {
 		time = System.currentTimeMillis();
-		Log.e("jiangfeiXl", "startProcessAuthElse 开始处理Auth流程|" + authType + time);
+		XLUtil.logDebug("jiangfeiXl", "startProcessAuthElse 开始处理Auth流程|" + authType + time);
 		if (activity == null || (authType != Constants.AUTH_TYPE_FAKE && authType != Constants.AUTH_TYPE_REAL)) {
-			Log.e("jiangfeiXl", "startProcessAuth|" + authType);
+			XLUtil.logDebug("jiangfeiXl", "startProcessAuth|" + authType);
 			processOnAuthResultBack(AuthorizeActivity.RESULT_FAIL, null);
 		} else {
 			getXiaoMiCode(activity, authType);
@@ -129,19 +130,19 @@ public class AuthManager {
 
 		mActivity = activity;
 		mAuthType = authType;
-		// Log.e("jiangfeiXl", "startGetOAuthCode|clientId=" + clientId +
+		// XLUtil.logDebug("jiangfeiXl", "startGetOAuthCode|clientId=" + clientId +
 		// "|redirectUri=" + redirectUri + "time=" + time);
 
 		XiaomiOAuthorize.startGetOAuthCode(activity, clientId, redirectUri, options, Constants.REQUESTCODE_CODE);
 
-		// Log.e("jiangfeiXl", "(只是调用完不代表已经返回)调用完后GetOAuthCode|clientId=" +
+		// XLUtil.logDebug("jiangfeiXl", "(只是调用完不代表已经返回)调用完后GetOAuthCode|clientId=" +
 		// clientId + "|redirectUri=" + redirectUri + "time=" + time);
 
 	}
 
 	// 获取迅雷Token
 	public void requertXunLeiToken() {
-		// Log.e("jiangfeiXl", "获取迅雷Token开始");
+		// XLUtil.logDebug("jiangfeiXl", "获取迅雷Token开始");
 		new GetXunLeiTokenThread().start();
 	}
 
@@ -163,7 +164,7 @@ public class AuthManager {
 			miTokenInfo.expiresIn = json.optString("expires_in");
 			miTokenInfo.scope = json.optString("scope");
 		} catch (JSONException e) {
-			// Log.e("testopenauth", "json字符串不合法");
+			// XLUtil.logDebug("testopenauth", "json字符串不合法");
 		}
 		return null;
 	}
@@ -185,7 +186,7 @@ public class AuthManager {
 	// 处理授权流程完毕
 	public void processAuthComplete(Intent data, int requestCode, int resultCode, int wap) {
 
-		// Log.e("jiangfeiXl", "从授权页面回来处理授权流程完毕，花费时间=" +
+		// XLUtil.logDebug("jiangfeiXl", "从授权页面回来处理授权流程完毕，花费时间=" +
 		// (System.currentTimeMillis() - time) + "毫秒");
 
 		if (data == null) {
@@ -197,10 +198,10 @@ public class AuthManager {
 				MiTokenInfo miInfo = processAuthResult(bundle);
 
 				if (mAuthType == Constants.AUTH_TYPE_FAKE) {
-					Log.e("jiangfeiXl", "开始迅雷伪授权");
+					XLUtil.logDebug("jiangfeiXl", "开始迅雷伪授权");
 					requertXunLeiToken();
 				} else if (mAuthType == Constants.AUTH_TYPE_REAL) {
-					Log.e("jiangfeiXl", "开始迅雷真授权");
+					XLUtil.logDebug("jiangfeiXl", "开始迅雷真授权");
 					XLAuthorizeActivity.startXunLeiLogin(mActivity, miInfo.code, wap, AuthManager.this.secondStep);
 					this.secondStep = 0;
 				}
@@ -237,7 +238,7 @@ public class AuthManager {
 		public void run() {
 			String result = null;
 			try {
-				// Log.e("jiangfeiXl", "start迅雷伪授权");
+				// XLUtil.logDebug("jiangfeiXl", "start迅雷伪授权");
 				result = new RequestXLAuthJob().getXLAuth(mActivity, miTokenInfo.code, mAuthType, mWapType, null, Constants.INVISABLE_TYPE_JSON, Constants.FORCE_LOGIN_FALSE);
 				JSONObject jsonObject = new JSONObject(result);
 				int resultNum = jsonObject.optInt("result");
@@ -247,7 +248,7 @@ public class AuthManager {
 				} else {
 					processOnAuthResultBack(AuthorizeActivity.RESULT_FAIL, result);
 				}
-				// Log.e("jiangfeiXl", "end迅雷伪授权");
+				// XLUtil.logDebug("jiangfeiXl", "end迅雷伪授权");
 			} catch (Exception e) {
 				processOnAuthResultBack(AuthorizeActivity.RESULT_FAIL, result);
 			}

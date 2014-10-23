@@ -134,7 +134,7 @@ public class XLAuthorizeActivity extends BaseActivity {
 		intent.putExtra("code", code);
 		intent.putExtra("wap", wap);
 		intent.putExtra("secondStep", secondStep);
-		// Log.e("secondStep", secondStep+"");
+		// XLUtil.logDebug("secondStep", secondStep+"");
 		activity.startActivityForResult(intent, Constants.REQUESTCODE_XL_TOKEN);
 	}
 
