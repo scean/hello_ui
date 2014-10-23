@@ -70,6 +70,21 @@ public class PreferenceLogic {
         return mSharedPreferences;
     }
 
+	private SharedPreferences getNotiSharedPreference() {
+		if (null == mSharedPreferences) {
+			Context ct = null;
+			try {
+				ct = mContext.createPackageContext(
+						DownloadList.DOWNLOADPROVIDER_PKG_NAME,
+						Context.CONTEXT_IGNORE_SECURITY);
+				mSharedPreferences = ct.getSharedPreferences("sp_notification",
+						Context.MODE_PRIVATE);
+			} catch (Exception e) {
+			}
+		}
+		return mSharedPreferences;
+	}
+
     private void saveStringPre(String key, String value) {
         SharedPreferences mPreferces = getSharedPreference();
 		if (mPreferces != null) {
@@ -205,11 +220,13 @@ public class PreferenceLogic {
 
     // 保存当天场景一提示
     public void saveStageOneIsTip(boolean isHaveTip) {
-        saveBooleanPre(STAGE_ONE_IS_TIP, isHaveTip);
+		SharedPreferences mPreferces = getNotiSharedPreference();
+		mPreferces.edit().putBoolean(STAGE_ONE_IS_TIP, isHaveTip).commit();
     }
 
     public boolean getStageOneIsTip() {
-        return getBooleanPre(STAGE_ONE_IS_TIP);
+		SharedPreferences mPreferces = getNotiSharedPreference();
+		return mPreferces.getBoolean(STAGE_ONE_IS_TIP, false);
     }
 
     // 保存当天场景二提示
