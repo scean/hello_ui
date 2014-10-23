@@ -17,7 +17,7 @@
 */
 -->
 
-<com.android.providers.downloads.ui.DownloadItem
+<com.android.providers.downloads.ui.view.DownloadItem
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/list_item_height"
@@ -70,7 +70,7 @@
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:orientation="horizontal" >
-            <com.android.providers.downloads.ui.DownloadProgressBar
+            <com.android.providers.downloads.ui.view.DownloadProgressBar
                 android:id="@+id/action_button"
                 android:layout_width="wrap_content"
                 android:layout_marginLeft="@dimen/distance_between_text_button"
@@ -95,5 +95,5 @@
             android:textColor="@color/download_info_text_color"
             android:textAppearance="@*miui:style/TextAppearance.List.Secondary"/>
    </RelativeLayout>
-</com.android.providers.downloads.ui.DownloadItem>
+</com.android.providers.downloads.ui.view.DownloadItem>
 

@@ -14,7 +14,8 @@ LOCAL_PACKAGE_NAME := DownloadProvider
 LOCAL_CERTIFICATE := media
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_STATIC_JAVA_LIBRARIES += guava \
-                               xl_download_lib
+                               xl_download_lib \
+							   MiPush
 
 
 
@@ -72,7 +73,8 @@ include $(BUILD_PREBUILT)
 #########################################################
 
 include $(CLEAR_VARS)
-LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := xl_download_lib:libs/xldownloadplatform.jar 
+LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := xl_download_lib:libs/xldownloadplatform.jar \
+										MiPush:libs/MiPush.jar
 include $(BUILD_MULTI_PREBUILT)
 # build UI + tests
 include $(call all-makefiles-under,$(LOCAL_PATH))

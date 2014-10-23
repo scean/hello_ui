@@ -6,10 +6,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.android.providers.downloads.ui.DownloadList;
-import com.android.providers.downloads.ui.DownloadSettingActivity;
+import com.android.providers.downloads.ui.activity.DownloadListActivity;
+import com.android.providers.downloads.ui.activity.DownloadSettingActivity;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.utils.DateUtil;
 
 public class PreferenceLogic {
     private static PreferenceLogic instance;
@@ -46,58 +47,91 @@ public class PreferenceLogic {
         mContext = context;
     }
 
-    public static PreferenceLogic init(Context context) {
-        if (null == instance) {
-            instance = new PreferenceLogic(context);
+    public static PreferenceLogic getInstance(Context context) {
+        synchronized (PreferenceLogic.class) {
+            if (instance == null) {
+                instance = new PreferenceLogic(context);
+            }
         }
         return instance;
     }
-
-    public static PreferenceLogic getInstance() {
+        public static PreferenceLogic getInstance() {
         return instance;
     }
+    
 
-    public static PreferenceLogic getInstance(Context context) {
-        return init(context);
-    }
+
+
 
     @SuppressLint("WorldWriteableFiles")
     private SharedPreferences getSharedPreference() {
         if (null == mSharedPreferences) {
              Context ct = null;
             try {
-                ct = mContext.createPackageContext(DownloadList.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
+                ct = mContext.createPackageContext(DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
                 mSharedPreferences = ct.getSharedPreferences(
-                        DownloadList.PREF_NAME, Context.MODE_MULTI_PROCESS);
+                        DownloadListActivity.PREF_NAME, Context.MODE_MULTI_PROCESS);
             } catch (Exception e) {
             }
         }
         return mSharedPreferences;
     }
 
+	private SharedPreferences getNotiSharedPreference() {
+		if (null == mSharedPreferences) {
+			Context ct = null;
+			try {
+				ct = mContext.createPackageContext(
+						DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME,
+						Context.CONTEXT_IGNORE_SECURITY);
+				mSharedPreferences = ct.getSharedPreferences("sp_notification",
+						Context.MODE_PRIVATE);
+			} catch (Exception e) {
+			}
+		}
+		return mSharedPreferences;
+	}
+
     private void saveStringPre(String key, String value) {
         SharedPreferences mPreferces = getSharedPreference();
-        mPreferces.edit().putString(key, value).commit();
+		if (mPreferces != null) {
+			mPreferces.edit().putString(key, value).commit();
+		}
+
     }
 
     private String getStringPre(String key) {
         SharedPreferences mPreferces = getSharedPreference();
-        return mPreferces.getString(key, "");
+		if (mPreferces != null) {
+			return mPreferces.getString(key, "");
+		}
+		return "";
     }
 
     private void saveBooleanPre(String key, boolean value) {
         SharedPreferences mPreferces = getSharedPreference();
-        mPreferces.edit().putBoolean(key, value).commit();
+		if (mPreferces != null) {
+			mPreferces.edit().putBoolean(key, value).commit();
+		}
+
     }
 
     private boolean getBooleanPre(String key) {
         SharedPreferences mPreferces = getSharedPreference();
-        return mPreferces.getBoolean(key, false);
+		if (mPreferces == null) {
+			return true;
+		} else {
+			return mPreferces.getBoolean(key, false);
+		}
+
     }
 
     private void saveIntPre(String key, int value) {
         SharedPreferences mPreferces = getSharedPreference();
-        mPreferces.edit().putInt(key, value).commit();
+		if (mPreferces != null) {
+			mPreferces.edit().putInt(key, value).commit();
+		}
+
     }
 
     private int getIntPre(String key) {
@@ -193,11 +227,13 @@ public class PreferenceLogic {
 
     // 保存当天场景一提示
     public void saveStageOneIsTip(boolean isHaveTip) {
-        saveBooleanPre(STAGE_ONE_IS_TIP, isHaveTip);
+		SharedPreferences mPreferces = getNotiSharedPreference();
+		mPreferces.edit().putBoolean(STAGE_ONE_IS_TIP, isHaveTip).commit();
     }
 
     public boolean getStageOneIsTip() {
-        return getBooleanPre(STAGE_ONE_IS_TIP);
+		SharedPreferences mPreferces = getNotiSharedPreference();
+		return mPreferces.getBoolean(STAGE_ONE_IS_TIP, false);
     }
 
     // 保存当天场景二提示

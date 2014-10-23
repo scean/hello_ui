@@ -2,3 +2,6 @@
 -keep class com.xunlei.** { *; }
 -dontwarn com.xiaomi.**
 -keep class com.xiaomi.** { *; }
+-keepattributes JavascriptInterface
+-keep class com.android.providers.downloads.ui.activity.XLUnbindActivity { *; }
+-keep class com.android.providers.downloads.ui.activity.XLAuthorizeActivity { *; }

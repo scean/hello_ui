@@ -4,20 +4,19 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.android.providers.downloads.ui.notification.AccountLogic;
-import com.android.providers.downloads.ui.pay.util.MyVolley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 
-import com.android.providers.downloads.ui.DownloadList;
-import com.android.providers.downloads.ui.DownloadUtils;
+import com.android.providers.downloads.ui.notification.AccountLogic;
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.utils.MyVolley;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance.ConfigJSInfo;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance.SpeedupJSInfo;
 import com.android.providers.downloads.ui.pay.MiBiPay.PayListener;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -28,7 +27,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 public class AccountInfoInstance {
-    static String TAG=XLUtil.getTagString(AccountInfoInstance.class);
+    private static String TAG = AccountInfoInstance.class.getSimpleName();
+
     final static String mAccountUrl="http://developer.open-api-auth.xunlei.com/get_user_info?";
     final static String mFlowUrl="http://openapi.service.cdn.vip.xunlei.com/mipay/queryFlow/?";
     final static String mAddFlowUrl="http://openapi.service.cdn.vip.xunlei.com/mipay/addFlow/?";
@@ -238,7 +238,6 @@ public class AccountInfoInstance {
                 result.fake    =jo.getInt("fake");
                 result.xl_type =jo.getInt("xl_type");
             }catch(JSONException e) {
-                e.printStackTrace();
             }
             return result;
     }
@@ -276,7 +275,7 @@ public class AccountInfoInstance {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     // TODO Auto-generated method stub
-                    XLUtil.logError(TAG, error.toString());
+                    XLUtil.logDebug(TAG, error.toString());
                     for(AccountListener listener : mListeners){
                         listener.OnAccountRtn(-1, getFailAccountInfo(),error.toString());
                     }
@@ -328,8 +327,6 @@ public class AccountInfoInstance {
                 result.autosend         =jo.getInt("autosend");
 	            result.historysend      =jo.getInt("historysend");
             }catch(JSONException e){
-                e.printStackTrace();
-
             }
 
             return result;
@@ -355,7 +352,6 @@ public class AccountInfoInstance {
 		                pair2 = pair1.substring(0, pair1.lastIndexOf(")"));
 
 	                }catch (Exception e){
-		                XLUtil.printStackTrace(e);
 	                }
                     FlowInfo res =flowjsonparse(pair2);
 
@@ -375,7 +371,7 @@ public class AccountInfoInstance {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     // TODO Auto-generated method stub
-                    XLUtil.logError(TAG, error.toString());
+                    XLUtil.logDebug(TAG, error.toString());
                     for(AccountListener listener : mListeners){
                         listener.OnFlowRtn(-1,getFailFlowInfo(),error.toString());
                     }
@@ -415,7 +411,6 @@ public class AccountInfoInstance {
                 result.need_auth      =jo.getInt("need_auth");
                 result.msg               =jo.getString("msg");
             }catch(JSONException e){
-                e.printStackTrace();
             }
 
             return result;
@@ -448,7 +443,6 @@ public class AccountInfoInstance {
 		                pair2 = pair1.substring(0, pair1.lastIndexOf(")"));
 
 	                }catch (Exception e){
-		                XLUtil.printStackTrace(e);
 	                }
                     AddFlowInfo res =addflowjsonparse(pair2);
 	                if(res.need_refresh ==1){
@@ -468,7 +462,7 @@ public class AccountInfoInstance {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     // TODO Auto-generated method stub
-                    XLUtil.logError(TAG, error.toString());
+                    XLUtil.logDebug(TAG, error.toString());
                     for(AccountListener listener : mListeners){
                         listener.OnAddFlowRtn(-1, getFailAddFlowInfo(),error.toString());
                     }
