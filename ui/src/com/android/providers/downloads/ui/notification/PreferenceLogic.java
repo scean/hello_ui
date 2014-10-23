@@ -55,6 +55,13 @@ public class PreferenceLogic {
         }
         return instance;
     }
+        public static PreferenceLogic getInstance() {
+        return instance;
+    }
+    
+
+
+
 
     @SuppressLint("WorldWriteableFiles")
     private SharedPreferences getSharedPreference() {
@@ -75,7 +82,7 @@ public class PreferenceLogic {
 			Context ct = null;
 			try {
 				ct = mContext.createPackageContext(
-						DownloadList.DOWNLOADPROVIDER_PKG_NAME,
+						DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME,
 						Context.CONTEXT_IGNORE_SECURITY);
 				mSharedPreferences = ct.getSharedPreferences("sp_notification",
 						Context.MODE_PRIVATE);
