@@ -99,7 +99,7 @@ public class PreferenceLogic {
 		if (mPreferces == null) {
 			return true;
 		} else {
-			return mPreferces.getBoolean(key, false);
+			return mPreferces.getBoolean(key, true);
 		}
 
     }
