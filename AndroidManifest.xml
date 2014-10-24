@@ -124,6 +124,11 @@
 	            <action android:name="com.process.media.broadcast.falsetoken"   />
             </intent-filter>
         </receiver>
+        <receiver android:name=".DownloadMiAccountReceiver"  android:exported="true">
+            <intent-filter>
+                <action android:name="android.accounts.LOGIN_ACCOUNTS_POST_CHANGED" />
+            </intent-filter>
+        </receiver>
         <service
           android:enabled="true"
           android:name="com.xiaomi.push.service.XMPushService"/>
