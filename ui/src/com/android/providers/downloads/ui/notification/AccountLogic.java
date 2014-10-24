@@ -1,8 +1,10 @@
 package com.android.providers.downloads.ui.notification;
 
 import com.android.providers.downloads.ui.pay.AccountInfoInstance;
-import com.xunlei.auth.AuthManager;
-import com.xunlei.constant.Constants;
+
+import com.android.providers.downloads.ui.auth.AuthManager;
+import com.android.providers.downloads.ui.auth.Constants;
+
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -855,11 +855,11 @@ public class DownloadService extends Service {
                                 return ;
                             }
                             */
-                            if (mXlDownloadManager == null) {
-                                return;
-                            }
                             int ret;
                             synchronized (TokenHelper.getInstance().mutex) {
+                                if (mXlDownloadManager == null) {
+                                    return;
+                                }
                                 ret = mXlDownloadManager.XLGetCdnUrl(xlCdnPara.mUrl,
                                         xlCdnPara.mName,
                                         xlCdnPara.mCid, 1,

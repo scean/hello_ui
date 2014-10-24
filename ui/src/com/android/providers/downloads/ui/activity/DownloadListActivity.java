@@ -55,9 +55,9 @@ import com.android.providers.downloads.ui.R;
 
 import com.xiaomi.account.openauth.AuthorizeActivity;
 
-import com.xunlei.auth.AuthManager;
-import com.xunlei.constant.Constants;
-import com.xunlei.listener.OnAuthResultListener;
+import com.android.providers.downloads.ui.auth.AuthManager;
+import com.android.providers.downloads.ui.auth.Constants;
+import com.android.providers.downloads.ui.auth.OnAuthResultListener;
 
 import miui.accounts.ExtraAccountManager;
 import miui.app.ActionBar;

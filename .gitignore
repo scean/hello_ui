@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 # Built application files
 *.apk
 *.ap_
@@ -48,6 +50,7 @@ ui/.settings
 tab2space.sh
 
 # gnu global index files
+>>>>>>> 37a2014ab9d2c823c5ff3c95975d15d2545537b1
 /GPATH
 /GRTAGS
 /GSYMS

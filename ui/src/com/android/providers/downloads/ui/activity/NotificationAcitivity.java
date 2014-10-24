@@ -7,8 +7,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.xunlei.auth.AuthManager;
-import com.xunlei.constant.Constants;
+import com.android.providers.downloads.ui.auth.AuthManager;
+
+import com.android.providers.downloads.ui.auth.Constants;
+
 
 import miui.accounts.ExtraAccountManager;
 import miui.content.ExtraIntent;

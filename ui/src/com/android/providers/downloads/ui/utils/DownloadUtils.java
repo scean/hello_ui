@@ -304,8 +304,9 @@ public class DownloadUtils {
          //trackData.put("xiaomi_id", xmId);
          //trackData.put("xunlei_id", xlId);
 
-         // trackData.put("imei", imei);
-         // trackData.put("mac", mac);
+
+        // trackData.put("imei", imei);
+        // trackData.put("mac", mac);
 
          //trackData.put("ip", ip);
          trackData.put("network_type", Integer.toString(network));

@@ -55,6 +55,13 @@ public class PreferenceLogic {
         }
         return instance;
     }
+        public static PreferenceLogic getInstance() {
+        return instance;
+    }
+    
+
+
+
 
     @SuppressLint("WorldWriteableFiles")
     private SharedPreferences getSharedPreference() {
@@ -69,6 +76,21 @@ public class PreferenceLogic {
         }
         return mSharedPreferences;
     }
+
+	private SharedPreferences getNotiSharedPreference() {
+		if (null == mSharedPreferences) {
+			Context ct = null;
+			try {
+				ct = mContext.createPackageContext(
+						DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME,
+						Context.CONTEXT_IGNORE_SECURITY);
+				mSharedPreferences = ct.getSharedPreferences("sp_notification",
+						Context.MODE_PRIVATE);
+			} catch (Exception e) {
+			}
+		}
+		return mSharedPreferences;
+	}
 
     private void saveStringPre(String key, String value) {
         SharedPreferences mPreferces = getSharedPreference();
@@ -99,7 +121,7 @@ public class PreferenceLogic {
 		if (mPreferces == null) {
 			return true;
 		} else {
-			return mPreferces.getBoolean(key, true);
+			return mPreferces.getBoolean(key, false);
 		}
 
     }
@@ -205,11 +227,13 @@ public class PreferenceLogic {
 
     // 保存当天场景一提示
     public void saveStageOneIsTip(boolean isHaveTip) {
-        saveBooleanPre(STAGE_ONE_IS_TIP, isHaveTip);
+		SharedPreferences mPreferces = getNotiSharedPreference();
+		mPreferces.edit().putBoolean(STAGE_ONE_IS_TIP, isHaveTip).commit();
     }
 
     public boolean getStageOneIsTip() {
-        return getBooleanPre(STAGE_ONE_IS_TIP);
+		SharedPreferences mPreferces = getNotiSharedPreference();
+		return mPreferces.getBoolean(STAGE_ONE_IS_TIP, false);
     }
 
     // 保存当天场景二提示
