@@ -583,7 +583,7 @@ public class DownloadInfo {
     			return NetworkState.OK; // we don't know the size yet
     		} else {
     			if (networkType == ConnectivityManager.TYPE_MOBILE) {
-    				Log.i("DownloadManager-jinghuang", "---> task running in mobile network, but filesize =" + mTotalBytes + ", return RECOMMENDED_UNUSABLE_DUE_TO_SIZE");
+    				//Log.i("DownloadManager-jinghuang", "---> task running in mobile network, but filesize =" + mTotalBytes + ", return RECOMMENDED_UNUSABLE_DUE_TO_SIZE");
         			return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE; // we don't know the size yet
     			}
     		}
@@ -599,7 +599,6 @@ public class DownloadInfo {
 
         Long maxBytesOverMobile = mSystemFacade.getMaxBytesOverMobile();
         if (maxBytesOverMobile != null && mTotalBytes > maxBytesOverMobile) {
-            Log.i(Constants.TAG, "jinghuang-a ---> + return NetworkState.UNUSABLE_DUE_TO_SIZE");
             return NetworkState.UNUSABLE_DUE_TO_SIZE;
         }
         if (mBypassRecommendedSizeLimit == 0) {
@@ -610,7 +609,6 @@ public class DownloadInfo {
                     && mTotalBytes > recommendedMaxBytesOverMobile) {
             	//Log.i("DownloadManager-jinghuang", "---> check max limit size, return RECOMMENDED_UNUSABLE_DUE_TO_SIZE");
                 
-                Log.i(Constants.TAG, "jinghuang-a ---> + return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE; ");
                 return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
             }
         }

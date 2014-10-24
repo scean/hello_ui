@@ -541,7 +541,7 @@ public class DownloadThread implements Runnable {
 
         NetworkInfo info = mSystemFacade.getActiveNetworkInfo(mInfo.mUid);
         // only do this proc in mobile network and new task
-        if (info.getType() == ConnectivityManager.TYPE_MOBILE && !state.mContinuingDownload) {
+        if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE && !state.mContinuingDownload) {
             checkFileSizeinMobile(state);
         }
         
