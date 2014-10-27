@@ -55,13 +55,6 @@ public class PreferenceLogic {
         }
         return instance;
     }
-        public static PreferenceLogic getInstance() {
-        return instance;
-    }
-    
-
-
-
 
     @SuppressLint("WorldWriteableFiles")
     private SharedPreferences getSharedPreference() {
