@@ -423,16 +423,17 @@ public class NotificationLogic {
             List<Integer> vip_expire_config = mConfigJSInfo.vip_guide_bar_before_expire_expire_config;
             AppConfig.LOGD(TAG, "isOutDateVip vip_expire_config=" + vip_expire_config);
             if (vip_expire_config == null || vip_expire_config.size() != 3) {
-                return VipExpireStatus.MOREDAY;
+                return VipExpireStatus.NOACCOUNT;
             }
 
-            if (diffDay == vip_expire_config.get(0)) {
-                return VipExpireStatus.SEVENDAY;
-            } else if (vip_expire_config.get(1) <= diffDay && diffDay < vip_expire_config.get(0)) {
-                return VipExpireStatus.FOURDAY;
-            } else if (vip_expire_config.get(2) <= diffDay && diffDay < vip_expire_config.get(1)) {
-                return VipExpireStatus.ONEDAY;
-            } else if (diffDay == 0.0) {
+            /*
+             * if (diffDay == vip_expire_config.get(0)) { return
+             * VipExpireStatus.SEVENDAY; } else if (vip_expire_config.get(1) <=
+             * diffDay && diffDay < vip_expire_config.get(0)) { return
+             * VipExpireStatus.FOURDAY; } else if (vip_expire_config.get(2) <=
+             * diffDay && diffDay < vip_expire_config.get(1)) { return
+             * VipExpireStatus.ONEDAY; } else
+             */if (diffDay == 0.0) {
                 return VipExpireStatus.TODAY;
             } else if (diffDay < vip_expire_config.get(2)) {
                 return VipExpireStatus.OUTDATE;
@@ -441,7 +442,7 @@ public class NotificationLogic {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return VipExpireStatus.MOREDAY;
+            return VipExpireStatus.NOACCOUNT;
         }
     }
 }
