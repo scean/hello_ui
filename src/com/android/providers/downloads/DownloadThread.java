@@ -513,11 +513,10 @@ public class DownloadThread implements Runnable {
      * handle the response, and transfer the data to the destination file.
      */
     private void executeDownload(State state) throws StopRequestException {
-        
         XLUtil.logDebug(Constants.TAG, "jinghuang4 ---> executeDownload");
         state.resetBeforeExecute();
         setupDestinationFile(state);
-        
+
 		// do start track
         /*
 		int network = XLUtil.getNetwrokType(mContext);
@@ -525,7 +524,7 @@ public class DownloadThread implements Runnable {
 		if (!mIsNewTask) {
 			status = 107;
 		}
-		
+
 		Helpers.trackDownloadStart(mContext, status, (int) mTaskId,
 				1 == state.mXlTaskOpenMark,!getVipSwitchStatus(), "", "", state.mPackage,
 				        XLConfig.PRODUCT_NAME, XLConfig.PRODUCT_VERSION,
@@ -542,9 +541,12 @@ public class DownloadThread implements Runnable {
         NetworkInfo info = mSystemFacade.getActiveNetworkInfo(mInfo.mUid);
         // only do this proc in mobile network and new task
         if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE && !state.mContinuingDownload) {
-            checkFileSizeinMobile(state);
+            Long recommendedMaxBytesOverMobile = mSystemFacade.getRecommendedMaxBytesOverMobile();
+            if (!((recommendedMaxBytesOverMobile != null && recommendedMaxBytesOverMobile == DownloadInfo.MAX_BYTES_OVER_MOBILE))) {
+                checkFileSizeinMobile(state);
+            }
         }
-        
+
         while (state.mRedirectionCount++ < Constants.MAX_REDIRECTS) {
             // Open connection and follow any redirects until we have a useful
             // response with body.
@@ -571,10 +573,10 @@ public class DownloadThread implements Runnable {
                             throw new StopRequestException(
                                     STATUS_CANNOT_RESUME, "Expected partial, but received OK");
                         }
-                        
+
                         XLUtil.logDebug(Constants.TAG, "jinghuang-a ---> + beforer processPro!");
                         processResponseHeaders(state, conn);
-                       
+
                         XLUtil.logDebug(Constants.TAG, "jinghuang-a ---> + after processPro!");
                         transferData(state, conn);
                         return;
@@ -1663,142 +1665,118 @@ public class DownloadThread implements Runnable {
 	            // TODO: handle exception
 	            XLUtil.logDebug(Constants.TAG, "xunlei(getVipSwitchStatus) ---> no vip flag in ui db.");
 	        }
-	        
+
 	        return vipflag == DownloadService.XUNLEI_VIP_ENABLED;
 	}
-	 
+
 	private void checkFileSizeinMobile(State state) throws StopRequestException {
-	    
 	    AndroidHttpClient client = null;
 	    HttpGet request = null;
 	    HttpResponse response = null;
 	    long fileSize = -1;
         String headerTransferEncoding = null;
         Header header = null;
-        
+
         int index = 0;
 	    while (index++ < Constants.MAX_REDIRECTS) {
-	        client = AndroidHttpClient.newInstance(userAgent(), mContext);
-	        request = new HttpGet(state.mRequestUri);
-	        
-	        for (Pair<String, String> headers : mInfo.getHeaders()) {
-	            request.addHeader(headers.first, headers.second);
-	        }
 	        try {
-	            response = client.execute(request);
-	        } catch (IllegalArgumentException ex) {
-	            if (client != null) {
-                    client.close();
-                    client = null;
+                client = AndroidHttpClient.newInstance(userAgent(), mContext);
+                request = new HttpGet(state.mRequestUri);
+
+                for (Pair<String, String> headers : mInfo.getHeaders()) {
+                    request.addHeader(headers.first, headers.second);
                 }
-                throw new StopRequestException(
-                        Downloads.Impl.STATUS_HTTP_DATA_ERROR,
-                        "while trying to execute request: " + ex.toString(), ex);
+
+	            response = client.execute(request);
+
+                header = response.getFirstHeader("Content-Disposition");
+                if (header != null) {
+                    state.mContentDisposition = header.getValue();
+                }
+                header = response.getFirstHeader("Content-Location");
+                if (header != null) {
+                    state.mContentLocation = header.getValue();
+                }
+
+                if (state.mMimeType == null) {
+                    header = response.getFirstHeader("Content-Type");
+                    if (header != null) {
+                        state.mMimeType = Intent.normalizeMimeType(header.getValue());
+                    }
+                }
+                header = response.getFirstHeader("ETag");
+                if (header != null) {
+                    state.mHeaderETag = header.getValue();
+                }
+                header = response.getFirstHeader("Last-Modified");
+                if (header != null) {
+                    state.mHeaderIfRangeId = header.getValue();    // be careful in here - added by xunlei
+                }
+                header = response.getFirstHeader("Accept-Ranges");
+                if (header != null) {
+                    state.mHeaderAcceptRanges = header.getValue();
+                }
+
+                header = response.getFirstHeader("Transfer-Encoding");
+                if (header != null) {
+                    headerTransferEncoding = header.getValue();
+                }
+
+                if (headerTransferEncoding == null) {
+                    header = response.getFirstHeader("Content-Length");
+                    if (header != null) {
+                        String len = header.getValue();
+                        state.mContentLength = Long.parseLong(len);    // get file size form http content
+                        XLUtil.logDebug(Constants.TAG, "jinghuang4 ---> total bytes = " + state.mContentLength);
+                        XLUtil.logDebug(Constants.TAG, "jinghuang4 ---> test, index=" + index);
+
+                        fileSize = state.mContentLength;
+                        state.mTotalBytes = state.mContentLength;
+                        mInfo.mTotalBytes = state.mContentLength;
+
+                        // update header values into database
+                        updateDatabaseFromHeaders(state);
+                        state.mFilename = Helpers.generateSaveFile(
+                                                                   mContext,
+                                                                   mInfo.mUri,
+                                                                   mInfo.mHint,
+                                                                   state.mContentDisposition,
+                                                                   state.mContentLocation,
+                                                                   state.mMimeType,
+                                                                   mInfo.mDestination,
+                                                                   state.mContentLength,
+                                                                   mStorageManager);
+                        state.mDownloadingFileName = state.mFilename + Helpers.sDownloadingExtension;
+                        // correct mimetype
+                        correctMimeType(state);
+                        // now filename is generated, and update in into database
+                        updateFilenameIntoDatabase(state);
+                        // now we get filename, and check space.
+                        mStorageManager.verifySpace(mInfo.mDestination, state.mFilename, state.mTotalBytes);
+                        break;
+                    }
+                } else {
+                    throw new StopRequestException(Downloads.Impl.STATUS_QUEUED_FOR_WIFI, "No Content-Length");
+                }
             } catch (IOException ex) {
+                throw new StopRequestException(
+                                               Downloads.Impl.STATUS_HTTP_DATA_ERROR,
+                                               "while trying to execute request: " + ex.toString(), ex);
+            } finally {
                 if (client != null) {
                     client.close();
                     client = null;
                 }
-                throw new StopRequestException(
-                        Downloads.Impl.STATUS_HTTP_DATA_ERROR,
-                        "while trying to execute request: " + ex.toString(), ex);
             }
-	        
-	        
-	        header = response.getFirstHeader("Content-Disposition");
-	        if (header != null) {
-	            state.mContentDisposition = header.getValue();
-	        }
-	        header = response.getFirstHeader("Content-Location");
-	        if (header != null) {
-	            state.mContentLocation = header.getValue();
-	        }
-	        
-	        if (state.mMimeType == null) {
-	            header = response.getFirstHeader("Content-Type");
-	            if (header != null) {
-	                state.mMimeType = Intent.normalizeMimeType(header.getValue());
-	            }
-	        }
-	        header = response.getFirstHeader("ETag");
-	        if (header != null) {
-	            state.mHeaderETag = header.getValue();
-	        }
-	        header = response.getFirstHeader("Last-Modified");
-	        if (header != null) {
-	            state.mHeaderIfRangeId = header.getValue();    // be careful in here - added by xunlei
-	        }
-	        header = response.getFirstHeader("Accept-Ranges");
-	        if (header != null) {
-	            state.mHeaderAcceptRanges = header.getValue();
-	        }
-	        
-	        header = response.getFirstHeader("Transfer-Encoding");
-	        if (header != null) {
-	            headerTransferEncoding = header.getValue();
-	        }
-	        if (headerTransferEncoding == null) {
-	            header = response.getFirstHeader("Content-Length");
-	            if (header != null) {
-	                String len = header.getValue();
-	                state.mContentLength = Long.parseLong(len);    // get file size form http content
-	                XLUtil.logDebug(Constants.TAG, "jinghuang4 ---> total bytes = " + state.mContentLength);
-	                XLUtil.logDebug(Constants.TAG, "jinghuang4 ---> test, index=" + index);
-	                if (client != null) {
-	                    client.close();
-	                    client = null;
-	                }
-	                fileSize = state.mContentLength;
-	                state.mTotalBytes = state.mContentLength;
-	                mInfo.mTotalBytes = state.mContentLength;
-	                
-	             // update header values into database
-	                updateDatabaseFromHeaders(state);
-	                state.mFilename = Helpers.generateSaveFile(
-	                        mContext,
-	                        mInfo.mUri,
-	                        mInfo.mHint,
-	                        state.mContentDisposition,
-	                        state.mContentLocation,
-	                        state.mMimeType,
-	                        mInfo.mDestination,
-	                        state.mContentLength,
-	                        mStorageManager);
-	                state.mDownloadingFileName = state.mFilename + Helpers.sDownloadingExtension;
-	                // correct mimetype
-	                correctMimeType(state);
-	                // now filename is generated, and update in into database
-	                updateFilenameIntoDatabase(state);
-	                // now we get filename, and check space.
-	                mStorageManager.verifySpace(mInfo.mDestination, state.mFilename, state.mTotalBytes);
-	                
-	                break;
-	            }
-	        } else {
-	            // Ignore content-length with transfer-encoding - 2616 4.4 3
-//	            fileSize = -1;
-	            if (Constants.LOGVV) {
-	                Log.v(Constants.TAG,
-	                        "ignoring content-length because of xfer-encoding");
-	            }
-	        }
-	        if (client != null) {
-                client.close();
-                client = null;
-            }
-	    }
-	    
-	    
-	    
-	    
-	    
+	    } /* End of While */
+
 	    int status = Downloads.Impl.STATUS_WAITING_FOR_NETWORK;
-	    
+
 	    if (index >= Constants.MAX_REDIRECTS) {
 	        XLUtil.logDebug(Constants.TAG, "jinghuang4 ---> except 1");
 	        throw new StopRequestException(STATUS_TOO_MANY_REDIRECTS, "Too many redirects");
 	    }
-	    
+
         Long maxBytesOverMobile = mSystemFacade.getMaxBytesOverMobile();
         if (maxBytesOverMobile != null && fileSize > maxBytesOverMobile) {
             status = Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
@@ -1806,16 +1784,16 @@ public class DownloadThread implements Runnable {
             XLUtil.logDebug(Constants.TAG, "jinghuang4 ---> except 2");
             throw new StopRequestException(status, "download size exceeds limit for mobile network");
         }
-        
+
         if (mInfo.mBypassRecommendedSizeLimit == 0) {
             Long recommendedMaxBytesOverMobile = mSystemFacade.getRecommendedMaxBytesOverMobile();
             if (recommendedMaxBytesOverMobile != null
-                    && fileSize > recommendedMaxBytesOverMobile) {
+                && fileSize > recommendedMaxBytesOverMobile) {
                 status = Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
                 XLUtil.logDebug(Constants.TAG, "jinghuang4 ---> except 3, status=" + status);
                 throw new StopRequestException(status, "download size exceeds recommended limit for mobile network");
             }
         }
-        
+
 	}
 }
