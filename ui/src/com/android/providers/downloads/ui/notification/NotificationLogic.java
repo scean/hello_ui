@@ -423,7 +423,7 @@ public class NotificationLogic {
             List<Integer> vip_expire_config = mConfigJSInfo.vip_guide_bar_before_expire_expire_config;
             AppConfig.LOGD(TAG, "isOutDateVip vip_expire_config=" + vip_expire_config);
             if (vip_expire_config == null || vip_expire_config.size() != 3) {
-                return VipExpireStatus.MOREDAY;
+                return VipExpireStatus.NOACCOUNT;
             }
 
             /*
@@ -442,7 +442,7 @@ public class NotificationLogic {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return VipExpireStatus.MOREDAY;
+            return VipExpireStatus.NOACCOUNT;
         }
     }
 }
