@@ -426,13 +426,14 @@ public class NotificationLogic {
                 return VipExpireStatus.MOREDAY;
             }
 
-            if (diffDay == vip_expire_config.get(0)) {
-                return VipExpireStatus.SEVENDAY;
-            } else if (vip_expire_config.get(1) <= diffDay && diffDay < vip_expire_config.get(0)) {
-                return VipExpireStatus.FOURDAY;
-            } else if (vip_expire_config.get(2) <= diffDay && diffDay < vip_expire_config.get(1)) {
-                return VipExpireStatus.ONEDAY;
-            } else if (diffDay == 0.0) {
+            /*
+             * if (diffDay == vip_expire_config.get(0)) { return
+             * VipExpireStatus.SEVENDAY; } else if (vip_expire_config.get(1) <=
+             * diffDay && diffDay < vip_expire_config.get(0)) { return
+             * VipExpireStatus.FOURDAY; } else if (vip_expire_config.get(2) <=
+             * diffDay && diffDay < vip_expire_config.get(1)) { return
+             * VipExpireStatus.ONEDAY; } else
+             */if (diffDay == 0.0) {
                 return VipExpireStatus.TODAY;
             } else if (diffDay < vip_expire_config.get(2)) {
                 return VipExpireStatus.OUTDATE;

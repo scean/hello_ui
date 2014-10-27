@@ -126,6 +126,39 @@ public class PreferenceLogic {
 
     }
 
+	/***
+	 * 
+	 * 保存通知本地弹出信息
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	private void saveNotiBoolean(String key, boolean value) {
+		SharedPreferences mPreferces = getNotiSharedPreference();
+		if (mPreferces != null) {
+			mPreferces.edit().putInt(key, value ? 1 : -1).commit();
+		}
+
+        System.out.println("ddddddddddddddddddddsave" + key + value);
+	}
+
+	/**
+	 * 获得通知本地弹出信息
+	 * 
+	 * @param key
+	 * @return
+	 */
+	private boolean getNotiBoolean(String key) {
+		SharedPreferences mPreferces = getNotiSharedPreference();
+		if (mPreferces == null) {
+			return true;
+		} else {
+            System.out.println("ddddddddddddddddddddget" + key + (mPreferces.getInt(key, 0) == 1));
+			return mPreferces.getInt(key, 0) == 1;
+		}
+
+	}
+
     private void saveIntPre(String key, int value) {
         SharedPreferences mPreferces = getSharedPreference();
 		if (mPreferces != null) {
@@ -227,13 +260,11 @@ public class PreferenceLogic {
 
     // 保存当天场景一提示
     public void saveStageOneIsTip(boolean isHaveTip) {
-		SharedPreferences mPreferces = getNotiSharedPreference();
-		mPreferces.edit().putBoolean(STAGE_ONE_IS_TIP, isHaveTip).commit();
+		saveNotiBoolean(STAGE_ONE_IS_TIP, isHaveTip);
     }
 
     public boolean getStageOneIsTip() {
-		SharedPreferences mPreferces = getNotiSharedPreference();
-		return mPreferces.getBoolean(STAGE_ONE_IS_TIP, false);
+		return getNotiBoolean(STAGE_ONE_IS_TIP);
     }
 
     // 保存当天场景二提示
@@ -246,18 +277,18 @@ public class PreferenceLogic {
     }
 
     public void saveBeforeGivenFlowOut(String ext, boolean hasShown) {
-        saveBooleanPre(BEFORE_GIVEN_FLOW_OUT + ext, hasShown);
+		saveNotiBoolean(BEFORE_GIVEN_FLOW_OUT + ext, hasShown);
     } 
     public boolean isGivenFlowShown(int ext) {
-        return getBooleanPre(GIVEN_FLOW + ext);
+		return getNotiBoolean(GIVEN_FLOW + ext);
     }
     
     public void saveGivenFlow(int ext, boolean hasShown) {
-        saveBooleanPre(GIVEN_FLOW + ext, hasShown);
+		saveNotiBoolean(GIVEN_FLOW + ext, hasShown);
     }
 
     public boolean isBeforeGivenFlowOutShown(String ext) {
-        return getBooleanPre(BEFORE_GIVEN_FLOW_OUT + ext);
+		return getNotiBoolean(BEFORE_GIVEN_FLOW_OUT + ext);
     }
     public void saveBeforeGivenFlowDay(int day) {
         saveIntPre(BEFORE_GIVEN_FLOW_OUT , day);
@@ -267,18 +298,18 @@ public class PreferenceLogic {
     }
 
     public void saveVipExpireOneIsTip(boolean isHaveTip) {
-        saveBooleanPre(VIP_OUTOF_DATE_ONE, isHaveTip);
+		saveNotiBoolean(VIP_OUTOF_DATE_ONE, isHaveTip);
     }
 
     public boolean getVipExpireOneIsTip() {
-        return getBooleanPre(VIP_OUTOF_DATE_ONE);
+		return getNotiBoolean(VIP_OUTOF_DATE_ONE);
     }
     public void saveVipExpireTodayIsTip(boolean isHaveTip) {
-        saveBooleanPre(VIP_OUTOF_DATE_TODAY, isHaveTip);
+		saveNotiBoolean(VIP_OUTOF_DATE_TODAY, isHaveTip);
     }
 
     public boolean getVipExpireTodayIsTip() {
-        return getBooleanPre(VIP_OUTOF_DATE_TODAY);
+        return getNotiBoolean(VIP_OUTOF_DATE_TODAY);
     }
 
     public void saveVipExpireFourIsTip(boolean isHaveTip) {
