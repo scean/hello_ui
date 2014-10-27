@@ -610,20 +610,21 @@ public class XLSpeedUpActivity extends BaseActivity {
 				XLUtil.logDebug(TAG, "auth success token:" + mToken);
 
 				if (!XLUtil.isNullOrEmpty(token)) {
-					mSetVipClickGoneFlag = 2;
+					if(mAuthFlag ==2) {
+						mSetVipClickGoneFlag = 2;
+					}
 				}
 				mHandler.post(new Runnable() {
 
 					@Override
 					public void run() {
-
-						if (!XLUtil.isNullOrEmpty(token)) {
-							if (mvipclick != null) {
-								mvipclick.setVisibility(View.GONE);
-								mSetVipClickGoneFlag = 0;
-							}
-						}
 						if (mAuthFlag == 2) {
+							if (!XLUtil.isNullOrEmpty(token)) {
+								if (mvipclick != null) {
+									mvipclick.setVisibility(View.GONE);
+									mSetVipClickGoneFlag = 0;
+								}
+							}
 							openChoosePrizeDialog();
 							mAuthFlag = 0;
 						}
