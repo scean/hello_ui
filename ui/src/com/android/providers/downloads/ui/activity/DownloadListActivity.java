@@ -306,7 +306,7 @@ public class DownloadListActivity extends BaseActivity implements RadioGroup.OnC
     }
 
     public void updateVipIconDisplay() {
-        boolean xunlei_usage = getXunleiUsagePermission();
+	    boolean xunlei_usage = getXunleiUsagePermission();
         boolean netStatus = DownloadUtils.isNetworkAvailable(getApplicationContext());
         int nVipMark = ConfigJSInstance.getInstance(getApplication()).getUseOpt();
         String xunlei_token = XLUtil.getStringPackagePreference(getApplicationContext());

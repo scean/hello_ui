@@ -39,7 +39,7 @@ public class AuthManager {
 	private AuthManager() {
 		setGlobalConstant();
 	}
-	
+
 
 	public static AuthManager getInstance() {
 		if (mRequestMISdkManager == null) {
@@ -47,15 +47,17 @@ public class AuthManager {
 		}
 		return mRequestMISdkManager;
 	}
-	private void setGlobalConstant(){
-		if(Constants.CURRENT_MIUI_V == 5){
-			mWapType =Constants.WAP_TYPE_CUSTOM;
-		}else if(Constants.CURRENT_MIUI_V == 6){
-			mWapType =Constants.WAP_TYPE_V6;
-		}else{
-			mWapType =Constants.WAP_TYPE_CUSTOM;
+
+	private void setGlobalConstant() {
+		if (Constants.CURRENT_MIUI_V == 5) {
+			mWapType = Constants.WAP_TYPE_CUSTOM;
+		} else if (Constants.CURRENT_MIUI_V == 6) {
+			mWapType = Constants.WAP_TYPE_V6;
+		} else {
+			mWapType = Constants.WAP_TYPE_CUSTOM;
 		}
 	}
+
 	// 添加授权结束监听器
 	public void addAuthListener(OnAuthResultListener onAuthResultListener) {
 

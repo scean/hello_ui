@@ -2,7 +2,7 @@ package com.android.providers.downloads.ui.auth;
 
 public class Constants {
 
-	public static final int CURRENT_MIUI_V    =6;	
+	public static final int CURRENT_MIUI_V = 6;
 	public static final int REQUESTCODE_TOKEN = 10001;
 	public static final int REQUESTCODE_CODE = 10002;
 	public static final int REQUESTCODE_XL_TOKEN = 10003;
@@ -19,7 +19,7 @@ public class Constants {
 	public static final int WAP_TYPE_PC = 0;
 	public static final int WAP_TYPE_MOBILE = 1;
 	public static final int WAP_TYPE_CUSTOM = 3;
-	public static final int WAP_TYPE_V6     =5;
+	public static final int WAP_TYPE_V6 = 5;
 
 	// 0 表示其他或不填则 302 跳转 ,1 表示 视为http调用 json格式返回
 	public static final int INVISABLE_TYPE_OTHER = 0;

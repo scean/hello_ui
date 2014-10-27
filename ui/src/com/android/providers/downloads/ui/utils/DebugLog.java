@@ -17,9 +17,7 @@ import android.util.Log;
 import android.os.Environment;
 
 /**
- * 
  * dump the log to sdcard file, should replace Config.LOG by this step by step
- * 
  */
 public class DebugLog {
 	private static String TAG = "DebugLog";
@@ -49,8 +47,8 @@ public class DebugLog {
 	private static DebugLog instance = null;
 
 	private BufferedWriter mOutWriter = null;
-    // Each log file every day.
-    private String mCurrentDay;
+	// Each log file every day.
+	private String mCurrentDay;
 
 	private static final String DATE_FORMAT = "MM-dd HH:mm:ss:SSS";
 	private SimpleDateFormat mDateFormat = new SimpleDateFormat(DATE_FORMAT);
@@ -68,12 +66,10 @@ public class DebugLog {
 
 	/**
 	 * Send a verbose log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
+	 * @param msg The message you would like logged.
 	 */
 	public static void vv(String tag, String msg) {
 		vv(tag, msg, null);
@@ -81,14 +77,11 @@ public class DebugLog {
 
 	/**
 	 * Send a verbose log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
-	 * @param tr
-	 *            An exception to log
+	 * @param msg The message you would like logged.
+	 * @param tr  An exception to log
 	 */
 	public static void vv(String tag, String msg, Throwable tr) {
 		if (!LOGVV) {
@@ -103,12 +96,10 @@ public class DebugLog {
 
 	/**
 	 * Send a verbose log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
+	 * @param msg The message you would like logged.
 	 */
 	public static void v(String tag, String msg) {
 		v(tag, msg, null);
@@ -116,14 +107,11 @@ public class DebugLog {
 
 	/**
 	 * Send a verbose log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
-	 * @param tr
-	 *            An exception to log
+	 * @param msg The message you would like logged.
+	 * @param tr  An exception to log
 	 */
 	public static void v(String tag, String msg, Throwable tr) {
 		if (!LOGV) {
@@ -138,12 +126,10 @@ public class DebugLog {
 
 	/**
 	 * Send a debug log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
+	 * @param msg The message you would like logged.
 	 */
 	public static void d(String tag, String msg) {
 		d(tag, msg, null);
@@ -151,14 +137,11 @@ public class DebugLog {
 
 	/**
 	 * Send a debug log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
-	 * @param tr
-	 *            An exception to log
+	 * @param msg The message you would like logged.
+	 * @param tr  An exception to log
 	 */
 	public static void d(String tag, String msg, Throwable tr) {
 		if (!LOGD) {
@@ -167,12 +150,12 @@ public class DebugLog {
 
 		getInstance().writeLog(DEBUG_TAG, tag, msg, tr);
 		if (DUMP_LOG_TO_CONSOLE) {
-		//	Log.d(TAG, "[[" + tag + "]]" + msg, tr);
-		    int index = tag.indexOf(".java");
-		    if (index > 0) {
-		        msg = "[[" + tag + "]]" + msg;
-		        tag = tag.substring(0, index); 
-		    }
+			//	Log.d(TAG, "[[" + tag + "]]" + msg, tr);
+			int index = tag.indexOf(".java");
+			if (index > 0) {
+				msg = "[[" + tag + "]]" + msg;
+				tag = tag.substring(0, index);
+			}
 			tag = tag.replace("[[", "").replace("]]", "");
 			Log.d(tag, msg, tr);
 		}
@@ -180,12 +163,10 @@ public class DebugLog {
 
 	/**
 	 * Send a warning log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
+	 * @param msg The message you would like logged.
 	 */
 	public static void w(String tag, String msg) {
 		w(tag, msg, null);
@@ -193,14 +174,11 @@ public class DebugLog {
 
 	/**
 	 * Send a warning log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
-	 * @param tr
-	 *            An exception to log
+	 * @param msg The message you would like logged.
+	 * @param tr  An exception to log
 	 */
 	public static void w(String tag, String msg, Throwable tr) {
 		if (!LOGW) {
@@ -215,12 +193,10 @@ public class DebugLog {
 
 	/**
 	 * Send a error log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
+	 * @param msg The message you would like logged.
 	 */
 	public static void e(String tag, String msg) {
 		e(tag, msg, null);
@@ -228,14 +204,11 @@ public class DebugLog {
 
 	/**
 	 * Send a error log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
-	 * @param tr
-	 *            An exception to log
+	 * @param msg The message you would like logged.
+	 * @param tr  An exception to log
 	 */
 	public static void e(String tag, String msg, Throwable tr) {
 		if (!LOGE) {
@@ -250,12 +223,10 @@ public class DebugLog {
 
 	/**
 	 * Send a release log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
+	 * @param msg The message you would like logged.
 	 */
 	public static void r(String tag, String msg) {
 		r(tag, msg, null);
@@ -263,14 +234,11 @@ public class DebugLog {
 
 	/**
 	 * Send a release log message.
-	 * 
-	 * @param tag
-	 *            Used to identify the source of a log message. It usually
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
 	 *            identifies the class or activity where the log call occurs.
-	 * @param msg
-	 *            The message you would like logged.
-	 * @param tr
-	 *            An exception to log
+	 * @param msg The message you would like logged.
+	 * @param tr  An exception to log
 	 */
 	public static void r(String tag, String msg, Throwable tr) {
 		if (!LOGR) {
@@ -294,7 +262,7 @@ public class DebugLog {
 	}
 
 	private synchronized void writeLog(String level, String tag, String msg,
-			Throwable tr) {
+	                                   Throwable tr) {
 		if (null == mOutWriter) {
 			boolean success = openFile();
 			if (!success) {
@@ -303,19 +271,19 @@ public class DebugLog {
 		}
 
 		try {
-            String day = getCurrentDay();
-            // If is another day, then create a new log file.
-            if (!day.equals(mCurrentDay)) {
-                mOutWriter.flush();
-                mOutWriter.close();
+			String day = getCurrentDay();
+			// If is another day, then create a new log file.
+			if (!day.equals(mCurrentDay)) {
+				mOutWriter.flush();
+				mOutWriter.close();
 
-                boolean success = openFile();
-                if (!success) {
-                    return;
-                }
-            }
+				boolean success = openFile();
+				if (!success) {
+					return;
+				}
+			}
 
-            StringBuilder log = composeLog(level, tag, msg, tr);
+			StringBuilder log = composeLog(level, tag, msg, tr);
 
 			mOutWriter.write(log.toString());
 			mOutWriter.flush();
@@ -326,9 +294,9 @@ public class DebugLog {
 	}
 
 	private boolean openFile() {
-	    if (LOG_DIR == null) {
-	        throw new IllegalArgumentException("LOG_DIR can't be empty!");
-	    }
+		if (LOG_DIR == null) {
+			throw new IllegalArgumentException("LOG_DIR can't be empty!");
+		}
 
 		File f = new File(LOG_DIR);
 
@@ -342,7 +310,7 @@ public class DebugLog {
 			return false;
 		}
 
-        mCurrentDay = getCurrentDay();
+		mCurrentDay = getCurrentDay();
 		f = new File(LOG_DIR, composeFileName(mCurrentDay));
 		mOutWriter = null;
 		try {
@@ -355,8 +323,8 @@ public class DebugLog {
 	}
 
 	private StringBuilder composeLog(String level, String tag, String msg,
-			Throwable tr) {
-	    StringBuilder log = new StringBuilder(512);
+	                                 Throwable tr) {
+		StringBuilder log = new StringBuilder(512);
 
 		log.append(composeTime());
 		log.append(" ");
@@ -378,15 +346,15 @@ public class DebugLog {
 		return mDateFormat.format(mCalendar.getTime());
 	}
 
-    private String composeFileName(String currentDay) {
-        if (!TextUtils.isEmpty(currentDay)) {
-            return "debug_log_ui_" + currentDay + ".txt";
-        }
-        return "debug_log_ui.txt";
-    }
+	private String composeFileName(String currentDay) {
+		if (!TextUtils.isEmpty(currentDay)) {
+			return "debug_log_ui_" + currentDay + ".txt";
+		}
+		return "debug_log_ui.txt";
+	}
 
-    private String getCurrentDay() {
-        return new SimpleDateFormat("yyMMdd").format(new Date());
-    }
+	private String getCurrentDay() {
+		return new SimpleDateFormat("yyMMdd").format(new Date());
+	}
 
 }

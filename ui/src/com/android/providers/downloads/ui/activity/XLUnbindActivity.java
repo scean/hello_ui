@@ -1,5 +1,5 @@
 package com.android.providers.downloads.ui.activity;
- 
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public class XLUnbindActivity extends BaseActivity {
 		@Override
 		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
 			XLUtil.logDebug("XLUnbindActivity", "onReceivedSslError=" + error.getUrl());
-			
+
 			handler.proceed();
 		}
 
@@ -49,6 +49,7 @@ public class XLUnbindActivity extends BaseActivity {
 
 			XLUtil.logDebug("XLUnbindActivity", "onPageStarted url=" + url);
 		}
+
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
@@ -60,6 +61,7 @@ public class XLUnbindActivity extends BaseActivity {
 
 			XLUtil.logDebug("XLUnbindActivity", "onPageFinished url=" + url);
 		}
+
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			/*String start = "https://open-api-auth.xunlei.com/platform?";
@@ -69,13 +71,13 @@ public class XLUnbindActivity extends BaseActivity {
 				view.loadUrl(url.replace(start, "https://125.39.36.126/platform?"));
 				return true;
 			}*/
-		
+
 			return super.shouldOverrideUrlLoading(view, url);
 		}
 
 	};
 
-	@SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
+	@SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -89,8 +91,8 @@ public class XLUnbindActivity extends BaseActivity {
 		mXLWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 		mXLWebView.getSettings().setJavaScriptEnabled(true);
 		mXLWebView.getSettings().setLoadWithOverviewMode(true);
-		mXLWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true); 
-		
+		mXLWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+
 		mXLWebView.setWebViewClient(mWebViewClient);
 
 		// 把本地方法注入给JS调用
@@ -99,9 +101,9 @@ public class XLUnbindActivity extends BaseActivity {
 		Intent intent = this.getIntent();
 		String token = intent.getStringExtra("token");
 		String from = intent.getStringExtra("from");
-		mXLWebView.loadUrl(HOME_URL+ from+"&token="+token);
-		XLUtil.logDebug("XLUnbindActivity", "loadUrl=" + HOME_URL+ from+"&token="+token);
-		
+		mXLWebView.loadUrl(HOME_URL + from + "&token=" + token);
+		XLUtil.logDebug("XLUnbindActivity", "loadUrl=" + HOME_URL + from + "&token=" + token);
+
 //		if(Constants.CURRENT_MIUI_V ==6){
 //			ActionBar actionBar = getActionBar();
 //			actionBar.setDisplayHomeAsUpEnabled(true);
@@ -114,14 +116,14 @@ public class XLUnbindActivity extends BaseActivity {
 	}
 
 	@JavascriptInterface
-	public void onSuccess(int flag, int result)
-	{
+	public void onSuccess(int flag, int result) {
 		XLUtil.logDebug("XLUnbindActivity", "result=" + result);
-		
+
 		finish();
 		UnbindManager manager = UnbindManager.getInstance();
-		manager.fireUnbindResultListeners(flag, result);		
+		manager.fireUnbindResultListeners(flag, result);
 	}
+
 	@JavascriptInterface
 	public void onDealMiLoginFrame(String src) {
 		if (src != null && mXLWebView != null) {
@@ -145,6 +147,7 @@ public class XLUnbindActivity extends BaseActivity {
 			}*/
 		}
 	}
+
 	protected void onDestroy() {
 		super.onDestroy();
 		if (mXLWebView != null) {
@@ -164,15 +167,15 @@ public class XLUnbindActivity extends BaseActivity {
 		linear.addView(mXLWebView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		return linear;
 	}
-	
+
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
+	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
-		if(item.getItemId() == android.R.id.home){
+		if (item.getItemId() == android.R.id.home) {
 			finish();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 }

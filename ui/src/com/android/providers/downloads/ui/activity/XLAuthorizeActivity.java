@@ -1,11 +1,11 @@
 package com.android.providers.downloads.ui.activity;
- 
+
 import java.util.HashMap;
 import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.app.Activity; 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.http.SslError;
 import android.os.Bundle;
@@ -77,7 +77,7 @@ public class XLAuthorizeActivity extends BaseActivity {
 
 	/**
 	 * 获取请求参数部分
-	 * 
+	 *
 	 * @param url地址
 	 * @return url请求参数部分
 	 */
@@ -98,7 +98,7 @@ public class XLAuthorizeActivity extends BaseActivity {
 
 	/**
 	 * 解析出url参数中的键值对
-	 * 
+	 *
 	 * @param url地址
 	 * @return url请求参数部分
 	 */
@@ -126,8 +126,8 @@ public class XLAuthorizeActivity extends BaseActivity {
 	}
 
 	public static void startXunLeiLogin(Activity activity, String code, int wap, int secondStep) {
-		if(activity == null){
-			return ;
+		if (activity == null) {
+			return;
 		}
 		Intent intent = new Intent();
 		intent.setClass(activity, XLAuthorizeActivity.class);
@@ -148,7 +148,7 @@ public class XLAuthorizeActivity extends BaseActivity {
 		this.setTitle("迅雷帐号授权");
 		Intent intent = this.getIntent();
 		String code = intent.getStringExtra("code");
-		wap = intent.getIntExtra("wap", 0); 
+		wap = intent.getIntExtra("wap", 0);
 		int secondStep = intent.getIntExtra("secondStep", 0);
 		String secondStepstr = "";
 		if (secondStep == 0) {
@@ -182,7 +182,7 @@ public class XLAuthorizeActivity extends BaseActivity {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			// showExitConfirmDialog();
 			String url = mXLWebView.getUrl();
-			if (url!=null && url.startsWith(HOME_URL) && wap == 4) {
+			if (url != null && url.startsWith(HOME_URL) && wap == 4) {
 				executeJsFunction("back");
 			} else {
 				finish();
@@ -214,7 +214,7 @@ public class XLAuthorizeActivity extends BaseActivity {
 
 	/**
 	 * 执行带参数的JS函数
-	 * 
+	 *
 	 * @param functionName
 	 * @param params
 	 */
@@ -224,7 +224,7 @@ public class XLAuthorizeActivity extends BaseActivity {
 
 	/**
 	 * 工具方法 根据JS方法名和和参数返回可以在WebView中执行的JS串
-	 * 
+	 *
 	 * @param callback
 	 * @param params
 	 * @return
@@ -254,7 +254,7 @@ public class XLAuthorizeActivity extends BaseActivity {
 
 	/**
 	 * 执行一段JS代码
-	 * 
+	 *
 	 * @param js
 	 */
 	public void executeJs(final String jsScript) {
@@ -269,11 +269,11 @@ public class XLAuthorizeActivity extends BaseActivity {
 	}
 
 	private Handler handler = new Handler();
-	
+
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
+	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
-		if(item.getItemId() == android.R.id.home){
+		if (item.getItemId() == android.R.id.home) {
 			finish();
 			return true;
 		}
@@ -284,6 +284,6 @@ public class XLAuthorizeActivity extends BaseActivity {
 
 	// 提示框
 	//public void alert(final String text) {
-		// alert(text, null); 
+	// alert(text, null);
 	//}
 }
