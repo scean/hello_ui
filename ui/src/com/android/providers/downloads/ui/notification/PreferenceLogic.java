@@ -1,7 +1,9 @@
 package com.android.providers.downloads.ui.notification;
 
+import java.util.Calendar;
 import java.util.List;
 
+import android.Manifest.permission;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -165,6 +167,26 @@ public class PreferenceLogic {
 			mPreferces.edit().putInt(key, value).commit();
 		}
 
+    }
+
+    /***
+     * 清楚本地数据弹出记录
+     * 
+     * @param context
+     */
+    public static void initNotiSetting(Context context)
+    {
+        PreferenceLogic preferenceLogic = PreferenceLogic.getInstance(context);
+
+        preferenceLogic.saveVipExpireTodayIsTip(false);
+
+        preferenceLogic.saveBeforeGivenFlowOut("NO_FLOW", false);
+
+        preferenceLogic.saveStageOneIsTip(false);
+
+        Calendar c = Calendar.getInstance();
+        int month = c.get(Calendar.MONTH);
+        preferenceLogic.saveGivenFlow(month, false);
     }
 
     private int getIntPre(String key) {

@@ -26,6 +26,7 @@ import com.android.providers.downloads.ui.pay.ConfigJSInstance;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance;
 import com.android.providers.downloads.ui.pay.MiBiPay;
 import com.android.providers.downloads.ui.notification.NotificationLogic;
+import com.android.providers.downloads.ui.notification.PreferenceLogic;
 import com.android.providers.downloads.ui.notification.NotificationLogic.GiveFlowUsedState;
 import com.android.providers.downloads.ui.notification.NotificationLogic.VipExpireStatus;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.AccountInfo;
@@ -170,6 +171,8 @@ public class XLSpeedUpActivity extends BaseActivity {
 					saveXLId(false);
 //					askRequestToken();
 
+                    // 初始化通知本地弹出条件
+                    PreferenceLogic.initNotiSetting(getApplicationContext());
 					String msg = XLSpeedUpActivity.this.getResources().getString(R.string.unbind_xunlei_success);
 					if (flag == 1) {
 						msg = XLSpeedUpActivity.this.getResources().getString(R.string.unbind_xunlei_2_success);
