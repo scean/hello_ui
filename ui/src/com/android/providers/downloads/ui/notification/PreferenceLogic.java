@@ -17,6 +17,7 @@ import com.android.providers.downloads.ui.utils.DateUtil;
 public class PreferenceLogic {
     private static PreferenceLogic instance;
     private SharedPreferences mSharedPreferences;
+    private SharedPreferences mNotiSharedPreferences;
     private Context mContext;
 
     private final String REMIND_CYCLE_DATE = "Remind_Cycle_Date";
@@ -80,18 +81,19 @@ public class PreferenceLogic {
     }
 
 	private SharedPreferences getNotiSharedPreference() {
-		if (null == mSharedPreferences) {
+
+        if (null == mNotiSharedPreferences) {
 			Context ct = null;
 			try {
 				ct = mContext.createPackageContext(
 						DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME,
 						Context.CONTEXT_IGNORE_SECURITY);
-				mSharedPreferences = ct.getSharedPreferences("sp_notification",
+                mNotiSharedPreferences = ct.getSharedPreferences("sp_notification",
 						Context.MODE_PRIVATE);
 			} catch (Exception e) {
 			}
 		}
-		return mSharedPreferences;
+        return mNotiSharedPreferences;
 	}
 
     private void saveStringPre(String key, String value) {
@@ -141,7 +143,6 @@ public class PreferenceLogic {
 			mPreferces.edit().putInt(key, value ? 1 : -1).commit();
 		}
 
-        System.out.println("ddddddddddddddddddddsave" + key + value);
 	}
 
 	/**
@@ -155,7 +156,6 @@ public class PreferenceLogic {
 		if (mPreferces == null) {
 			return true;
 		} else {
-            System.out.println("ddddddddddddddddddddget" + key + (mPreferces.getInt(key, 0) == 1));
 			return mPreferces.getInt(key, 0) == 1;
 		}
 
