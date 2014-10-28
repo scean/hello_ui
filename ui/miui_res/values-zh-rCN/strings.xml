@@ -4,7 +4,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 	
     <string name="dialog_confirm_delete_downloads_message">确定删除%d条任务？</string>
-    <string name="dialog_confirm_delete_the_download_item_message">确定删除该任务</string>
+    <string name="dialog_confirm_delete_the_download_item_message">确定删除该任务？</string>
 	<string name="dialog_confirm_delete_checkbox_message">同时删除本地文件</string>
 	
     <string name="download_when_network_connected">"任何网络连接时下载"</string>
