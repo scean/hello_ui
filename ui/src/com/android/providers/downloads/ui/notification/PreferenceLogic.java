@@ -1,7 +1,9 @@
 package com.android.providers.downloads.ui.notification;
 
+import java.util.Calendar;
 import java.util.List;
 
+import android.Manifest.permission;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,6 +17,7 @@ import com.android.providers.downloads.ui.utils.DateUtil;
 public class PreferenceLogic {
     private static PreferenceLogic instance;
     private SharedPreferences mSharedPreferences;
+    private SharedPreferences mNotiSharedPreferences;
     private Context mContext;
 
     private final String REMIND_CYCLE_DATE = "Remind_Cycle_Date";
@@ -71,18 +74,19 @@ public class PreferenceLogic {
     }
 
 	private SharedPreferences getNotiSharedPreference() {
-		if (null == mSharedPreferences) {
+
+        if (null == mNotiSharedPreferences) {
 			Context ct = null;
 			try {
 				ct = mContext.createPackageContext(
 						DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME,
 						Context.CONTEXT_IGNORE_SECURITY);
-				mSharedPreferences = ct.getSharedPreferences("sp_notification",
+                mNotiSharedPreferences = ct.getSharedPreferences("sp_notification",
 						Context.MODE_PRIVATE);
 			} catch (Exception e) {
 			}
 		}
-		return mSharedPreferences;
+        return mNotiSharedPreferences;
 	}
 
     private void saveStringPre(String key, String value) {
@@ -132,7 +136,6 @@ public class PreferenceLogic {
 			mPreferces.edit().putInt(key, value ? 1 : -1).commit();
 		}
 
-        System.out.println("ddddddddddddddddddddsave" + key + value);
 	}
 
 	/**
@@ -146,7 +149,6 @@ public class PreferenceLogic {
 		if (mPreferces == null) {
 			return true;
 		} else {
-            System.out.println("ddddddddddddddddddddget" + key + (mPreferces.getInt(key, 0) == 1));
 			return mPreferces.getInt(key, 0) == 1;
 		}
 
@@ -158,6 +160,26 @@ public class PreferenceLogic {
 			mPreferces.edit().putInt(key, value).commit();
 		}
 
+    }
+
+    /***
+     * 清楚本地数据弹出记录
+     * 
+     * @param context
+     */
+    public static void initNotiSetting(Context context)
+    {
+        PreferenceLogic preferenceLogic = PreferenceLogic.getInstance(context);
+
+        preferenceLogic.saveVipExpireTodayIsTip(false);
+
+        preferenceLogic.saveBeforeGivenFlowOut("NO_FLOW", false);
+
+        preferenceLogic.saveStageOneIsTip(false);
+
+        Calendar c = Calendar.getInstance();
+        int month = c.get(Calendar.MONTH);
+        preferenceLogic.saveGivenFlow(month, false);
     }
 
     private int getIntPre(String key) {
