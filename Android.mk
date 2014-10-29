@@ -18,9 +18,9 @@ LOCAL_STATIC_JAVA_LIBRARIES += guava xl_download_lib MiPush_Xunlei_141017
 LOCAL_PROGUARD_ENABLED := obfuscate
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 LOCAL_REQUIRED_MODULES := libxl_thunder_sdk \
-libxl_thunder_iface \
-libvip_channel \
-libxl_stat
+                          libxl_thunder_iface \
+                          libvip_channel \
+                          libxl_stat
 
 include $(BUILD_PACKAGE)
 
