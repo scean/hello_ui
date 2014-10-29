@@ -170,9 +170,6 @@ public class XLSpeedUpActivity extends BaseActivity {
 					setToken("");
 					saveXLId(false);
 //					askRequestToken();
-
-                    // 初始化通知本地弹出条件
-                    PreferenceLogic.initNotiSetting(getApplicationContext());
 					String msg = XLSpeedUpActivity.this.getResources().getString(R.string.unbind_xunlei_success);
 					if (flag == 1) {
 						msg = XLSpeedUpActivity.this.getResources().getString(R.string.unbind_xunlei_2_success);
