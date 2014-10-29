@@ -1,4 +1,4 @@
-package com.android.providers.downloads.notification;
+package com.android.providers.downloads;
 
 import android.content.Context;
 import android.content.Intent;

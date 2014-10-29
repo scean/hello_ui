@@ -30,12 +30,20 @@ import android.net.wifi.WifiInfo;
 import miui.os.Environment;
 import android.os.Build;
 import android.os.SystemClock;
-import static com.android.providers.downloads.Constants.TAG;
 import android.provider.Downloads;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
+import android.content.Context;
+import android.os.SystemClock;
+import android.provider.Downloads;
+import android.text.TextUtils;
+import android.util.Log;
+import android.webkit.MimeTypeMap;
+import android.net.Uri;
+import android.os.Process;
+import android.telephony.TelephonyManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,33 +52,21 @@ import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.content.Context;
-import android.net.Uri;
-
 import java.net.NetworkInterface;
 import java.net.InetAddress;
-
-
-import android.os.SystemClock;
-import android.provider.Downloads;
-import android.text.TextUtils;
-import android.util.Log;
-import android.webkit.MimeTypeMap;
-
 import java.util.Map;
 import java.util.Enumeration;
 
-import com.xunlei.downloadplatforms.util.XLUtil;
-
 import miui.analytics.Analytics;
-import android.os.Process;
-import android.telephony.TelephonyManager;
+
+import com.xunlei.downloadplatforms.util.XLUtil;
 
 /**
  * Some helper functions for the download manager
  */
 public class Helpers {
+    private static final boolean DEBUG = XLConfig.DEBUG;
+
     public static Random sRandom = new Random(SystemClock.uptimeMillis());
     public static final int DEFAULT_MAX_DOWNLOADS_COUNT = 5;
     public static final int DEFAULT_MAX_DOWNLOADS_COUNT_PER_DOMAIN = 2;
@@ -123,11 +119,9 @@ public class Helpers {
     private static final String TRACK_ID_XL_ERROR_CODE = "xl_error_code";
     /** error for xiaomi analysis */
     private static final String TRACK_ID_XL_TASK_ID = "xl_task_id";
-    
+
     private static final String STAT_TAG_TASKSTATUS = "DownloadUtils.Stat.TaskStatus";
-    
-    private static final boolean STAT_LOG_ON = false;
-    
+
     private static final String STAT_TAG_ONLINESTATUS = "DownloadUtils.Stat.OnLineStatus";
 
     private Helpers() {
@@ -447,7 +441,7 @@ public class Helpers {
                     Environment.getExternalStorageDirectory().getCanonicalPath(),
             };
         } catch (IOException e) {
-            Log.w(TAG, "Failed to resolve canonical path: " + e);
+            Log.w(Constants.TAG, "Failed to resolve canonical path: " + e);
             return false;
         }
 
@@ -844,7 +838,7 @@ public class Helpers {
         // track
         Analytics tracker = Analytics.getInstance();
         Map <String,String> trackData = new HashMap<String, String>();
-        if (STAT_LOG_ON) {
+        if (DEBUG) {
             Log.v(Constants.TAG, "track download event : error code = " + errorCode +
                     " xl error code = " + xlErrorCode + ", xl task id = " + xlTaskId +
                     ", use engine = " + useEngine + ", size = " + size + ", contribution = " + contribution +
@@ -987,7 +981,7 @@ public class Helpers {
     }
     
     static void traceLog(String tag, String behavior, Map<String, String> trackData) {
-    	  if (STAT_LOG_ON) {
+    	  if (DEBUG) {
       		StringBuffer buffer = new StringBuffer();
       		for (Map.Entry<String, String> entry : trackData.entrySet()) {
       			buffer.append(entry.getKey());
@@ -1009,7 +1003,7 @@ public class Helpers {
             vipflag = sharedPreferences.getLong(DownloadService.PREF_KEY_XUNLEI_VIP, DownloadService.XUNLEI_VIP_ENABLED);
         } catch (Exception e) {
             // TODO: handle exception
-            XLUtil.logDebug(Constants.TAG, "xunlei(getVipSwitchStatus) ---> no vip flag in ui db.");
+            XLConfig.LOGD(Constants.TAG, "xunlei(getVipSwitchStatus) ---> no vip flag in ui db.");
         }
         
         return vipflag == DownloadService.XUNLEI_VIP_ENABLED;

@@ -7,16 +7,14 @@ import android.content.*;
 import android.os.*;
 import android.preference.PreferenceManager;
 
-import com.xunlei.speedup.util.Constant;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.xunlei.downloadplatforms.util.XLUtil;
 
 import miui.accounts.IXiaomiAccountService;
 import miui.accounts.ExtraAccountManager;
 
-
+import com.xunlei.speedup.util.Constant;
+import com.xunlei.downloadplatforms.util.XLUtil;
 
 public class TokenHelper {
 
@@ -112,17 +110,17 @@ public class TokenHelper {
 
         @Override
         public void run() {
-            XLUtil.logDebug(Constants.TAG, "(subThread.run) ---> Entering background thread");
+            XLConfig.LOGD(Constants.TAG, "(subThread.run) ---> Entering background thread");
             Looper.prepare();
             handler = new Handler() {
                 public void handleMessage(Message message) {
-                    XLUtil.logDebug(Constants.TAG, "(subThread.run) ---> message: " + message);
+                    XLConfig.LOGD(Constants.TAG, "(subThread.run) ---> message: " + message);
                 }
             };
-            XLUtil.logDebug(Constants.TAG, "(subThread.run) ---> Background thread handler is created");
+            XLConfig.LOGD(Constants.TAG, "(subThread.run) ---> Background thread handler is created");
             synchronized (posted) {
                 for (Runnable task : posted) {
-                    XLUtil.logDebug(Constants.TAG, "(subThread.run) ---> Copying posted bg task to handler : " + task);
+                    XLConfig.LOGD(Constants.TAG, "(subThread.run) ---> Copying posted bg task to handler : " + task);
                     handler.post(task);
                 }
                 posted.clear();
@@ -130,20 +128,20 @@ public class TokenHelper {
             Looper.loop();
             handler = null;
             instance = null;
-            XLUtil.logDebug(Constants.TAG, "(subThread.run) ---> Exiting background thread");
+            XLConfig.LOGD(Constants.TAG, "(subThread.run) ---> Exiting background thread");
         }
     }
 	private ServiceConnection serviceConnection = new ServiceConnection() {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			// mMiUiAccountBinder = null;
-			XLUtil.logDebug(Constants.TAG, "xunlei(ServiceConnection) ---> disconnected xiaomi account service.");
+			XLConfig.LOGD(Constants.TAG, "xunlei(ServiceConnection) ---> disconnected xiaomi account service.");
 			setBinder(null);
 		}
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			XLUtil.logDebug(Constants.TAG, "xunlei(ServiceConnection) ---> bind xiaomi account service success.");
+			XLConfig.LOGD(Constants.TAG, "xunlei(ServiceConnection) ---> bind xiaomi account service success.");
 			setBinder(service);
 			if(mTrueRequestTimes >0){
 				tureRefreshFailAndRetry();
@@ -198,7 +196,7 @@ public class TokenHelper {
 			}
 			xunlei_usage  = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
 		}
-		XLUtil.logDebug(Constants.TAG, "(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
+		XLConfig.LOGD(Constants.TAG, "(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
 		return xunlei_usage;
 	}
 	private void saveDefaultAccountName(Account account){
@@ -227,7 +225,7 @@ public class TokenHelper {
 		checkDefaultInfoAndReadXml();
 		boolean res = true ;
 		long timeTmp= XLUtil.getCurrentUnixTime() ;
-		XLUtil.logDebug(Constants.TAG, "isTokenAvailable() current"+timeTmp+" last+maxDelay="+ (mLastChangeTokenTime+MAX_TOKEN_DELAY) );
+		XLConfig.LOGD(Constants.TAG, "isTokenAvailable() current"+timeTmp+" last+maxDelay="+ (mLastChangeTokenTime+MAX_TOKEN_DELAY) );
 		if(timeTmp < (mLastChangeTokenTime + MAX_TOKEN_DELAY)){
 			res =true;
 		}else{
@@ -238,7 +236,7 @@ public class TokenHelper {
 		if(account ==null){
 			return res;
 		}
-		XLUtil.logDebug(Constants.TAG, "isTokenAvailable() account.name="+account.name+" defaultname="+mDefaultAccountName );
+		XLConfig.LOGD(Constants.TAG, "isTokenAvailable() account.name="+account.name+" defaultname="+mDefaultAccountName );
 		if(account.name.equals(mDefaultAccountName)){
 			res =true;
 		}else {
@@ -301,7 +299,7 @@ public class TokenHelper {
 
     }
 	private synchronized int requestTokenInner(final boolean tokenStrategy){
-		XLUtil.logDebug(Constants.TAG,"(RequestToken) --> requestToken mdefaultaccount ="+mDefaultAccountName+"mlastchangetime="+mLastChangeTokenTime);
+		XLConfig.LOGD(Constants.TAG,"(RequestToken) --> requestToken mdefaultaccount ="+mDefaultAccountName+"mlastchangetime="+mLastChangeTokenTime);
 		int res = -1;
 		if(mContext == null){
 			return  res;
@@ -324,12 +322,12 @@ public class TokenHelper {
 					// TODO Auto-generated method stub
 					Account account = ExtraAccountManager.getXiaomiAccount(mContext);
 					if(isAccountNullAndProcess(account)){
-						XLUtil.logDebug(Constants.TAG, "(RequestToken) ---> account is null set token empty");
+						XLConfig.LOGD(Constants.TAG, "(RequestToken) ---> account is null set token empty");
 						return;
 					}
 					if(tokenStrategy ==false){
 						if(isTokenAvailable(account)){
-							XLUtil.logDebug(Constants.TAG, "(RequestToken) ---> token is available return");
+							XLConfig.LOGD(Constants.TAG, "(RequestToken) ---> token is available return");
 							return;
 						}
 					}
@@ -340,7 +338,7 @@ public class TokenHelper {
 					}
 					try {
 						result = accountService.getAccessToken(account, "micloud", "XUNLEI", tokenStrategy);
-						XLUtil.logDebug(Constants.TAG, "(RequestToken) ---> token ExtraAccountManager.getXiaomiAccount(mContext):"
+						XLConfig.LOGD(Constants.TAG, "(RequestToken) ---> token ExtraAccountManager.getXiaomiAccount(mContext):"
 								+ account + ", tokenStrategy=" + tokenStrategy);
 
 						String beginTarget = "StringContent{body='";
@@ -348,7 +346,7 @@ public class TokenHelper {
 						String xl_token = "";
 						String xm_id = "";
 						xm_id = account.name;
-						XLUtil.logDebug(Constants.TAG, "(RequestToken) ---> get token from api: " + result + ", xiaomiid:" + xm_id);
+						XLConfig.LOGD(Constants.TAG, "(RequestToken) ---> get token from api: " + result + ", xiaomiid:" + xm_id);
 
 						if (result != null && result.startsWith(beginTarget)) {
 							result = result.substring(beginTarget.length());
@@ -356,15 +354,15 @@ public class TokenHelper {
 						if (result != null && result.endsWith(endTarget)) {
 							result = result.substring(0, result.length() - endTarget.length());
 						}
-						//XLUtil.logDebug(Constants.TAG,  "(RequestToken) ---> json token: " + result);
+						//XLConfig.LOGD(Constants.TAG,  "(RequestToken) ---> json token: " + result);
 						if (result != null) {
 							JSONObject json_object = new JSONObject(result);
 							int code = json_object.getInt("code");
-							XLUtil.logDebug(Constants.TAG, "(RequestToken) ---> token.code=" + code);
+							XLConfig.LOGD(Constants.TAG, "(RequestToken) ---> token.code=" + code);
 							if (24003 != code) {
 								JSONObject xl_data = json_object.getJSONObject("data");
 								xl_token = xl_data.getString("key");
-								XLUtil.logDebug(Constants.TAG, "(RequestToken) ---> real token: " + xl_token);
+								XLConfig.LOGD(Constants.TAG, "(RequestToken) ---> real token: " + xl_token);
 								if (mlistener != null) {
 									mlistener.OnTokenGet(code, xl_token);
 								}
@@ -382,7 +380,7 @@ public class TokenHelper {
 						editor.putString(XLConfig.PREF_KEY_XUNLEI_TOKEN, xl_token);
 						editor.putString(XLConfig.PREF_KEY_XIAOMI_ID, xm_id);
 						boolean editortrue = editor.commit();
-						XLUtil.logDebug(Constants.TAG, "(RequestToken) ---> write token to xml:" + xl_token + ", xiaomiid:" + xm_id +",editortrue ="+editortrue);
+						XLConfig.LOGD(Constants.TAG, "(RequestToken) ---> write token to xml:" + xl_token + ", xiaomiid:" + xm_id +",editortrue ="+editortrue);
 
 
 					}catch (DeadObjectException e){
@@ -423,7 +421,7 @@ public class TokenHelper {
             throws RemoteException {
 
         String res = accountService.getNickName(ExtraAccountManager.getXiaomiAccount(mContext));
-        XLUtil.logDebug(Constants.TAG, "(RequestNickName) ---> nickname=" + res);
+        XLConfig.LOGD(Constants.TAG, "(RequestNickName) ---> nickname=" + res);
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString("miui_nickname", res);
         editor.commit();
@@ -433,7 +431,7 @@ public class TokenHelper {
             throws RemoteException {
 
         ParcelFileDescriptor res = accountService.getAvatarFd(ExtraAccountManager.getXiaomiAccount(mContext));
-        XLUtil.logDebug(Constants.TAG, "(RequestAvatar) ---> avstartFile=" + res);
+        XLConfig.LOGD(Constants.TAG, "(RequestAvatar) ---> avstartFile=" + res);
         Intent intent = new Intent(ACTION_INTENT_XLSPEEDUPACTIVITY_BROADCAST);
         intent.putExtra("Avatarfd", res);
         mContext.sendBroadcast(intent);

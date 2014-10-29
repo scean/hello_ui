@@ -39,7 +39,6 @@ import android.widget.Toast;
 import android.content.ActivityNotFoundException;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.xunlei.downloadplatforms.util.XLUtil;
 
 /**
  * Receives system broadcasts (boot, network connectivity)
@@ -229,7 +228,7 @@ public class DownloadReceiver extends BroadcastReceiver {
             }
 
             Intent appIntent = null;
-            XLUtil.logDebug("DownloadUtils.Stat.Behavior", " isPublicApi == " + isPublicApi);
+            XLConfig.LOGD("DownloadUtils.Stat.Behavior", " isPublicApi == " + isPublicApi);
             if (isPublicApi) {
                 appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
                 appIntent.setPackage(packageName);

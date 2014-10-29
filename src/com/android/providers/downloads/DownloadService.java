@@ -70,7 +70,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.providers.downloads.TokenHelper.TokenHelperListener;
-import com.android.providers.downloads.notification.NotificationHelper;
+import com.android.providers.downloads.NotificationHelper;
 import com.google.android.collect.Maps;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -260,8 +260,7 @@ public class DownloadService extends Service {
             Log.v(Constants.TAG, "Service onCreate");
         }
 
-        XLUtil.setLogPrintFlag(XLConfig.XUNLEI_LOG_PRINT);
-        XLUtil.logDebug(Constants.TAG, "(onCreate) ---> Service onCreate");
+        XLConfig.LOGD(Constants.TAG, "(onCreate) ---> Service onCreate");
 
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(this);
@@ -318,7 +317,7 @@ public class DownloadService extends Service {
             break;
         case 1:
             // TODO Auto-generated method stub
-            XLUtil.logDebug(Constants.TAG, "xunlei Service ---> receive broadcast, executive getting token process");
+            XLConfig.LOGD(Constants.TAG, "xunlei Service ---> receive broadcast, executive getting token process");
             startGetXlTokenEx(true);
             break;
 
@@ -343,7 +342,7 @@ public class DownloadService extends Service {
             Log.v(Constants.TAG, "Service onDestroy");
         }
         super.onDestroy();
-        XLUtil.logDebug(Constants.TAG, "(onDestroy) ---> Service onDestroy");
+        XLConfig.LOGD(Constants.TAG, "(onDestroy) ---> Service onDestroy");
         if (mXunleiEngineEnable) {
             uninitXunleiEngine();
         }
@@ -551,9 +550,9 @@ public class DownloadService extends Service {
                 nextActionMillis = Math.min(currentDownloadNextActionMillis, nextActionMillis);
             }
         } catch(SQLiteDiskIOException e) {
-        	XLUtil.logDebug(Constants.TAG, e.toString());
+        	XLConfig.LOGD(Constants.TAG, e.toString());
         }catch (Exception e) {
-        	XLUtil.logDebug(Constants.TAG, e.toString());
+        	XLConfig.LOGD(Constants.TAG, e.toString());
         }finally {
         	if (cursor != null) {
         		cursor.close();
@@ -618,7 +617,7 @@ public class DownloadService extends Service {
          * // task(xunlei) already exist, but xunlei engine is uninit
          */
         if (info.mXlTaskOpenMark == 1 && null == mXlDownloadManager) {
-            XLUtil.logDebug(Constants.TAG, "(updateDownload) ---> xunlei task resume but engine uninit, init xunlei engine again.");
+            XLConfig.LOGD(Constants.TAG, "(updateDownload) ---> xunlei task resume but engine uninit, init xunlei engine again.");
             initXunleiEngine();
         }
         
@@ -641,13 +640,13 @@ public class DownloadService extends Service {
 
     private void deleteFileIfExists(String path) {
         if (!TextUtils.isEmpty(path)) {
-            XLUtil.logDebug(Constants.TAG, "deleteFileIfExists() deleting " + path);
+            XLConfig.LOGD(Constants.TAG, "deleteFileIfExists() deleting " + path);
             final File file = new File(path);
             if (file.exists() && !file.delete()) {
-                XLUtil.logDebug(Constants.TAG, "file: '" + path + "' couldn't be deleted");
+                XLConfig.LOGD(Constants.TAG, "file: '" + path + "' couldn't be deleted");
                 return;
              }
-            XLUtil.logDebug(Constants.TAG, "DownloadService.deleteFileIfExists: delete file: " + path);
+            XLConfig.LOGD(Constants.TAG, "DownloadService.deleteFileIfExists: delete file: " + path);
         }
     }
 
@@ -668,11 +667,11 @@ public class DownloadService extends Service {
     public void startGetXlTokenEx(boolean tokenStrategy)
     {
 
-            XLUtil.logDebug(Constants.TAG, "(startGetXlTokenEx) ---> create get token subThread.");
+            XLConfig.LOGD(Constants.TAG, "(startGetXlTokenEx) ---> create get token subThread.");
             if (mTokenHelper instanceof TokenHelper) {
                 mTokenHelper.RequestToken(tokenStrategy);
             }else{
-                XLUtil.logDebug(Constants.TAG, "(startGetXlTokenEx) ---> init TokenHelper class.");
+                XLConfig.LOGD(Constants.TAG, "(startGetXlTokenEx) ---> init TokenHelper class.");
                 mTokenHelper =TokenHelper.getInstance();
                 mTokenHelper.setTokenHelperListener(mtokenlisten);
                 mTokenHelper.RequestToken(tokenStrategy);
@@ -684,7 +683,7 @@ public class DownloadService extends Service {
         public int OnTokenGet(int ret, String token) {
             // TODO Auto-generated method stub
             if (token != null && mXlDownloadManager != null) {
-                XLUtil.logDebug(Constants.TAG, "(subThread.run) ---> get token from api success, set it to vip hub");
+                XLConfig.LOGD(Constants.TAG, "(subThread.run) ---> get token from api success, set it to vip hub");
 				try
 				{
 					mXlDownloadManager.XLSetUserAccessToken(token);
@@ -715,14 +714,14 @@ public class DownloadService extends Service {
             }
             xunlei_usage  = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
         }
-        XLUtil.logDebug(Constants.TAG, "(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
+        XLConfig.LOGD(Constants.TAG, "(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
         return xunlei_usage;
     }
     /**
      * init Xunlei service
      */
     private synchronized void initXunleiEngine() {
-        XLUtil.logDebug(Constants.TAG, "(initXunleiEngine) ---> init xunlei engine service.");
+        XLConfig.LOGD(Constants.TAG, "(initXunleiEngine) ---> init xunlei engine service.");
 
         mXlDownloadManager = XLDownloadManager.getDownloadManager();
         InitParam para = new InitParam();
@@ -732,7 +731,7 @@ public class DownloadService extends Service {
         para.mAppName = XLConfig.PRODUCT_NAME;
         para.mAppVersion = XLConfig.PRODUCT_VERSION;
         para.mGuid = Util.md5(para.mPeerId);
-        XLUtil.logDebug(Constants.TAG, "initXunleiEngine  mGuid = " + para.mGuid);
+        XLConfig.LOGD(Constants.TAG, "initXunleiEngine  mGuid = " + para.mGuid);
         
         para.mStatCfgSavePath = Environment.getExternalStorageDirectory().getPath() + "/";
         para.mStatSavePath = Environment.getExternalStorageDirectory().getPath() + "/";
@@ -749,7 +748,7 @@ public class DownloadService extends Service {
                 public void run() {
                     // TODO Auto-generated method stub
                     String xml_token = mPreferences.getString(XLConfig.PREF_KEY_XUNLEI_TOKEN, "");
-                    XLUtil.logDebug(Constants.TAG, "(xlViphubThread.run) ---> get token from xml:" + xml_token);
+                    XLConfig.LOGD(Constants.TAG, "(xlViphubThread.run) ---> get token from xml:" + xml_token);
                     mXlDownloadManager.XLConnectVipHub(xml_token);
                 }
 
@@ -763,7 +762,7 @@ public class DownloadService extends Service {
      * how to call this function - if some tasks running(xunlei), create a new task(android)
      */
     private void uninitXunleiEngine() {
-        XLUtil.logDebug(Constants.TAG, "(uninitXunleiEngine) ---> uninit xunlei engine service.");
+        XLConfig.LOGD(Constants.TAG, "(uninitXunleiEngine) ---> uninit xunlei engine service.");
         if (null != mXlDownloadManager) {
             mXlDownloadManager.XLUnInit();
             //mXlDownloadManager.disConnectVipHub();
@@ -779,7 +778,7 @@ public class DownloadService extends Service {
      * check xunlei engine when create a new task
      */
     private void checkXunleiEngineStatus() {
-//        XLUtil.logDebug(Constants.TAG, "(checkXunleiEngineStatus) ---> check xunlei engine status.");
+//        XLConfig.LOGD(Constants.TAG, "(checkXunleiEngineStatus) ---> check xunlei engine status.");
         Boolean curFlag = getXunleiUsagePermission();
         if (mXunleiEngineEnable != curFlag) {
             mXunleiEngineEnable = curFlag;
@@ -830,14 +829,14 @@ public class DownloadService extends Service {
         @Override
         public void run() {
             // TODO Auto-generated method stub
-            XLUtil.logDebug(Constants.TAG, "(CdnQueryingThread) ---> running");
+            XLConfig.LOGD(Constants.TAG, "(CdnQueryingThread) ---> running");
 
             int times;
             while (isServiceRunning) {
                 if (mCDNQueryList.size() > 0) {
                     for (XLCdnPara xlCdnPara : mCDNQueryList) {
                         if (!xlCdnPara.getCdnQueryedFlag() && xlCdnPara.getQueryedTimes() < XLConfig.XUNLEI_CDN_QUERY_TIMES) {
-                            XLUtil.logDebug(Constants.TAG, "(CdnQueryingThread) ---> query cdn, name=" + xlCdnPara.mName);
+                            XLConfig.LOGD(Constants.TAG, "(CdnQueryingThread) ---> query cdn, name=" + xlCdnPara.mName);
                             GetCdnUrl cdnurl = new GetCdnUrl();
                             /*
                             int ret = -1;
@@ -876,10 +875,10 @@ public class DownloadService extends Service {
                                 if (cdnurl.mCdnUrl != null && cdnurl.mCdnCookie != null) {
                                     xlCdnPara.setCdn(cdnurl.mCdnUrl);
                                     xlCdnPara.setCdnCookie(cdnurl.mCdnCookie);
-                                    XLUtil.logDebug(Constants.TAG, "(CdnQueryingThread) ---> Queryying return success(name:"
+                                    XLConfig.LOGD(Constants.TAG, "(CdnQueryingThread) ---> Queryying return success(name:"
                                             + xlCdnPara.mName + "), queryTimes=" + times);
                                 } else {
-                                    XLUtil.logDebug(Constants.TAG, "(CdnQueryingThread) ---> Queryying cdn not exist!!!(name:"
+                                    XLConfig.LOGD(Constants.TAG, "(CdnQueryingThread) ---> Queryying cdn not exist!!!(name:"
                                             + xlCdnPara.mName + "), ret=" + ret + ", queryTimes=" + times);
                                 }
                                 xlCdnPara.setCdnQueryedFlag(true);
@@ -888,7 +887,7 @@ public class DownloadService extends Service {
                             		TokenHelper.getInstance().RequestToken(true);
                             	}
                                 // query return error, 7002
-                                XLUtil.logDebug(Constants.TAG, "(CdnQueryingThread) ---> Queryying return error!!!(name:"
+                                XLConfig.LOGD(Constants.TAG, "(CdnQueryingThread) ---> Queryying return error!!!(name:"
                                         + xlCdnPara.mName + "), ret=" + ret + ", queryTimes=" + times);
                                 xlCdnPara.setQueryedTimes(times);
                                 if (times > 1) {
@@ -907,7 +906,7 @@ public class DownloadService extends Service {
                     }
                 }
             }
-            XLUtil.logDebug(Constants.TAG, "(CdnQueryingThread) ---> stopped");
+            XLConfig.LOGD(Constants.TAG, "(CdnQueryingThread) ---> stopped");
         }
     }
 
@@ -919,7 +918,7 @@ public class DownloadService extends Service {
         for (XLCdnPara xlCdnPara : mCDNQueryList) {
             if (xlCdnPara.mUrl.equals(para.mUrl))
             {
-                XLUtil.logDebug(Constants.TAG, "(XLAddCdnQueryTask) ---> task already removed, stop cdn query!");
+                XLConfig.LOGD(Constants.TAG, "(XLAddCdnQueryTask) ---> task already removed, stop cdn query!");
                 mCDNQueryList.remove(xlCdnPara);
             }
         }
@@ -928,25 +927,25 @@ public class DownloadService extends Service {
     public static void XLAddCdnQueryTask(XLCdnPara para) {
         for (XLCdnPara xlCdnPara : mCDNQueryList) {
             if (xlCdnPara.mUrl.equals(para.mUrl))
-                XLUtil.logDebug(Constants.TAG, "(XLAddCdnQueryTask) ---> task already exist, CurrentSize="
+                XLConfig.LOGD(Constants.TAG, "(XLAddCdnQueryTask) ---> task already exist, CurrentSize="
                         + mCDNQueryList.size());
                 return;
         }
         mCDNQueryList.add(para);
-        XLUtil.logDebug(Constants.TAG, "(XLAddCdnQueryTask) ---> add new task success, CurrentSize=" + mCDNQueryList.size());
+        XLConfig.LOGD(Constants.TAG, "(XLAddCdnQueryTask) ---> add new task success, CurrentSize=" + mCDNQueryList.size());
     }
 
     public static XLCdnPara XLQueryCdn(String url) {
         for (XLCdnPara xlCdnPara : mCDNQueryList) {
             if (xlCdnPara.mUrl.equals(url)) {
                 if (xlCdnPara.getCdnQueryedFlag()) {
-                    XLUtil.logDebug(Constants.TAG, "(XLQueryCdn) ---> Querying CDN task success! Remove it");
+                    XLConfig.LOGD(Constants.TAG, "(XLQueryCdn) ---> Querying CDN task success! Remove it");
                     mCDNQueryList.remove(xlCdnPara);
                     return xlCdnPara;
                 }
             }
         }
-        XLUtil.logDebug(Constants.TAG, "(XLQueryCdn) ---> Querying CDN operation did not completed");
+        XLConfig.LOGD(Constants.TAG, "(XLQueryCdn) ---> Querying CDN operation did not completed");
         return null;
     }
     
@@ -956,7 +955,7 @@ public class DownloadService extends Service {
             if (xlCdnPara.mUrl.equals(para.mUrl)) {
             	has = true;
                 if (xlCdnPara.getCdnQueryedFlag()) {
-                    XLUtil.logDebug(Constants.TAG, "(XLQueryCdn) ---> Querying CDN task success! Remove it");
+                    XLConfig.LOGD(Constants.TAG, "(XLQueryCdn) ---> Querying CDN task success! Remove it");
                     mCDNQueryList.remove(xlCdnPara);
                     return xlCdnPara;
                 }
@@ -965,9 +964,9 @@ public class DownloadService extends Service {
         }
         if (!has){
         	mCDNQueryList.add(para);
-            XLUtil.logDebug(Constants.TAG, "(XLAddCdnQueryTask) ---> retry to add new task success, CurrentSize=" + mCDNQueryList.size());
+            XLConfig.LOGD(Constants.TAG, "(XLAddCdnQueryTask) ---> retry to add new task success, CurrentSize=" + mCDNQueryList.size());
         }
-        XLUtil.logDebug(Constants.TAG, "(XLQueryCdn) ---> Querying CDN operation did not completed!");
+        XLConfig.LOGD(Constants.TAG, "(XLQueryCdn) ---> Querying CDN operation did not completed!");
         return null;
     }
 
@@ -981,7 +980,7 @@ public class DownloadService extends Service {
         @Override
         public void run() {
             // TODO Auto-generated method stub
-            XLUtil.logDebug(Constants.TAG, "(MobileCloudControlThread) ---> running");
+            XLConfig.LOGD(Constants.TAG, "(MobileCloudControlThread) ---> running");
             SpeedupHttpEngine engine = new SpeedupHttpEngine();
             while (isServiceRunning) {
                 if (mControlCheckList.size() > 0) {
@@ -995,7 +994,7 @@ public class DownloadService extends Service {
                             xl.setMiuiVersion("1.0.2");
                             //xl.setPhoneNum("19262162555");
                             boolean flag = engine.reqPushTask(xl, null);
-                            XLUtil.logDebug(Constants.TAG, "(MobileCloudControlThread) ---> flag = " + flag);
+                            XLConfig.LOGD(Constants.TAG, "(MobileCloudControlThread) ---> flag = " + flag);
                             xlCheckPara.setCloudControlFlag(flag);
                             xlCheckPara.setCheckedFlag(true);
                         }
@@ -1009,19 +1008,19 @@ public class DownloadService extends Service {
                     }
                 }
             }
-            XLUtil.logDebug(Constants.TAG, "(MobileCloudControlThread) ---> stopped");
+            XLConfig.LOGD(Constants.TAG, "(MobileCloudControlThread) ---> stopped");
         }
     }
 
     public static void XLAddCloudCheckTask(XLCloudControlPara para) {
         for (XLCloudControlPara xlCheckPara : mControlCheckList) {
             if (xlCheckPara.mUrl.equals(para.mUrl))
-                XLUtil.logDebug(Constants.TAG, "(XLAddCloudCheckTask) ---> task already exist, CurrentSize="
+                XLConfig.LOGD(Constants.TAG, "(XLAddCloudCheckTask) ---> task already exist, CurrentSize="
                                 + mControlCheckList.size());
                 return;
         }
         mControlCheckList.add(para);
-        XLUtil.logDebug(Constants.TAG, "(XLAddCloudCheckTask) ---> add new task success, CurrentSize=" + mControlCheckList.size());
+        XLConfig.LOGD(Constants.TAG, "(XLAddCloudCheckTask) ---> add new task success, CurrentSize=" + mControlCheckList.size());
     }
 
     public static int XLQueryCloudCheck(String url) {
@@ -1030,13 +1029,13 @@ public class DownloadService extends Service {
             if (xlCheckPara.mUrl.equals(url)) {
                 if (xlCheckPara.getCheckedFlag()) {
                     boolean ccFlag = xlCheckPara.getCloudControlFlag();
-                    XLUtil.logDebug(Constants.TAG, "(XLQueryCloudCheck) ---> Querying CC task success! Remove it, CloudCrontol = " + ccFlag);
+                    XLConfig.LOGD(Constants.TAG, "(XLQueryCloudCheck) ---> Querying CC task success! Remove it, CloudCrontol = " + ccFlag);
                     mCDNQueryList.remove(xlCheckPara);
                     return ccFlag ? 1 : 0;
                 }
             }
         }
-        XLUtil.logDebug(Constants.TAG, "(XLQueryCloudCheck) ---> Querying CC operation did not completed");
+        XLConfig.LOGD(Constants.TAG, "(XLQueryCloudCheck) ---> Querying CC operation did not completed");
         return queryRet;
     }
     

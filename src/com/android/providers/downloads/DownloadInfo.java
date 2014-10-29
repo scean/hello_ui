@@ -113,7 +113,7 @@ public class DownloadInfo {
 			            info.mStatus = cursorStatus;
 		            }
 	            }catch (Exception e){
-		            XLUtil.logError(TAG,e.toString());
+		            XLConfig.LOGD(TAG,e.toString());
 	            }finally {
 		            if(latestCursor != null){
 			            latestCursor.close();
@@ -860,7 +860,7 @@ public class DownloadInfo {
     }
     
     private static int checkDownloadEngine(String pkgName, String appointName, boolean xlEngineFlag) {
-        XLUtil.logDebug(Constants.TAG, "(checkDownloadEngine) ---> pkgName=" + pkgName + 
+        XLConfig.LOGD(Constants.TAG, "(checkDownloadEngine) ---> pkgName=" + pkgName + 
                 ", appointName=" + appointName + ", xlEngineFlag=" + xlEngineFlag);
         int xlTaskOpenMark = 1;
         if (xlEngineFlag) {
@@ -874,7 +874,7 @@ public class DownloadInfo {
         } else {
             xlTaskOpenMark = 0;
         }
-        XLUtil.logDebug(Constants.TAG, "(checkDownloadEngine) ---> after check, xlTaskOpenMark=" + xlTaskOpenMark);
+        XLConfig.LOGD(Constants.TAG, "(checkDownloadEngine) ---> after check, xlTaskOpenMark=" + xlTaskOpenMark);
         return xlTaskOpenMark;
     }
 }

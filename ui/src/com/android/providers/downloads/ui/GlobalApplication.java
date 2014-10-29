@@ -27,7 +27,9 @@ public class GlobalApplication extends miui.external.Application {
 		initToken();
 		askPrizesList();
 
-        CrashHandler.getInstance().init(this);
+        if (AppConfig.DEBUG) {
+            CrashHandler.getInstance().init(this);
+        }
 	}
 
 	public void uninit() {
