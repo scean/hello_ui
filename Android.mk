@@ -13,18 +13,14 @@ LOCAL_AAPT_FLAGS := --auto-add-overlay
 LOCAL_PACKAGE_NAME := DownloadProvider
 LOCAL_CERTIFICATE := media
 LOCAL_PRIVILEGED_MODULE := true
-LOCAL_STATIC_JAVA_LIBRARIES += guava \
-                               xl_download_lib \
-							   MiPush
-
-
+LOCAL_STATIC_JAVA_LIBRARIES += guava xl_download_lib MiPush_Xunlei_141017
 
 LOCAL_PROGUARD_ENABLED := obfuscate
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 LOCAL_REQUIRED_MODULES := libxl_thunder_sdk \
-                          libxl_thunder_iface \
-                          libvip_channel \
-						  libxl_stat
+libxl_thunder_iface \
+libvip_channel \
+libxl_stat
 
 include $(BUILD_PACKAGE)
 
@@ -74,7 +70,8 @@ include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
 LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := xl_download_lib:libs/xldownloadplatform.jar \
-										MiPush:libs/MiPush.jar
+                                        MiPush_Xunlei_141017:libs/MiPush_Xunlei_141017.jar
+
 include $(BUILD_MULTI_PREBUILT)
 # build UI + tests
 include $(call all-makefiles-under,$(LOCAL_PATH))
