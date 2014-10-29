@@ -30,7 +30,10 @@ import android.widget.RemoteViews;
 import android.content.SharedPreferences;
 import android.widget.Toast;
 
-import com.android.providers.downloads.ui.*;
+import com.android.providers.downloads.ui.app.AppConfig;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
+import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.utils.DateUtil;
 import com.android.providers.downloads.ui.notification.NotificationLogic.VipExpireStatus;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
@@ -38,8 +41,10 @@ import com.android.providers.downloads.ui.pay.AccountInfoInstance.AccountInfo;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.AccountListener;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.AddFlowInfo;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance.FlowInfo;
-import com.android.providers.downloads.ui.pay.util.XLUtil;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
+
+import com.android.providers.downloads.ui.R;
+
 import miui.maml.util.AppIconsHelper;
 
 /**
@@ -52,6 +57,7 @@ import miui.maml.util.AppIconsHelper;
  * @date 2014年6月28日 下午9:08:01
  */
 public class NotificationHelper {
+    private static final String TAG = NotificationHelper.class.getSimpleName();
 
 	private static NotificationHelper instance;
 	private Context mContext;
@@ -77,12 +83,14 @@ public class NotificationHelper {
 
 	/** 是否是会员 */
 	private static boolean isVipAccount = false;
-	
+
+
+    private PreferenceLogic mPreferenceLogic;
 	private NotificationLogic logic ;
 
 	public NotificationHelper(Context context) {
 		mContext = context;
-		PreferenceLogic.init(context);
+        mPreferenceLogic = PreferenceLogic.getInstance(context);
 	}
 
 	public static void init(Context context) {
@@ -92,7 +100,7 @@ public class NotificationHelper {
 
 		// 屏蔽国际版通知和英文
 		if ((miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD)
-				&& !XLUtil.isLanguageCNorTW()) {
+            && !XLUtil.isLanguageCNorTW()) {
 
 		} else {
 			instance.doInit();
@@ -105,16 +113,14 @@ public class NotificationHelper {
 
 	private synchronized void doInit() {
 		logic = new NotificationLogic(mContext);
-		isUsingXunleiDownload = AccountLogic.getInstance()
-				.isUsingXunleiDownload();
+		isUsingXunleiDownload = AccountLogic.getInstance().isUsingXunleiDownload(mContext);
 		isLogined = AccountLogic.getInstance().isLogined(mContext);
 		isAuthed = AccountLogic.getInstance().isAuthed(mContext);
 		isVipAccount = AccountLogic.getInstance().isVipXunleiAccount(mContext);
 		boolean isUseServe = ConfigJSInstance.getInstance(mContext).getUseOpt() == ConfigJSInstance.Opt_NetALL;
-		
-		LogUtil.debugLog("NotificationReveiver"+isUsingXunleiDownload+isLogined+isAuthed+isVipAccount);
-		
-		
+
+		AppConfig.LOGD(TAG, "NotificationReveiver"+isUsingXunleiDownload+isLogined+isAuthed+isVipAccount);
+
 		// 正在下载的文件是否大于1M,用于判断有没有任务在下载 有网络
 		if (logic.isExecFileSize(1) && logic.isShowNotificationInWifi()) {
 			// 使用下载引擎，开启了下载服务
@@ -148,85 +154,85 @@ public class NotificationHelper {
 
 	public void showLoginNotification() {
 		String methodName = XLUtil.getTagString(this.getClass()) + "_"
-				+ "showLoginNotification";
+            + "showLoginNotification";
 		AccountInfoInstance mAccountInfoInstance = AccountInfoInstance
-				.getInstance(mContext,
-						XLUtil.getStringPackagePreference(mContext));
+            .getInstance(mContext,
+                         XLUtil.getStringPackagePreference(mContext));
 
 		mAccountInfoInstance.setAccountListener(new AccountListener() {
-			@Override
-			public int OnFlowRtn(int ret, FlowInfo flow, String msg) {
-				if (flow != null && flow.historysend == 0) {
-					LogUtil.debugLog("NotificationReveiver flow.historysend"
-							+ flow.historysend);
-					showLoginFirstMonth();
-				}
-				return 0;
-			}
+                @Override
+                public int OnFlowRtn(int ret, FlowInfo flow, String msg) {
+                    if (flow != null && flow.historysend == 0) {
+                        AppConfig.LOGD(TAG, "NotificationReveiver flow.historysend"
+                                       + flow.historysend);
+                        showLoginFirstMonth();
+                    }
+                    return 0;
+                }
 
-			@Override
-			public int OnAddFlowRtn(int ret, AddFlowInfo addflow, String msg) {
+                @Override
+                public int OnAddFlowRtn(int ret, AddFlowInfo addflow, String msg) {
 
-				return 0;
-			}
+                    return 0;
+                }
 
-			@Override
-			public int OnAccountRtn(int ret, AccountInfo account, String msg) {
-				return 0;
-			}
-		});
+                @Override
+                public int OnAccountRtn(int ret, AccountInfo account, String msg) {
+                    return 0;
+                }
+            });
 		mAccountInfoInstance.requestFlow(methodName);
 
 	}
 
 	public void showLoginFirstMonth() {
 		if (isLogined
-				&& !PreferenceLogic.getInstance().getStageOneIsTip()
-				&& logic.isExecFileSize(logic.mSpeedupJSInfo.scene1_min_file_size)) {
+            && !mPreferenceLogic.getStageOneIsTip()
+            && logic.isExecFileSize(logic.mSpeedupJSInfo.scene1_min_file_size)) {
 			// 不在弹出
-			PreferenceLogic.getInstance().saveStageOneIsTip(true);
-			
+            mPreferenceLogic.saveStageOneIsTip(true);
+
 			if (isAuthed && isVipAccount) {// 已绑定迅雷账号
 				showSpeedUpNotification();
 			} else {
-				LogUtil.debugLog("未绑定迅雷帐号");
+				AppConfig.LOGD(TAG, "未绑定迅雷帐号");
 				if (isUsingXunleiDownload) {
-					String token = PreferenceLogic.init(mContext).getToken();
+					String token = mPreferenceLogic.getToken();
 					AccountInfoInstance accoutnInstance = AccountInfoInstance
-							.getInstance(mContext, token);
+                        .getInstance(mContext, token);
 					PendingIntent pendingIntent = null;
 					int flag = 0;
 					if (isAuthed) {
 						flag = 3;
 						pendingIntent = AccountLogic.getInstance()
-								.getToDownloadListPendingIntent(mContext,
-										NotificationReveiver.NOTICE_FLOW_SHOW3);
+                            .getToDownloadListPendingIntent(mContext,
+                                                            NotificationReveiver.NOTICE_FLOW_SHOW3);
 					} else {
 						if (accoutnInstance.isFakeAuthed()) {
 							flag = 1;
 							pendingIntent = AccountLogic
-									.getInstance()
-									.getToDownloadListPendingIntent(
-											mContext,
-											NotificationReveiver.NOTICE_FLOW_SHOW1);
+                                .getInstance()
+                                .getToDownloadListPendingIntent(
+                                                                mContext,
+                                                                NotificationReveiver.NOTICE_FLOW_SHOW1);
 						} else {
 							flag = 2;
 							pendingIntent = AccountLogic
-									.getInstance()
-									.getToDownloadListPendingIntent(
-											mContext,
-											NotificationReveiver.NOTICE_FLOW_SHOW2);
+                                .getInstance()
+                                .getToDownloadListPendingIntent(
+                                                                mContext,
+                                                                NotificationReveiver.NOTICE_FLOW_SHOW2);
 						}
 					}
 					// 上报
 					DownloadUtils.trackBehaviorEvent(mContext,
-							"notice_flow_show", 0, flag);
+                                                     "notice_flow_show", 0, flag);
 
 					showXiaomiNotification(
-							logic.mConfigJSInfo.speed_guide_bar_login_unbind_scene1_title,
-							logic.mConfigJSInfo.speed_guide_bar_login_unbind_scene1_content,
-							logic.mConfigJSInfo.speed_guide_bar_login_unbind_scene1_btn,
-							pendingIntent);
+                                           logic.mConfigJSInfo.speed_guide_bar_login_unbind_scene1_title,
+                                           logic.mConfigJSInfo.speed_guide_bar_login_unbind_scene1_content,
+                                           logic.mConfigJSInfo.speed_guide_bar_login_unbind_scene1_btn,
+                                           pendingIntent);
 				}
 			}
 		}
@@ -234,87 +240,75 @@ public class NotificationHelper {
 
 	public void showNotification() {
 		String methodName = XLUtil.getTagString(this.getClass()) + "_"
-				+ "initAccountInfo";
+            + "initAccountInfo";
 		Calendar c = Calendar.getInstance();
 		int month = c.get(Calendar.MONTH);
 		// 如果单月没有弹出则注册
-		if (!PreferenceLogic.getInstance().isGivenFlowShown(month) && !flag) {
+		if (!mPreferenceLogic.isGivenFlowShown(month) && !flag) {
 			flag = true;
 			AccountInfoInstance mAccountInfoInstance = AccountInfoInstance
-					.getInstance(mContext,
-							XLUtil.getStringPackagePreference(mContext));
-			LogUtil.debugLog("NotificationHelper.java showNotification() request flow");
+                .getInstance(mContext,
+                             XLUtil.getStringPackagePreference(mContext));
+			AppConfig.LOGD(TAG, "NotificationHelper.java showNotification() request flow");
 			
 			mAccountInfoInstance.setAccountListener(new AccountListener() {
 
-				@Override
-				public int OnFlowRtn(int ret, FlowInfo flow, String msg) {
-					if (flow != null) {
-						Calendar c = Calendar.getInstance();
-						int month = c.get(Calendar.MONTH);
-						boolean flag = ConfigJSInstance.getInstance(
-								mContext.getApplicationContext()).getUseOpt() == ConfigJSInstance.Opt_NetALL;
-						LogUtil.debugLog(" ret = "
-								+ ret
-								+ "flow.historysend  =  "
-								+ flow.historysend
-								+ "msg = "
-								+ msg
-								+ PreferenceLogic.getInstance()
-										.isGivenFlowShown(month));
-						if (ret == 0
+                    @Override
+                    public int OnFlowRtn(int ret, FlowInfo flow, String msg) {
+                        if (flow != null) {
+                            Calendar c = Calendar.getInstance();
+                            int month = c.get(Calendar.MONTH);
+                            boolean flag = ConfigJSInstance.getInstance(
+                                                                        mContext.getApplicationContext()).getUseOpt() == ConfigJSInstance.Opt_NetALL;
+                            AppConfig.LOGD(TAG, " ret = "
+                                           + ret
+                                           + "flow.historysend  =  "
+                                           + flow.historysend
+                                           + "msg = "
+                                           + msg
+                                           + mPreferenceLogic
+                                           .isGivenFlowShown(month));
+                            if (ret == 0
 								&& flow.autosend == 1
 								&& flow.historysend > 1
-								&& AccountLogic.getInstance()
-										.isUsingXunleiDownload()
-								&& !PreferenceLogic.getInstance()
-										.isGivenFlowShown(month)
-								&& AccountLogic.getInstance().isLogined(
-										mContext)
+								&& AccountLogic.getInstance().isUsingXunleiDownload(mContext)
+								&& !mPreferenceLogic.isGivenFlowShown(month)
+								&& AccountLogic.getInstance().isLogined(mContext)
 								&& flag
-								&& !AccountLogic.getInstance()
-										.isVipXunleiAccount(mContext)) {
+								&& !AccountLogic.getInstance().isVipXunleiAccount(mContext)) {
+                                showXiaomiNotification(logic.mConfigJSInfo.flow_gift_next_month_title,logic.mConfigJSInfo.flow_gift_next_month_content, null,
+                                                       AccountLogic.getInstance()
+                                                       .getToAutoObtainOneMonth(mContext));
+                                mPreferenceLogic.saveGivenFlow(month, true);
+                                mPreferenceLogic.saveBeforeGivenFlowDay(-1);// 当前月没有弹出流量即将用完通知
+                                mPreferenceLogic.saveBeforeGivenFlowOut("NO_FLOW", false);// 当前月没有弹出流量用完通知
+                                mPreferenceLogic.saveBeforeGivenFlowOut("OUT_LIMIT_FLOW", false);// 当前月没有弹出流量用完通知
+                            }
 
-							showXiaomiNotification(logic.mConfigJSInfo.flow_gift_next_month_title,logic.mConfigJSInfo.flow_gift_next_month_content, null,
-									AccountLogic.getInstance()
-											.getToAutoObtainOneMonth(mContext));
-							PreferenceLogic.getInstance().saveGivenFlow(month,
-									true);
+                            month = --month < 0 ? 12 : month;
+                            mPreferenceLogic.saveGivenFlow(month, false);
+                        }
+                        return 0;
+                    }
 
-							PreferenceLogic.getInstance()
-									.saveBeforeGivenFlowDay(-1);// 当前月没有弹出流量即将用完通知
-							PreferenceLogic.getInstance()
-									.saveBeforeGivenFlowOut("NO_FLOW", false);// 当前月没有弹出流量用完通知
-							PreferenceLogic.getInstance()
-									.saveBeforeGivenFlowOut("OUT_LIMIT_FLOW",
-											false);// 当前月没有弹出流量用完通知
-						}
+                    @Override
+                    public int OnAddFlowRtn(int ret, AddFlowInfo addflow, String msg) {
 
-						month = --month < 0 ? 12 : month;
-						PreferenceLogic.getInstance().saveGivenFlow(month,
-								false);
-					}
-					return 0;
-				}
+                        return 0;
+                    }
 
-				@Override
-				public int OnAddFlowRtn(int ret, AddFlowInfo addflow, String msg) {
-
-					return 0;
-				}
-
-				@Override
-				public int OnAccountRtn(int ret, AccountInfo account, String msg) {
-					return 0;
-				}
-			});
+                    @Override
+                    public int OnAccountRtn(int ret, AccountInfo account, String msg) {
+                        return 0;
+                    }
+                });
 			mAccountInfoInstance.requestFlow(methodName);
 		}
 
 	}
 
 	private boolean getXunleiUsagePermission() {
-		return PreferenceLogic.getInstance().getIsHaveUseXunleiDownload();
+		return mPreferenceLogic.getIsHaveUseXunleiDownload();
 	}
 
 	/**
@@ -328,8 +322,8 @@ public class NotificationHelper {
 	private void showStageOneNotification() {
 		
 		// 场景一 ： 当前下载文件>60M 并且当天没有提示过
-		if (!PreferenceLogic.getInstance().getStageOneIsTip()
-				&& logic.isExecFileSize(logic.mSpeedupJSInfo.scene1_min_file_size)) {
+		if (!mPreferenceLogic.getStageOneIsTip()
+            && logic.isExecFileSize(logic.mSpeedupJSInfo.scene1_min_file_size)) {
 			
 			if (isLogined ) {// 已登录
 				if (!firstFlag) {
@@ -343,29 +337,26 @@ public class NotificationHelper {
 				}
 			} else {
 				if (isUsingXunleiDownload) {
-//					不再弹出
-					PreferenceLogic.getInstance().saveStageOneIsTip(true);
+                    //					不再弹出
+					mPreferenceLogic.saveStageOneIsTip(true);
 					// 上报
 					DownloadUtils.trackBehaviorEvent(mContext,
-							"notice_flow_show", 0, 0);
-//					弹出绑定通知
+                                                     "notice_flow_show", 0, 0);
+                    //					弹出绑定通知
 					showXiaomiNotification(
-							logic.mConfigJSInfo.speed_guide_bar_unlogin_scene1_title,
-							logic.mConfigJSInfo.speed_guide_bar_unlogin_scene1_content,
-							logic.mConfigJSInfo.speed_guide_bar_unlogin_scene1_btn,
-							AccountLogic
-									.getInstance()
-									.getGoToXiaomiLoginPendingIntent(
-											mContext,
-											NotificationReveiver.NOTICE_FLOW_SHOW0));
+                                           logic.mConfigJSInfo.speed_guide_bar_unlogin_scene1_title,
+                                           logic.mConfigJSInfo.speed_guide_bar_unlogin_scene1_content,
+                                           logic.mConfigJSInfo.speed_guide_bar_unlogin_scene1_btn,
+                                           AccountLogic
+                                           .getInstance()
+                                           .getGoToXiaomiLoginPendingIntent(
+                                                                            mContext,
+                                                                            NotificationReveiver.NOTICE_FLOW_SHOW0));
 				}
 			}
 
 			// 记录周期的提醒日期
-			PreferenceLogic.getInstance()
-					.saveRemindCycleDate(
-							NotificationLogic.NOTIFICATION_SCENCE_1,
-							DateUtil.getDate());
+			mPreferenceLogic.saveRemindCycleDate(NotificationLogic.NOTIFICATION_SCENCE_1, DateUtil.getDate());
 		}
 	}
 
@@ -379,22 +370,22 @@ public class NotificationHelper {
 	 */
 	private void showSpeedUpNotification() {
 		if (logic == null && null == logic.mFlowInfo)
-			return;
+        return;
 
 		// 开启迅雷加速
 		if (isUsingXunleiDownload) {
-			if (PreferenceLogic.getInstance().getFirstReceive()) {
-				LogUtil.debugLog("开启迅雷加速， 赠送流量提示:尊敬的迅雷会员，已为您开启手机下载加速服务！");
+			if (mPreferenceLogic.getFirstReceive()) {
+				AppConfig.LOGD(TAG, "开启迅雷加速， 赠送流量提示:尊敬的迅雷会员，已为您开启手机下载加速服务！");
 				DownloadUtils.trackBehaviorEvent(mContext, "notice_flow_show",
-						0, 4);
+                                                 0, 4);
 				showXiaomiNotification(
-						logic.mConfigJSInfo.speed_guide_bar_login_bind_scene1_title,
-						logic.mConfigJSInfo.speed_guide_bar_login_bind_scene1_content,
-						"",
-						AccountLogic.getInstance()
-								.getToDownloadListPendingIntent(mContext,
-										NotificationReveiver.NOTICE_FLOW_SHOW4));
-				PreferenceLogic.getInstance().setFirstReceive(false);
+                                       logic.mConfigJSInfo.speed_guide_bar_login_bind_scene1_title,
+                                       logic.mConfigJSInfo.speed_guide_bar_login_bind_scene1_content,
+                                       "",
+                                       AccountLogic.getInstance()
+                                       .getToDownloadListPendingIntent(mContext,
+                                                                       NotificationReveiver.NOTICE_FLOW_SHOW4));
+				mPreferenceLogic.setFirstReceive(false);
 			}
 		}
 	}
@@ -412,30 +403,30 @@ public class NotificationHelper {
 		PendingIntent mPendingIntent = null;
 		switch (logic.getShowBeforeGivenFlowOutState()) {
 		case NO_FLOW:
-			LogUtil.debugLog("判断流量使用: 无流量");
+			AppConfig.LOGD(TAG, "判断流量使用: 无流量");
 			mPendingIntent = AccountLogic.getInstance()
-					.getToVipExpirePendingIntent(mContext,
-							NotificationReveiver.NOTICE_FLOWSTARTUS_SHOW1);
+                .getToVipExpirePendingIntent(mContext,
+                                             NotificationReveiver.NOTICE_FLOWSTARTUS_SHOW1);
 			DownloadUtils.trackBehaviorEvent(mContext,
-					"notice_flowstatus_show", 1, 0);
+                                             "notice_flowstatus_show", 1, 0);
 			showXiaomiNotification(logic.mConfigJSInfo.gift_flow_use_up_tile,
-					logic.mConfigJSInfo.gift_flow_use_up_content,
-					null, mPendingIntent);
+                                   logic.mConfigJSInfo.gift_flow_use_up_content,
+                                   null, mPendingIntent);
 			return true;
-		/*	
-		case OUT_LIMIT_FLOW:
-			LogUtil.debugLog("判断流量使用: 已80%或90%流量");
-			mPendingIntent = AccountLogic.getInstance()
-					.getToVipExpirePendingIntent(mContext,
-							NotificationReveiver.NOTICE_FLOWSTARTUS_SHOW0);
-			DownloadUtils.trackBehaviorEvent(mContext,
-					"notice_flowstatus_show", 0, 0);
-			showXiaomiNotification(
-					logic.mConfigJSInfo.gift_flow_before_use_up_title,
-					logic.mConfigJSInfo.gift_flow_before_use_up_content,null,
-					mPendingIntent);
-			return true;
-		//*/	
+            /*	
+                case OUT_LIMIT_FLOW:
+                AppConfig.LOGD(TAG, "判断流量使用: 已80%或90%流量");
+                mPendingIntent = AccountLogic.getInstance()
+                .getToVipExpirePendingIntent(mContext,
+                NotificationReveiver.NOTICE_FLOWSTARTUS_SHOW0);
+                DownloadUtils.trackBehaviorEvent(mContext,
+                "notice_flowstatus_show", 0, 0);
+                showXiaomiNotification(
+                logic.mConfigJSInfo.gift_flow_before_use_up_title,
+                logic.mConfigJSInfo.gift_flow_before_use_up_content,null,
+                mPendingIntent);
+                return true;
+            //*/	
 		default:
 			return false;
 		}
@@ -451,97 +442,74 @@ public class NotificationHelper {
 	private boolean judgeVipExpire() {
 		NotificationLogic logic = new NotificationLogic(mContext);
 		if (null == logic.mAccountInfo)
-			return false;
+        return false;
 		// oneDay, fourDay, sevenDay, moreDay;
 		switch (logic.isOutDateVip()) {
 
 		case TODAY:
-			LogUtil.errorLog("时间到期了 ，是今天");
-			if (!PreferenceLogic.getInstance().getVipExpireTodayIsTip()) {
+			AppConfig.LOGD(TAG, "时间到期了 ，是今天");
+			if (!mPreferenceLogic.getVipExpireTodayIsTip()) {
 				showXiaomiNotification(
-						logic.mConfigJSInfo.vip_guide_bar_expire_title,
-						logic.mConfigJSInfo.vip_guide_bar_expire_content,
-						"",
-						AccountLogic.getInstance().getToVipExpirePendingIntent(
-								mContext));
-				PreferenceLogic.getInstance().saveVipExpireTodayIsTip(true);
+                                       logic.mConfigJSInfo.vip_guide_bar_expire_title,
+                                       logic.mConfigJSInfo.vip_guide_bar_expire_content,
+                                       "",
+                                       AccountLogic.getInstance().getToVipExpirePendingIntent(
+                                                                                              mContext));
+				mPreferenceLogic.saveVipExpireTodayIsTip(true);
 				DownloadUtils.trackBehaviorEvent(mContext,
-						"notice_VIPstatus_show", 2, 0);
+                                                 "notice_VIPstatus_show", 2, 0);
 			}
 			return true;
-		/*	
-		case OUTDATE:
-			if (!PreferenceLogic.getInstance().getVipExpireIsTip()) {
-				LogUtil.debugLog("判断Vip过期: 已过期");
-				DownloadUtils.trackBehaviorEvent(mContext,
-						"notice_VIPstatus_show", 3, 0);
-				showXiaomiNotification(
-						logic.mConfigJSInfo.vip_guide_bar_expire_title,
-						logic.mConfigJSInfo.vip_guide_bar_expire_content,
-						"",
-						AccountLogic.getInstance().getToVipExpirePendingIntent(
-								mContext,
-								NotificationReveiver.NOTICE_VIPSTARTUS_SHOW3));
-				PreferenceLogic.getInstance().saveVipExpireIsTip(true);
-			}
-
-			return true;
-		case ONEDAY:
-			if (!PreferenceLogic.getInstance().getVipExpireOneIsTip()) {
-				LogUtil.debugLog("判断Vip过期: 1-3天");
-				DownloadUtils.trackBehaviorEvent(mContext,
-						"notice_VIPstatus_show", 2, 0);
-				showXiaomiNotification(
-						logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
-						logic.mConfigJSInfo.vip_guide_bar_before_expire_content,
-						"",
-						AccountLogic.getInstance().getToVipExpirePendingIntent(
-								mContext,
-								NotificationReveiver.NOTICE_VIPSTARTUS_SHOW2));
-				PreferenceLogic.getInstance().saveVipExpireOneIsTip(true);
-			}
-
-			return true;
-		case FOURDAY:
-			if (!PreferenceLogic.getInstance().getVipExpireFourIsTip()) {
-				LogUtil.debugLog("判断Vip过期: 4-6天");
-				DownloadUtils.trackBehaviorEvent(mContext,
-						"notice_VIPstatus_show", 1, 0);
-				showXiaomiNotification(
-						logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
-						logic.mConfigJSInfo.vip_guide_bar_before_expire_content,
-						"",
-						AccountLogic.getInstance().getToVipExpirePendingIntent(
-								mContext,
-								NotificationReveiver.NOTICE_VIPSTARTUS_SHOW1));
-				PreferenceLogic.getInstance().saveVipExpireFourIsTip(true);
-			}
-
-			return true;
-		case SEVENDAY:
-			if (!PreferenceLogic.getInstance().getVipExpireSevenIsTip()) {
-				LogUtil.debugLog("判断Vip过期: 7天");
-				DownloadUtils.trackBehaviorEvent(mContext,
-						"notice_VIPstatus_show", 0, 0);
-				showXiaomiNotification(
-						logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
-						logic.mConfigJSInfo.vip_guide_bar_before_expire_content,
-						"",
-						AccountLogic.getInstance().getToVipExpirePendingIntent(
-								mContext,
-								NotificationReveiver.NOTICE_VIPSTARTUS_SHOW0));
-				PreferenceLogic.getInstance().saveVipExpireSevenIsTip(true);
-			}
-
-			return true;
+			/*
+			 * case OUTDATE: if
+			 * (!PreferenceLogic.getInstance().getVipExpireIsTip()) {
+			 * LogUtil.debugLog("判断Vip过期: 已过期");
+			 * DownloadUtils.trackBehaviorEvent(mContext,
+			 * "notice_VIPstatus_show", 3, 0); showXiaomiNotification(
+			 * logic.mConfigJSInfo.vip_guide_bar_expire_title,
+			 * logic.mConfigJSInfo.vip_guide_bar_expire_content, "",
+			 * AccountLogic.getInstance().getToVipExpirePendingIntent( mContext,
+			 * NotificationReveiver.NOTICE_VIPSTARTUS_SHOW3));
+			 * PreferenceLogic.getInstance().saveVipExpireIsTip(true); }
+			 * 
+			 * return true; case ONEDAY: if
+			 * (!PreferenceLogic.getInstance().getVipExpireOneIsTip()) {
+			 * LogUtil.debugLog("判断Vip过期: 1-3天");
+			 * DownloadUtils.trackBehaviorEvent(mContext,
+			 * "notice_VIPstatus_show", 2, 0); showXiaomiNotification(
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_content, "",
+			 * AccountLogic.getInstance().getToVipExpirePendingIntent( mContext,
+			 * NotificationReveiver.NOTICE_VIPSTARTUS_SHOW2));
+			 * PreferenceLogic.getInstance().saveVipExpireOneIsTip(true); }
+			 * 
+			 * return true; case FOURDAY: if
+			 * (!PreferenceLogic.getInstance().getVipExpireFourIsTip()) {
+			 * LogUtil.debugLog("判断Vip过期: 4-6天");
+			 * DownloadUtils.trackBehaviorEvent(mContext,
+			 * "notice_VIPstatus_show", 1, 0); showXiaomiNotification(
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_content, "",
+			 * AccountLogic.getInstance().getToVipExpirePendingIntent( mContext,
+			 * NotificationReveiver.NOTICE_VIPSTARTUS_SHOW1));
+			 * PreferenceLogic.getInstance().saveVipExpireFourIsTip(true); }
+			 * 
+			 * return true; case SEVENDAY: if
+			 * (!PreferenceLogic.getInstance().getVipExpireSevenIsTip()) {
+			 * LogUtil.debugLog("判断Vip过期: 7天");
+			 * DownloadUtils.trackBehaviorEvent(mContext,
+			 * "notice_VIPstatus_show", 0, 0); showXiaomiNotification(
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_title,
+			 * logic.mConfigJSInfo.vip_guide_bar_before_expire_content, "",
+			 * AccountLogic.getInstance().getToVipExpirePendingIntent( mContext,
+			 * NotificationReveiver.NOTICE_VIPSTARTUS_SHOW0));
+			 * PreferenceLogic.getInstance().saveVipExpireSevenIsTip(true); }
+			 * 
+			 * return true; //
+			 */
 		case MOREDAY:
-			LogUtil.debugLog("判断Vip过期: > 7天");
-			PreferenceLogic.getInstance().saveVipExpireIsTip(false);
-			PreferenceLogic.getInstance().saveVipExpireOneIsTip(false);
-			PreferenceLogic.getInstance().saveVipExpireFourIsTip(false);
-			PreferenceLogic.getInstance().saveVipExpireSevenIsTip(false);
+            mPreferenceLogic.saveVipExpireTodayIsTip(false);
 			return false;
-		//*/	
 		default:
 			return false;
 		}
@@ -549,31 +517,31 @@ public class NotificationHelper {
 	}
 
 	public void showXiaomiNotification(String textTip, String contextTip,
-			String btnText, PendingIntent pendingIntent) {
-		LogUtil.debugLog(textTip);
+                                       String btnText, PendingIntent pendingIntent) {
+		AppConfig.LOGD(TAG, textTip);
 		if (null == textTip)
-			return;
+        return;
 
 		if (null == mNotifManager)
-			mNotifManager = (NotificationManager) mContext
-					.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotifManager = (NotificationManager) mContext
+            .getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification notification = new Notification();
 
 		RemoteViews remoteView = new RemoteViews(mContext.getPackageName(),
-				R.layout.download_notification);
+                                                 R.layout.download_notification);
 
 		Bitmap bitmap = getIconByPackageName(mContext);
 		if (null != bitmap)
-			remoteView.setImageViewBitmap(R.id.notification_iv_icon, bitmap);
+        remoteView.setImageViewBitmap(R.id.notification_iv_icon, bitmap);
 
 		remoteView.setTextViewText(R.id.notification_tv_tip, textTip);
 		remoteView.setTextViewText(R.id.notification_tv_content, contextTip);
 		remoteView.setTextViewText(R.id.notification_button_forward, btnText);
 		remoteView.setViewVisibility(R.id.notification_button_forward,
-				TextUtils.isEmpty(btnText) ? View.GONE : View.VISIBLE);
+                                     TextUtils.isEmpty(btnText) ? View.GONE : View.VISIBLE);
 		if (null != pendingIntent) {
 			remoteView.setOnClickPendingIntent(
-					R.id.notification_button_forward, pendingIntent);
+                                               R.id.notification_button_forward, pendingIntent);
 		}
 
 		notification.icon = com.android.providers.downloads.ui.R.drawable.stat_sys_download_anim5;
@@ -600,10 +568,10 @@ public class NotificationHelper {
 	 * @date 2014年6月23日 下午9:09:44
 	 */
 	public void cancelDownLoadNotification() {
-		LogUtil.debugLog("取消通知");
+		AppConfig.LOGD(TAG, "取消通知");
 		if (null == mNotifManager)
-			mNotifManager = (NotificationManager) mContext
-					.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotifManager = (NotificationManager) mContext
+            .getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotifManager.cancel(DOWNLOAD_NOTIFICATION_ID);
 		collapseStatusBar(mContext);
 	}
@@ -620,10 +588,10 @@ public class NotificationHelper {
 		final PackageManager pm = context.getPackageManager();
 		try {
 			ApplicationInfo appinfo = pm.getApplicationInfo(
-					context.getPackageName(), 0);
+                                                            context.getPackageName(), 0);
 			Drawable icon = AppIconsHelper.getIconDrawable(
-					context.getApplicationContext(), appinfo, pm,
-					AppIconsHelper.TIME_MIN);
+                                                           context.getApplicationContext(), appinfo, pm,
+                                                           AppIconsHelper.TIME_MIN);
 			if (icon == null) {
 				icon = appinfo.loadIcon(pm);
 			}
@@ -644,15 +612,15 @@ public class NotificationHelper {
 	 */
 	private Bitmap drawableToBitmap(Drawable drawable) {
 		Bitmap bitmap = Bitmap
-				.createBitmap(
-						drawable.getIntrinsicWidth(),
-						drawable.getIntrinsicHeight(),
-						drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
-								: Bitmap.Config.RGB_565);
+            .createBitmap(
+                          drawable.getIntrinsicWidth(),
+                          drawable.getIntrinsicHeight(),
+                          drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
+                          : Bitmap.Config.RGB_565);
 		Canvas canvas = new Canvas(bitmap);
 		// canvas.setBitmap(bitmap);
 		drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
-				drawable.getIntrinsicHeight());
+                           drawable.getIntrinsicHeight());
 		drawable.draw(canvas);
 
 		return bitmap;
@@ -675,7 +643,7 @@ public class NotificationHelper {
 				collapse = statusBarManager.getClass().getMethod("collapse");
 			} else {
 				collapse = statusBarManager.getClass().getMethod(
-						"collapsePanels");
+                                                                 "collapsePanels");
 			}
 			collapse.invoke(statusBarManager);
 		} catch (Exception localException) {

@@ -1,2 +1,17 @@
+-ignorewarnings
 -verbose
 -keep class com.xunlei.** { *; }
+
+#keep our receiver
+-keep class com.android.providers.downloads.DownloadPushMessageReceiver { *; }
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keepclasseswithmembernames class * {
+    private int mNativeContext;
+    private int mListenerContext;
+    private android.view.Surface mSurface;
+    public static final int *;
+}

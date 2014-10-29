@@ -41,7 +41,7 @@
         android:label="@string/permlab_accessAllDownloads"
         android:description="@string/permdesc_accessAllDownloads"
         android:protectionLevel="signature"/>
-
+	<permission android:name="com.android.providers.downloads.permission.MIPUSH_RECEIVE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
     <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM" />
@@ -123,6 +123,46 @@
                 <action android:name="com.process.media.broadcast.downloadlist" />
 	            <action android:name="com.process.media.broadcast.falsetoken"   />
             </intent-filter>
+        </receiver>
+        <receiver android:name=".DownloadMiAccountReceiver"  android:exported="true">
+            <intent-filter>
+                <action android:name="android.accounts.LOGIN_ACCOUNTS_POST_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <service
+          android:enabled="true"
+          android:name="com.xiaomi.push.service.XMPushService"/>
+        <service
+          android:enabled="true"
+          android:exported="true"
+          android:name="com.xiaomi.mipush.sdk.PushMessageHandler" />
+        <service 
+            android:enabled="true"
+            android:name="com.xiaomi.mipush.sdk.MessageHandleService"/>
+		<receiver
+          android:exported="true"
+          android:name="com.xiaomi.push.service.receivers.NetworkStatusReceiver" >
+          <intent-filter>
+            <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            <category android:name="android.intent.category.DEFAULT" />
+          </intent-filter>
+        </receiver>
+        <receiver
+          android:exported="false"
+          android:name="com.xiaomi.push.service.receivers.PingReceiver" >
+          <intent-filter>
+            <action android:name="com.xiaomi.push.PING_TIMER" />
+          </intent-filter>
+        </receiver>
+        <receiver
+          android:exported="true"
+          android:name="com.android.providers.downloads.DownloadPushMessageReceiver">
+          <intent-filter>
+            <action android:name="com.xiaomi.mipush.RECEIVE_MESSAGE" />
+          </intent-filter>
+          <intent-filter>
+            <action android:name="com.xiaomi.mipush.ERROR" />
+          </intent-filter>
         </receiver>
         <receiver android:name=".DownloadUpdateReceiver">
             <intent-filter>
