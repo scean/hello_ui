@@ -172,8 +172,13 @@ public class DownloadNotifier {
                         getDownloadIds(cluster));
                 builder.setContentIntent(PendingIntent.getBroadcast(mContext,
                         0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
-                builder.setOngoing(true);
 
+                // Make can clear when waiting.
+                if (type == TYPE_WAITING) {
+                    builder.setOngoing(false);
+                } else {
+                    builder.setOngoing(true);
+                }
             } else if (type == TYPE_COMPLETE) {
                 final DownloadInfo info = cluster.iterator().next();
                 final Uri uri = ContentUris.withAppendedId(

@@ -74,7 +74,6 @@ public class PreferenceLogic {
     }
 
 	private SharedPreferences getNotiSharedPreference() {
-
         if (null == mSharedPreferences) {
 			Context ct = null;
 			try {
