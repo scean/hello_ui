@@ -811,6 +811,9 @@ public final class DownloadProvider extends ContentProvider {
             return -1;
         }
         long ret = -1;
+        // If url or localUri contains single quote, then Lexer validation will throw exception, and sql execute will fail.
+        url = url.replaceAll("'", "''");
+        localUri = localUri.replaceAll("'", "''");
         String selection = " (" + Downloads.Impl.COLUMN_URI + "=" + "'" + url + "' ) AND (" +
                             Downloads.Impl.COLUMN_FILE_NAME_HINT + "=" + "'" + localUri + "' )";
         Cursor cursor = query(uri, null, selection, null, null);
