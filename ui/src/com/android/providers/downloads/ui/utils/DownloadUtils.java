@@ -37,6 +37,7 @@ import miui.accounts.ExtraAccountManager;
 import miui.provider.ExtraSettings;
 
 public class DownloadUtils {
+    private static final boolean DEBUG = AppConfig.DEBUG;
 	/**
 	 * track event id for triger xunlei usage switch
 	 */
@@ -58,9 +59,8 @@ public class DownloadUtils {
 	public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
 	public static final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads";
 	private static final String STAT_TAG_ONLINESTATUS = "DownloadUtils.Stat.OnLineStatus";
-	public static final String PRODUCT_NAME = "MIUI V6 Download";
-	private static final boolean STAT_LOG_ON = false;
-	private static final String STAT_TAG_BEHAVIOR = "DownloadUtils.Stat.Behavior";
+    public static final String PRODUCT_NAME = "MIUI V6 Download";
+    private static final String STAT_TAG_BEHAVIOR = "DownloadUtils.Stat.Behavior";
 
 	private static final long BASE_B = 1L; // ת��Ϊ�ֽڻ���
 	private static final long BASE_KB = 1024; // ת��ΪKB
@@ -421,7 +421,7 @@ public class DownloadUtils {
 	}
 
 	private static void traceLog(String tag, String behavior, Map<String, String> trackData) {
-		if (STAT_LOG_ON) {
+		if (DEBUG) {
 			StringBuffer buffer = new StringBuffer();
 			for (Map.Entry<String, String> entry : trackData.entrySet()) {
 				buffer.append(entry.getKey());
