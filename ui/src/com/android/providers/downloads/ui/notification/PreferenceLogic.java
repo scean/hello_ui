@@ -71,18 +71,18 @@ public class PreferenceLogic {
     }
 
 	private SharedPreferences getNotiSharedPreference() {
-		if (null == mSharedPreferences) {
+        if (null == mSharedPreferences) {
 			Context ct = null;
 			try {
 				ct = mContext.createPackageContext(
 						DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME,
 						Context.CONTEXT_IGNORE_SECURITY);
-				mSharedPreferences = ct.getSharedPreferences("sp_notification",
+                mSharedPreferences = ct.getSharedPreferences("sp_notification",
 						Context.MODE_PRIVATE);
 			} catch (Exception e) {
 			}
 		}
-		return mSharedPreferences;
+        return mSharedPreferences;
 	}
 
     private void saveStringPre(String key, String value) {
@@ -127,7 +127,7 @@ public class PreferenceLogic {
 	 * @param value
 	 */
 	private void saveNotiBoolean(String key, boolean value) {
-		SharedPreferences mPreferces = getNotiSharedPreference();
+        SharedPreferences mPreferces = getSharedPreference();
 		if (mPreferces != null) {
 			mPreferces.edit().putInt(key, value ? 1 : -1).commit();
 		}
@@ -142,7 +142,7 @@ public class PreferenceLogic {
 	 * @return
 	 */
 	private boolean getNotiBoolean(String key) {
-		SharedPreferences mPreferces = getNotiSharedPreference();
+        SharedPreferences mPreferces = getSharedPreference();
 		if (mPreferces == null) {
 			return true;
 		} else {
