@@ -38,10 +38,8 @@ public class DownloadMiAccountReceiver extends BroadcastReceiver {
         if(ACTION_LOGIN_ACCOUNTS_POST_CHANGED.equals(action)) {  
             Account account = ExtraAccountManager.getXiaomiAccount(context);
             if(account != null) {//Xiaomi Account logged in
-                Log.d(TAG, "Xiaomi Account Login.");
-                MiPushClient.registerPush(context, DownloadApplication.APP_ID, DownloadApplication.APP_KEY);          
+                MiPushClient.registerPush(context, DownloadApplication.APP_ID, DownloadApplication.APP_KEY);
             } else {
-                Log.d(TAG, "Xiaomi Account Exit.");
                 MiPushClient.unregisterPush(context);
             }
         }
