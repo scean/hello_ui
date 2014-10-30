@@ -8,7 +8,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.android.providers.downloads.ui.activity.DownloadListActivity;
+import com.android.providers.downloads.ui.DownloadList;
 import com.android.providers.downloads.ui.activity.DownloadSettingActivity;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
 import com.android.providers.downloads.ui.utils.XLUtil;
@@ -64,9 +64,9 @@ public class PreferenceLogic {
         if (null == mSharedPreferences) {
              Context ct = null;
             try {
-                ct = mContext.createPackageContext(DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
+                ct = mContext.createPackageContext(DownloadList.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
                 mSharedPreferences = ct.getSharedPreferences(
-                        DownloadListActivity.PREF_NAME, Context.MODE_MULTI_PROCESS);
+                        DownloadList.PREF_NAME, Context.MODE_MULTI_PROCESS);
             } catch (Exception e) {
             }
         }
@@ -78,7 +78,7 @@ public class PreferenceLogic {
 			Context ct = null;
 			try {
 				ct = mContext.createPackageContext(
-						DownloadListActivity.DOWNLOADPROVIDER_PKG_NAME,
+						DownloadList.DOWNLOADPROVIDER_PKG_NAME,
 						Context.CONTEXT_IGNORE_SECURITY);
                 mSharedPreferences = ct.getSharedPreferences("sp_notification",
 						Context.MODE_PRIVATE);
@@ -132,9 +132,8 @@ public class PreferenceLogic {
 	private void saveNotiBoolean(String key, boolean value) {
         SharedPreferences mPreferces = getSharedPreference();
 		if (mPreferces != null) {
-			mPreferces.edit().putInt(key, value ? 1 : -1).commit();
+            mPreferces.edit().putBoolean(key, value).commit();
 		}
-
 	}
 
 	/**
@@ -148,9 +147,8 @@ public class PreferenceLogic {
 		if (mPreferces == null) {
 			return true;
 		} else {
-			return mPreferces.getInt(key, 0) == 1;
+            return mPreferces.getBoolean(key, false);
 		}
-
 	}
 
     private void saveIntPre(String key, int value) {

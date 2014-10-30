@@ -17,7 +17,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout.LayoutParams;
 import com.android.providers.downloads.ui.app.AppConfig;
 import com.android.providers.downloads.ui.activity.BaseActivity;
-import com.android.providers.downloads.ui.activity.DownloadListActivity;
+import com.android.providers.downloads.ui.DownloadList;
 import com.android.providers.downloads.ui.utils.DownloadUtils;
 import com.android.providers.downloads.ui.utils.MyVolley;
 import com.android.providers.downloads.ui.utils.XLUtil;
@@ -242,7 +242,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 			xunleiID = account.uid;
 		}
 
-		XLUtil.saveStringPackagePreferenc(getApplicationContext(), DownloadListActivity.PREF_KEY_XUNLEI_USER_ID, xunleiID);
+		XLUtil.saveStringPackagePreferenc(getApplicationContext(), DownloadList.PREF_KEY_XUNLEI_USER_ID, xunleiID);
 
 	}
 
