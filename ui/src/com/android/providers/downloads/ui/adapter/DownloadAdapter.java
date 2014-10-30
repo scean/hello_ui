@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import miui.os.Build;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
@@ -51,6 +50,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.webkit.MimeTypeMap;
+
+import miui.os.Build;
 
 import com.android.providers.downloads.ui.utils.DownloadUtils;
 import com.android.providers.downloads.ui.fragment.DownloadListFragment;
