@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.android.providers.downloads.ui.app.AppConfig;
-import com.android.providers.downloads.ui.activity.DownloadListActivity;
+import com.android.providers.downloads.ui.DownloadList;
 import com.android.providers.downloads.ui.utils.DownloadUtils;
 import com.android.providers.downloads.ui.utils.XLUtil;
 import com.android.providers.downloads.ui.pay.AccountInfoInstance;
@@ -87,7 +87,7 @@ public class NotificationReveiver extends BroadcastReceiver {
             NotificationHelper.init(context.getApplicationContext());
         } else if (ACTION_XIAOMI_LOGIN.equals(action)) {
         	report(context,intent);
-            intent = new Intent(context, DownloadListActivity.class);
+            intent = new Intent(context, DownloadList.class);
             intent.putExtra(PAGE_TYPE, ACTION_XIAOMI_LOGIN);
 //          intent = new Intent(context, XLSpeedUpActivity.class);
 //          intent.putExtra(XLSpeedUpActivity.INTENT_FLAG, XLSpeedUpActivity.INTENT_FLAG_LET_LOGIN);
@@ -95,7 +95,7 @@ public class NotificationReveiver extends BroadcastReceiver {
             context.startActivity(intent);
             cancelNotification();
         } else if (ACTION_XIAOMI_AUTH.equals(action)) {
-            intent = new Intent(context, DownloadListActivity.class);
+            intent = new Intent(context, DownloadList.class);
             intent.putExtra(PAGE_TYPE, ACTION_XIAOMI_AUTH);
 //          intent = new Intent(context, XLSpeedUpActivity.class);
 //          intent.putExtra(XLSpeedUpActivity.INTENT_FLAG, XLSpeedUpActivity.INTENT_FLAG_LET_AUTH);
@@ -111,7 +111,7 @@ public class NotificationReveiver extends BroadcastReceiver {
             cancelNotification();
         } else if (ACTION_FORWARD_TO_DOWNLOADLIST.equals(action)) {
         	report(context ,intent);
-            intent = new Intent(context, DownloadListActivity.class);
+            intent = new Intent(context, DownloadList.class);
             intent.putExtra(PAGE_TYPE, ACTION_FORWARD_TO_DOWNLOADLIST);
 //          intent = new Intent(context, XLSpeedUpActivity.class);
 //          intent.putExtra(XLSpeedUpActivity.INTENT_FLAG, XLSpeedUpActivity.INTENT_FLAG_LET_AUTH);

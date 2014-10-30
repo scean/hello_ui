@@ -17,7 +17,7 @@
 package com.android.providers.downloads.ui.fragment;
 
 import com.android.providers.downloads.ui.R;
-import com.android.providers.downloads.ui.activity.DownloadListActivity;
+import com.android.providers.downloads.ui.DownloadList;
 import com.android.providers.downloads.ui.adapter.DownloadAdapter;
 
 import java.io.File;
@@ -115,7 +115,7 @@ public class DownloadListFragment extends Fragment{
     // used to filter downloading and downloaded tasks
     private int mFilterPosition = 0;
     // used to filter all, apk, music, picture, document, video, zip, and others tasks.
-    private int mFilterIndex = DownloadListActivity.FILTER_ALL;
+    private int mFilterIndex = DownloadList.FILTER_ALL;
     private final static int FILTER_SUCCESSFUL = 1;
     private final static int FILTER_DOWNLOADING = 2;
 
@@ -317,19 +317,19 @@ public class DownloadListFragment extends Fragment{
         // set filter for mimetype
         String mimetypeSelection = null;
         switch (mFilterIndex) {
-            case DownloadListActivity.FILTER_APK:
+            case DownloadList.FILTER_APK:
                 mimetypeSelection = getMimetypeFilter(MIMETYPE_APK, "OR", "=");
                 break;
-            case DownloadListActivity.FILTER_MEDIA:
+            case DownloadList.FILTER_MEDIA:
                 mimetypeSelection = getMimetypeFilter(MIMETYPE_MEDIA, "OR", "LIKE");
                 break;
-            case DownloadListActivity.FILTER_PACKAGE:
+            case DownloadList.FILTER_PACKAGE:
                 mimetypeSelection = getMimetypeFilter(MIMETYPE_PACKAGE, "OR", "=");
                 break;
-            case DownloadListActivity.FILTER_DOC:
+            case DownloadList.FILTER_DOC:
                 mimetypeSelection = getMimetypeFilter(MIMETYPE_DOC, "OR", "LIKE");
                 break;
-            case DownloadListActivity.FILTER_OTHER:
+            case DownloadList.FILTER_OTHER:
                 mimetypeSelection = getMimetypeOther();
                 break;
         }

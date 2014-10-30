@@ -29,7 +29,7 @@
       android:process="android.process.mediaUI" >
 
     <activity
-        android:name=".activity.DownloadListActivity"
+        android:name=".DownloadList"
         android:configChanges="orientation|screenSize"
         android:launchMode="singleTop"
         android:screenOrientation="portrait"
