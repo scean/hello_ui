@@ -129,10 +129,8 @@ public class PreferenceLogic {
 	private void saveNotiBoolean(String key, boolean value) {
         SharedPreferences mPreferces = getSharedPreference();
 		if (mPreferces != null) {
-			mPreferces.edit().putInt(key, value ? 1 : -1).commit();
+            mPreferces.edit().putBoolean(key, value).commit();
 		}
-
-        System.out.println("ddddddddddddddddddddsave" + key + value);
 	}
 
 	/**
@@ -146,8 +144,7 @@ public class PreferenceLogic {
 		if (mPreferces == null) {
 			return true;
 		} else {
-            System.out.println("ddddddddddddddddddddget" + key + (mPreferces.getInt(key, 0) == 1));
-			return mPreferces.getInt(key, 0) == 1;
+            return mPreferces.getBoolean(key, false);
 		}
 
 	}
