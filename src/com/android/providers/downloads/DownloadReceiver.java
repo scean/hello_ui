@@ -34,7 +34,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.Downloads;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 import android.content.ActivityNotFoundException;
 
@@ -64,17 +63,14 @@ public class DownloadReceiver extends BroadcastReceiver {
         }
 
         String action = intent.getAction();
+        if (TextUtils.isEmpty(action)) {
+            return;
+        }
+
+        XLConfig.LOGD("Received broadcast intent for " + action);
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-            if (Constants.LOGVV) {
-                Log.v(Constants.TAG, "Received broadcast intent for " +
-                        Intent.ACTION_BOOT_COMPLETED);
-            }
             startService(context);
         } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-            if (Constants.LOGVV) {
-                Log.v(Constants.TAG, "Received broadcast intent for " +
-                        Intent.ACTION_MEDIA_MOUNTED);
-            }
             startService(context);
         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
             final ConnectivityManager connManager = (ConnectivityManager) context
@@ -88,7 +84,6 @@ public class DownloadReceiver extends BroadcastReceiver {
         } else if (action.equals(Constants.ACTION_OPEN)
                 || action.equals(Constants.ACTION_LIST)
                 || action.equals(Constants.ACTION_HIDE)) {
-
             final PendingResult result = goAsync();
             if (result == null) {
                 // TODO: remove this once test is refactored
@@ -116,17 +111,17 @@ public class DownloadReceiver extends BroadcastReceiver {
             sendNotificationClickedIntent(context, ids);
 
         } else if (Constants.ACTION_OPEN.equals(action)) {
-        	if (intent.getData() == null) {
-        		return;
-        	}
+            if (intent.getData() == null) {
+                return;
+            }
             final long id = ContentUris.parseId(intent.getData());
             openDownload(context, id);
             hideNotification(context, id);
 
         } else if (Constants.ACTION_HIDE.equals(action)) {
-        	if (intent.getData() == null) {
-        		return;
-        	}
+            if (intent.getData() == null) {
+                return;
+            }
             final long id = ContentUris.parseId(intent.getData());
             hideNotification(context, id);
         }
@@ -137,43 +132,33 @@ public class DownloadReceiver extends BroadcastReceiver {
      * user so it's not renewed later.
      */
     private void hideNotification(Context context, long id) {
-    	
-    	try {
-    		final int status;
-            final int visibility;
+        final int status;
+        final int visibility;
 
-            final Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
-            final Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
-            try {
-                if (cursor != null && cursor.moveToFirst()) {
-                    status = getInt(cursor, Downloads.Impl.COLUMN_STATUS);
-                    visibility = getInt(cursor, Downloads.Impl.COLUMN_VISIBILITY);
-                } else {
-                    Log.w(TAG, "Missing details for download " + id);
-                    return;
-                }
-            } finally {
-            	if (cursor != null) {
-            		cursor.close();
-            	}
+        final Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
+        final Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                status = getInt(cursor, Downloads.Impl.COLUMN_STATUS);
+                visibility = getInt(cursor, Downloads.Impl.COLUMN_VISIBILITY);
+            } else {
+                XLConfig.LOGD("Missing details for download " + id);
+                return;
             }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
 
-            if (Downloads.Impl.isStatusCompleted(status) &&
-                    (visibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-                    || visibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION)) {
-                final ContentValues values = new ContentValues();
-                values.put(Downloads.Impl.COLUMN_VISIBILITY,
-                        Downloads.Impl.VISIBILITY_VISIBLE);
-                context.getContentResolver().update(uri, values, null, null);
-            }
-            
-		} catch (NullPointerException e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-    	
+        if (Downloads.Impl.isStatusCompleted(status) &&
+            (visibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+             || visibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION)) {
+            final ContentValues values = new ContentValues();
+            values.put(Downloads.Impl.COLUMN_VISIBILITY,
+                       Downloads.Impl.VISIBILITY_VISIBLE);
+            context.getContentResolver().update(uri, values, null, null);
+        }
     }
 
     /**
@@ -181,99 +166,84 @@ public class DownloadReceiver extends BroadcastReceiver {
      * {@link DownloadManager#COLUMN_ID}.
      */
     private void openDownload(Context context, long id) {
-    	try {
-    		if (!OpenHelper.startViewIntent(context, id, Intent.FLAG_ACTIVITY_NEW_TASK)) {
-                Toast.makeText(context, R.string.download_no_application_title, Toast.LENGTH_SHORT)
-                        .show();
-            }
-		} catch (NullPointerException e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+        if (!OpenHelper.startViewIntent(context, id, Intent.FLAG_ACTIVITY_NEW_TASK)) {
+            Toast.makeText(context, R.string.download_no_application_title, Toast.LENGTH_SHORT)
+                .show();
+        }
     }
 
     /**
      * Notify the owner of a running download that its notification was clicked.
      */
     private void sendNotificationClickedIntent(Context context, long[] ids) {
-    	
-    	try {
-    		final String packageName;
-            final String clazz;
-            final boolean isPublicApi;
+        if (ids == null || ids.length == 0) {
+            return;
+        }
 
-            final Uri uri = ContentUris.withAppendedId(
-                    Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, ids[0]);
-            final Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
-            try {
-                if (cursor != null && cursor.moveToFirst()) {
-                    packageName = getString(cursor, Downloads.Impl.COLUMN_NOTIFICATION_PACKAGE);
-                    clazz = getString(cursor, Downloads.Impl.COLUMN_NOTIFICATION_CLASS);
-                    isPublicApi = getInt(cursor, Downloads.Impl.COLUMN_IS_PUBLIC_API) != 0;
-                } else {
-                    Log.w(TAG, "Missing details for download " + ids[0]);
-                    return;
-                }
-            } finally {
-            	if (cursor != null) {
-            		cursor.close();
-            	}
+        final String packageName;
+        final String clazz;
+        final boolean isPublicApi;
+
+        final Uri uri = ContentUris.withAppendedId(
+                                                   Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, ids[0]);
+        final Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                packageName = getString(cursor, Downloads.Impl.COLUMN_NOTIFICATION_PACKAGE);
+                clazz = getString(cursor, Downloads.Impl.COLUMN_NOTIFICATION_CLASS);
+                isPublicApi = getInt(cursor, Downloads.Impl.COLUMN_IS_PUBLIC_API) != 0;
+            } else {
+                XLConfig.LOGD("Missing details for download " + ids[0]);
+                return;
             }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
 
-            if (TextUtils.isEmpty(packageName)) {
-                Log.w(TAG, "Missing package; skipping broadcast");
+        if (TextUtils.isEmpty(packageName)) {
+            XLConfig.LOGD("Missing package; skipping broadcast");
+            return;
+        }
+
+        Intent appIntent = null;
+        XLConfig.LOGD("DownloadUtils.Stat.Behavior", " isPublicApi == " + isPublicApi);
+        if (isPublicApi) {
+            appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
+            appIntent.setPackage(packageName);
+            appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, ids);
+            java.util.List<ResolveInfo> receivers = context.getPackageManager().queryBroadcastReceivers(appIntent, appIntent.getFlags());
+
+            if (receivers == null || receivers.isEmpty()) {
+                // Open the downloads page
+                Intent pageView = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
+                pageView.putExtra(DownloadManager.INTENT_EXTRA_APPLICATION_PACKAGENAME, packageName);
+                pageView.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    context.startActivity(pageView);
+                } catch (ActivityNotFoundException e) {
+                    XLConfig.LOGD("no activity found to start!");
+                }
+                return;
+            }
+        } else { // legacy behavior
+            if (TextUtils.isEmpty(clazz)) {
+                XLConfig.LOGD("Missing class; skipping broadcast");
                 return;
             }
 
-            Intent appIntent = null;
-            XLConfig.LOGD("DownloadUtils.Stat.Behavior", " isPublicApi == " + isPublicApi);
-            if (isPublicApi) {
-                appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
-                appIntent.setPackage(packageName);
-                appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, ids);
-                java.util.List<ResolveInfo> receivers = context.getPackageManager().queryBroadcastReceivers(appIntent, appIntent.getFlags());
-                	
-                if (receivers == null || receivers.isEmpty()) {
-                    // Open the downloads page
-                    Intent pageView = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
-                    pageView.putExtra(DownloadManager.INTENT_EXTRA_APPLICATION_PACKAGENAME, packageName);
-                    pageView.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                    	context.startActivity(pageView);
-    				} catch (ActivityNotFoundException e) {
-    					// TODO: handle exception
-    					Log.d(Constants.TAG, "no activity found to start!");
-    					e.printStackTrace();
-    				}
-                    return;
-                }
-            } else { // legacy behavior
-                if (TextUtils.isEmpty(clazz)) {
-                    Log.w(TAG, "Missing class; skipping broadcast");
-                    return;
-                }
+            appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
+            appIntent.setClassName(packageName, clazz);
+            appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, ids);
 
-                appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
-                appIntent.setClassName(packageName, clazz);
-                appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, ids);
-
-                if (ids.length == 1) {
-                    appIntent.setData(uri);
-                } else {
-                    appIntent.setData(Downloads.Impl.CONTENT_URI);
-                }
+            if (ids.length == 1) {
+                appIntent.setData(uri);
+            } else {
+                appIntent.setData(Downloads.Impl.CONTENT_URI);
             }
-            mSystemFacade.sendBroadcast(appIntent);
-    		
-		} catch (NullPointerException e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-    	
+        }
+        mSystemFacade.sendBroadcast(appIntent);
     }
 
     private static String getString(Cursor cursor, String col) {

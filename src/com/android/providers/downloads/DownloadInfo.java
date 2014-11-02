@@ -43,7 +43,6 @@ import android.os.Environment;
 import android.provider.Downloads;
 import android.provider.Downloads.Impl;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
@@ -59,6 +58,7 @@ public class DownloadInfo {
     // periodically pushing to provider.
     private static final String TAG = "DownloadInfo";
 
+    // Caution: this value should be the same as 'prefValues_max_bytes_limit' max value.
     public static final int MAX_BYTES_OVER_MOBILE = 2147483647;
 
     public static class Reader {
@@ -71,16 +71,10 @@ public class DownloadInfo {
         }
 
         public DownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade,
-                StorageManager storageManager, DownloadNotifier notifier, boolean xlEngineFlag, XLDownloadManager dm, SharedPreferences pf) {
+                                            StorageManager storageManager, DownloadNotifier notifier, boolean xlEngineFlag, XLDownloadManager dm, SharedPreferences pf) {
             final DownloadInfo info = new DownloadInfo(
-                    context, systemFacade, storageManager, notifier, dm, pf);
-            try {
-            	updateFromDatabase(info);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+                                                       context, systemFacade, storageManager, notifier, dm, pf);
+            updateFromDatabase(info);
 
             // if a new task, rewrite this flag
             info.mXlTaskOpenMark = checkDownloadEngine(info.mPackage, info.mAppointName, xlEngineFlag);
@@ -104,21 +98,21 @@ public class DownloadInfo {
                 // This is necessary as cursor could be out of date, especially when it was created long ago.
                 // By doing this, we can prevent a download from being executed more than once.
 
-	            Cursor latestCursor = null;
-	            try {
-		            latestCursor = mResolver.query(info.getAllDownloadsUri(), null, null, null, null);
-		            if (latestCursor != null && latestCursor.moveToNext()) {
-			            info.mStatus = getInt(latestCursor, Downloads.Impl.COLUMN_STATUS);
-		            } else {
-			            info.mStatus = cursorStatus;
-		            }
-	            }catch (Exception e){
-		            XLConfig.LOGD(TAG,e.toString());
-	            }finally {
-		            if(latestCursor != null){
-			            latestCursor.close();
-		            }
-	            }
+                Cursor latestCursor = null;
+                try {
+                    latestCursor = mResolver.query(info.getAllDownloadsUri(), null, null, null, null);
+                    if (latestCursor != null && latestCursor.moveToNext()) {
+                        info.mStatus = getInt(latestCursor, Downloads.Impl.COLUMN_STATUS);
+                    } else {
+                        info.mStatus = cursorStatus;
+                    }
+                } catch (Exception e){
+                    XLConfig.LOGD(TAG, e);
+                } finally {
+                    if(latestCursor != null){
+                        latestCursor.close();
+                    }
+                }
             }
 
             info.mNumFailed = getInt(Downloads.Impl.COLUMN_FAILED_CONNECTIONS);
@@ -150,13 +144,13 @@ public class DownloadInfo {
             info.mTitle = getString(Downloads.Impl.COLUMN_TITLE);
             info.mDescription = getString(Downloads.Impl.COLUMN_DESCRIPTION);
             info.mBypassRecommendedSizeLimit =
-                    getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
+                getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             //v5 have  v6 don't have
-			//info.mSubDirectory = getString(ExtraDownloads.COLUMN_SUB_DIRECTORY);
+            //info.mSubDirectory = getString(ExtraDownloads.COLUMN_SUB_DIRECTORY);
             //info.mAppointName = getString(ExtraDownloads.COLUMN_APPOINT_NAME);
             // Read xunlei relevant fields
             info.mFileCreateTime = getLong(ExtraDownloads.COLUMN_FILE_CREATE_TIME);
-//            info.mFileCreateTime = System.currentTimeMillis();  // close by hzg 20140923
+            //            info.mFileCreateTime = System.currentTimeMillis();  // close by hzg 20140923
             info.mDownloadingCurrentSpeed = getLong(ExtraDownloads.COLUMN_DOWNLOADING_CURRENT_SPEED);
             info.mDownloadSurplustime = getLong(ExtraDownloads.COLUMN_DOWNLOAD_SURPLUS_TIME);
             info.mXlAccelerateSpeed = getLong(ExtraDownloads.COLUMN_XL_ACCELERATE_SPEED);
@@ -185,7 +179,7 @@ public class DownloadInfo {
             try {
                 uri = URI.create(uriString);
             } catch (IllegalArgumentException e) {
-                Log.e(Constants.TAG, "Illegal url:" + uriString, e);
+                XLConfig.LOGD("Illegal url:" + uriString, e);
                 return null;
             }
             String host = null;
@@ -199,29 +193,26 @@ public class DownloadInfo {
         }
 
         private void readRequestHeaders(DownloadInfo info) {
-        	Cursor cursor;
+            Cursor cursor;
             info.mRequestHeaders.clear();
-            Uri headerUri = Uri.withAppendedPath(
-                    info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
+            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
             try{
-             cursor = mResolver.query(headerUri, null, null, null, null);
-            }catch(Exception e){
-            	e.printStackTrace();
-            	return;
+                cursor = mResolver.query(headerUri, null, null, null, null);
+            } catch(Exception e){
+                return;
             }
-            
+
             try {
                 int headerIndex =
-                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_HEADER);
+                    cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_HEADER);
                 int valueIndex =
-                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_VALUE);
+                    cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_VALUE);
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                     addHeader(info, cursor.getString(headerIndex), cursor.getString(valueIndex));
                 }
-            }catch(Exception e){ 
-            	e.printStackTrace();
-            }
-            finally {
+            } catch(Exception e){
+                XLConfig.LOGD("error when readRequestHeaders: ", e);
+            } finally {
                 cursor.close();
             }
 
@@ -373,12 +364,12 @@ public class DownloadInfo {
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
-    
+
     private XLDownloadManager mXlDownloadManager = null;
     private SharedPreferences mPreference;
 
     private DownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager,
-            DownloadNotifier notifier, XLDownloadManager dm, SharedPreferences pf) {
+                         DownloadNotifier notifier, XLDownloadManager dm, SharedPreferences pf) {
         mContext = context;
         mSystemFacade = systemFacade;
         mInsufficientAlreadyPosted = false;
@@ -435,6 +426,7 @@ public class DownloadInfo {
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_TOTAL_BYTES, mTotalBytes);
         mSystemFacade.sendBroadcast(intent);
     }
+
     /**
      * Returns the time when a download should be restarted.
      */
@@ -446,8 +438,8 @@ public class DownloadInfo {
             return mLastMod + mRetryAfter;
         }
         return mLastMod +
-                Constants.RETRY_FIRST_DELAY *
-                    (1000 + mFuzz) * (1 << (mNumFailed - 1));
+            Constants.RETRY_FIRST_DELAY *
+            (1000 + mFuzz) * (1 << (mNumFailed - 1));
     }
 
     /**
@@ -456,12 +448,12 @@ public class DownloadInfo {
     private boolean isReadyToDownload(boolean isActive) {
         if (TextUtils.isEmpty(mUriDomain)) {
             if (mDestination != Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
-                Log.e(Constants.TAG, "Unknown domain for uri: " + mUri);
+                XLConfig.LOGD("Unknown domain for uri: " + mUri);
             }
             return false;
         }
         if (!isActive && Helpers.sDownloadsDomainCountMap.containsKey(mUriDomain)
-                && Helpers.sDownloadsDomainCountMap.get(mUriDomain) >= Helpers.sMaxDownloadsCountPerDomain) {
+            && Helpers.sDownloadsDomainCountMap.get(mUriDomain) >= Helpers.sMaxDownloadsCountPerDomain) {
             return false;
         }
         if (mControl == Downloads.Impl.CONTROL_PAUSED) {
@@ -469,26 +461,26 @@ public class DownloadInfo {
             return false;
         }
         switch (mStatus) {
-            case 0: // status hasn't been initialized yet, this is a new download
-            case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
-            case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
-                                                // running, without a chance to update the database
-                return true;
+        case 0: // status hasn't been initialized yet, this is a new download
+        case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
+        case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
+            // running, without a chance to update the database
+            return true;
 
-            case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
-            case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
-                return checkCanUseNetwork(false) == NetworkState.OK;
+        case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
+        case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
+            return checkCanUseNetwork(false) == NetworkState.OK;
 
-            case Downloads.Impl.STATUS_WAITING_TO_RETRY:
-                // download was waiting for a delayed restart
-                final long now = mSystemFacade.currentTimeMillis();
-                return restartTime(now) <= now;
-            case Downloads.Impl.STATUS_DEVICE_NOT_FOUND_ERROR:
-                // is the media mounted?
-                return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-            case Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR:
-                // should check space to make sure it is worth retrying the download.
-                return hasEnoughSpace();
+        case Downloads.Impl.STATUS_WAITING_TO_RETRY:
+            // download was waiting for a delayed restart
+            final long now = mSystemFacade.currentTimeMillis();
+            return restartTime(now) <= now;
+        case Downloads.Impl.STATUS_DEVICE_NOT_FOUND_ERROR:
+            // is the media mounted?
+            return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+        case Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR:
+            // should check space to make sure it is worth retrying the download.
+            return hasEnoughSpace();
         }
         return false;
     }
@@ -526,7 +518,7 @@ public class DownloadInfo {
         }
         return checkIsNetworkTypeAllowed(isTaskRunning, info.getType());
     }
-    
+
     private boolean isRoamingAllowed() {
         if (mIsPublicApi) {
             return mAllowRoaming;
@@ -557,18 +549,18 @@ public class DownloadInfo {
      */
     private int translateNetworkTypeToApiFlag(int networkType) {
         switch (networkType) {
-            case ConnectivityManager.TYPE_MOBILE:
-                return DownloadManager.Request.NETWORK_MOBILE;
+        case ConnectivityManager.TYPE_MOBILE:
+            return DownloadManager.Request.NETWORK_MOBILE;
 
-            case ConnectivityManager.TYPE_WIFI:
-            case ConnectivityManager.TYPE_ETHERNET:
-                return DownloadManager.Request.NETWORK_WIFI;
+        case ConnectivityManager.TYPE_WIFI:
+        case ConnectivityManager.TYPE_ETHERNET:
+            return DownloadManager.Request.NETWORK_WIFI;
 
-            case ConnectivityManager.TYPE_BLUETOOTH:
-                return DownloadManager.Request.NETWORK_BLUETOOTH;
+        case ConnectivityManager.TYPE_BLUETOOTH:
+            return DownloadManager.Request.NETWORK_BLUETOOTH;
 
-            default:
-                return 0;
+        default:
+            return 0;
         }
     }
 
@@ -582,17 +574,17 @@ public class DownloadInfo {
             return NetworkState.OK;
         }
 
-    	if (mTotalBytes <= 0) {
-    		if (!isTaskRunning) {
+        if (mTotalBytes <= 0) {
+            if (!isTaskRunning) {
                 if (mStatus == Downloads.Impl.STATUS_QUEUED_FOR_WIFI && networkType == ConnectivityManager.TYPE_MOBILE) {
                     return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
                 }
-    			return NetworkState.OK; // we don't know the size yet
-    		} else {
-    			if (networkType == ConnectivityManager.TYPE_MOBILE) {
-        			return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE; // we don't know the size yet
-    			}
-    		}
+                return NetworkState.OK; // we don't know the size yet
+            } else {
+                if (networkType == ConnectivityManager.TYPE_MOBILE) {
+                    return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE; // we don't know the size yet
+                }
+            }
         }
 
         if (networkType == ConnectivityManager.TYPE_WIFI ||
@@ -606,7 +598,7 @@ public class DownloadInfo {
         }
         if (mBypassRecommendedSizeLimit == 0) {
             if (recommendedMaxBytesOverMobile != null
-                    && mTotalBytes > recommendedMaxBytesOverMobile) {
+                && mTotalBytes > recommendedMaxBytesOverMobile) {
                 return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
             }
         }
@@ -634,11 +626,11 @@ public class DownloadInfo {
                 if (mVisibility != Impl.VISIBILITY_HIDDEN && mStatus == Impl.STATUS_RUNNING) {
                     synchronized (Helpers.sDownloadsDomainCountMap) {
                         Helpers.sDownloadsDomainCountMap.put(mUriDomain, Helpers.sDownloadsDomainCountMap.containsKey(mUriDomain) ?
-                            (Helpers.sDownloadsDomainCountMap.get(mUriDomain)+1) : 1);
+                                                             (Helpers.sDownloadsDomainCountMap.get(mUriDomain)+1) : 1);
                     }
                 }
                 mTask = new DownloadThread(
-                        mContext, mSystemFacade, this, mStorageManager, mNotifier, mXlDownloadManager, mPreference);
+                                           mContext, mSystemFacade, this, mStorageManager, mNotifier, mXlDownloadManager, mPreference);
                 mSubmittedTask = executor.submit(mTask);
             }
             return isReady;
@@ -744,10 +736,10 @@ public class DownloadInfo {
      */
     public boolean shouldScanFile() {
         return (mMediaScanned == 0)
-                && (mDestination == Downloads.Impl.DESTINATION_EXTERNAL ||
-                        mDestination == Downloads.Impl.DESTINATION_FILE_URI && Helpers.shouldBeScanned(mHint) ||
-                        mDestination == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
-                && Downloads.Impl.isStatusSuccess(mStatus);
+            && (mDestination == Downloads.Impl.DESTINATION_EXTERNAL ||
+                mDestination == Downloads.Impl.DESTINATION_FILE_URI && Helpers.shouldBeScanned(mHint) ||
+                mDestination == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
+            && Downloads.Impl.isStatusSuccess(mStatus);
     }
 
     boolean hasEnoughSpace() {
@@ -765,7 +757,7 @@ public class DownloadInfo {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(getAllDownloadsUri());
         intent.setClassName(SizeLimitActivity.class.getPackage().getName(),
-                SizeLimitActivity.class.getName());
+                            SizeLimitActivity.class.getName());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);
         mContext.startActivity(intent);
@@ -792,8 +784,8 @@ public class DownloadInfo {
      */
     String getNotificationStringOfInsufficientSpace() {
         int notifyResId = isOnExternalStorage(getLocalUri()) ?
-                R.string.dialog_insufficient_space_on_external :
-                R.string.dialog_insufficient_space_on_cache;
+            R.string.dialog_insufficient_space_on_external :
+            R.string.dialog_insufficient_space_on_cache;
         return mContext.getString(notifyResId);
     }
 
@@ -802,8 +794,8 @@ public class DownloadInfo {
      */
     public static int queryDownloadStatus(ContentResolver resolver, long id) {
         final Cursor cursor = resolver.query(
-                ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
-                new String[] { Downloads.Impl.COLUMN_STATUS }, null, null, null);
+                                             ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
+                                             new String[] { Downloads.Impl.COLUMN_STATUS }, null, null, null);
         try {
             if (cursor.moveToFirst()) {
                 return cursor.getInt(0);
@@ -832,16 +824,16 @@ public class DownloadInfo {
 
     /*private*/ String getLocalUri() {
         switch(mDestination) {
-            case Downloads.Impl.DESTINATION_FILE_URI:
-                return mHint;
-            case Downloads.Impl.DESTINATION_EXTERNAL:
-            case Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD:
-                return mFileName != null ? Uri.fromFile(new File(mFileName)).toString() : null;
-            default:
-                return getAllDownloadsUri().toString();
+        case Downloads.Impl.DESTINATION_FILE_URI:
+            return mHint;
+        case Downloads.Impl.DESTINATION_EXTERNAL:
+        case Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD:
+            return mFileName != null ? Uri.fromFile(new File(mFileName)).toString() : null;
+        default:
+            return getAllDownloadsUri().toString();
         }
     }
-    
+
     private static boolean isMusicOnline(String pkgName, String appointName) {
         // When listen music online, must download temporary file in the order
         // from the beginning to the end. So, download engine should not be used.
@@ -858,10 +850,10 @@ public class DownloadInfo {
         }
         return false;
     }
-    
+
     private static int checkDownloadEngine(String pkgName, String appointName, boolean xlEngineFlag) {
-        XLConfig.LOGD(Constants.TAG, "(checkDownloadEngine) ---> pkgName=" + pkgName + 
-                ", appointName=" + appointName + ", xlEngineFlag=" + xlEngineFlag);
+        XLConfig.LOGD("(checkDownloadEngine) ---> pkgName=" + pkgName + 
+                      ", appointName=" + appointName + ", xlEngineFlag=" + xlEngineFlag);
         int xlTaskOpenMark = 1;
         if (xlEngineFlag) {
             if (pkgName != null && appointName != null) {
@@ -874,7 +866,7 @@ public class DownloadInfo {
         } else {
             xlTaskOpenMark = 0;
         }
-        XLConfig.LOGD(Constants.TAG, "(checkDownloadEngine) ---> after check, xlTaskOpenMark=" + xlTaskOpenMark);
+        XLConfig.LOGD("(checkDownloadEngine) ---> after check, xlTaskOpenMark=" + xlTaskOpenMark);
         return xlTaskOpenMark;
     }
 }

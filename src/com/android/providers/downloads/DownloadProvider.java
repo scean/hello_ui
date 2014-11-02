@@ -65,7 +65,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.SuperscriptSpan;
-import android.util.Log;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.google.android.collect.Maps;
@@ -286,7 +285,7 @@ public final class DownloadProvider extends ContentProvider {
      * an updated version of the database.
      */
     private final class DatabaseHelper extends SQLiteOpenHelper {
-        
+
         private SQLiteDatabase mSqldb;
         public DatabaseHelper(final Context context) {
             super(context, DB_NAME, null, DB_VERSION);
@@ -297,20 +296,16 @@ public final class DownloadProvider extends ContentProvider {
          */
         @Override
         public void onCreate(final SQLiteDatabase db) {
-            if (Constants.LOGVV) {
-                Log.v(Constants.TAG, "populating new database");
-            }
+            XLConfig.LOGD("populating new database");
             mSqldb = db;
             onUpgrade(db, 0, DB_VERSION);
         }
-        
+
         @Override
         public void onDowngrade (SQLiteDatabase db, int oldV, int newV) {
-            if (Constants.LOGVV) {
-                Log.v(Constants.TAG, "db downgrade");
-            }
+            XLConfig.LOGD("db downgrade");
         }
-        
+
         /**
          * Updates the database format when a content provider is used
          * with a database that was created with a different format.
@@ -326,13 +321,13 @@ public final class DownloadProvider extends ContentProvider {
                 oldV = 100;
             } else if (oldV < 100) {
                 // no logic to upgrade from these older version, just recreate the DB
-                Log.i(Constants.TAG, "Upgrading downloads database from version " + oldV
+                XLConfig.LOGD("Upgrading downloads database from version " + oldV
                       + " to version " + newV + ", which will destroy all old data");
                 oldV = 99;
             } else if (oldV > newV) {
                 // user must have downgraded software; we have no way to know how to downgrade the
                 // DB, so just recreate it
-                Log.i(Constants.TAG, "Downgrading downloads database from version " + oldV
+                XLConfig.LOGD("Downgrading downloads database from version " + oldV
                       + " (current version is " + newV + "), destroying all old data");
                 oldV = 99;
             }
@@ -341,7 +336,7 @@ public final class DownloadProvider extends ContentProvider {
                 upgradeTo(db, version);
             }
         }
-        
+
         /**
          * Upgrade database from (version - 1) to version.
          */
@@ -505,7 +500,7 @@ public final class DownloadProvider extends ContentProvider {
                         Downloads.Impl.COLUMN_DESCRIPTION + " TEXT, " +
                         Constants.MEDIA_SCANNED + " BOOLEAN);");
             } catch (SQLException ex) {
-                Log.e(Constants.TAG, "couldn't create table in downloads database");
+                XLConfig.LOGD("couldn't create table in downloads database", ex);
                 throw ex;
             }
         }
@@ -517,11 +512,10 @@ public final class DownloadProvider extends ContentProvider {
                     mSqldb.execSQL("DROP TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
                 }
             } catch (SQLException e) {
-                // TODO: handle exception
-                Log.e(Constants.TAG, "couldn't delete table in downloads database");
+                XLConfig.LOGD("couldn't delete table in downloads database", e);
             }
         }
-        
+
         private void createHeadersTable(SQLiteDatabase db) {
             db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
             db.execSQL("CREATE TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE + "(" +
@@ -554,7 +548,7 @@ public final class DownloadProvider extends ContentProvider {
             appInfo = getContext().getPackageManager().
                     getApplicationInfo("com.android.defcontainer", 0);
         } catch (NameNotFoundException e) {
-            Log.wtf(Constants.TAG, "Could not get ApplicationInfo for com.android.defconatiner", e);
+            XLConfig.LOGD("Could not get ApplicationInfo for com.android.defconatiner", e);
         }
         if (appInfo != null) {
             mDefContainerUid = appInfo.uid;
@@ -567,7 +561,7 @@ public final class DownloadProvider extends ContentProvider {
         try {
             SELinux.restorecon(mDownloadsDataDir.getCanonicalPath());
         } catch (IOException e) {
-            Log.wtf(Constants.TAG, "Could not get canonical path for download directory", e);
+            XLConfig.LOGD("Could not get canonical path for download directory", e);
         }
         return true;
     }
@@ -601,9 +595,7 @@ public final class DownloadProvider extends ContentProvider {
                 }
             }
             default: {
-                if (Constants.LOGV) {
-                    Log.v(Constants.TAG, "calling getType on an unknown URI: " + uri);
-                }
+                XLConfig.LOGD("calling getType on an unknown URI: " + uri);
                 throw new IllegalArgumentException("Unknown URI: " + uri);
             }
         }
@@ -620,14 +612,14 @@ public final class DownloadProvider extends ContentProvider {
         // note we disallow inserting into ALL_DOWNLOADS
         int match = sURIMatcher.match(uri);
         if (match != MY_DOWNLOADS) {
-            Log.d(Constants.TAG, "calling insert on an unknown/invalid URI: " + uri);
+            XLConfig.LOGD("calling insert on an unknown/invalid URI: " + uri);
             throw new IllegalArgumentException("Unknown/Invalid URI " + uri);
         }
 
         // if an identical task already exists, do not insert again
         long existId = checkDownloadTaskExist(uri, values);
+        XLConfig.LOGD("in insert url=" + uri.toString() + ", existsId=" + existId);
         if (existId > 0) {
-            Log.v("DownloadManager", "Download task already exists!");
             return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, existId);
         }
 
@@ -775,18 +767,11 @@ public final class DownloadProvider extends ContentProvider {
             copyBoolean(Downloads.Impl.COLUMN_ALLOW_METERED, values, filteredValues);
         }
 
-        if (Constants.LOGVV) {
-            Log.v(Constants.TAG, "initiating download with UID "
-                    + filteredValues.getAsInteger(Constants.UID));
-            if (filteredValues.containsKey(Downloads.Impl.COLUMN_OTHER_UID)) {
-                Log.v(Constants.TAG, "other UID " +
-                        filteredValues.getAsInteger(Downloads.Impl.COLUMN_OTHER_UID));
-            }
-        }
+        XLConfig.LOGD("in insert filteredValues: \n\t" + filteredValues.toString());
 
         long rowID = db.insert(DB_TABLE, null, filteredValues);
         if (rowID == -1) {
-            Log.d(Constants.TAG, "couldn't insert into downloads database");
+            XLConfig.LOGD("couldn't insert into downloads database");
             return null;
         }
 
@@ -981,6 +966,7 @@ public final class DownloadProvider extends ContentProvider {
                 }
                 error.append(entry.getKey());
             }
+            XLConfig.LOGD("checkInsertPermissions throw SecurityException: " + error.toString());
             throw new SecurityException(error.toString());
         }
     }
@@ -1001,6 +987,7 @@ public final class DownloadProvider extends ContentProvider {
                 return;
             }
         }
+        XLConfig.LOGD("enforceAllowedValues throw SecurityException: Invalid value for " + column + ": " + value);
         throw new SecurityException("Invalid value for " + column + ": " + value);
     }
 
@@ -1015,19 +1002,16 @@ public final class DownloadProvider extends ContentProvider {
         Helpers.validateSelection(selection, sAppReadableColumnsSet);
         SQLiteDatabase db = null;
 
-        try{
+        try {
         	 db = mOpenHelper.getReadableDatabase();
         } catch (SQLiteException e){
-        	e.printStackTrace();
         	((DatabaseHelper)mOpenHelper).deleteDownloadsTable();
         	return null;
-        } 
+        }
 
         int match = sURIMatcher.match(uri);
         if (match == -1) {
-            if (Constants.LOGV) {
-                Log.v(Constants.TAG, "querying unknown URI: " + uri);
-            }
+            XLConfig.LOGD("querying unknown URI: " + uri);
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
 
@@ -1063,7 +1047,7 @@ public final class DownloadProvider extends ContentProvider {
             }
         }
 
-        if (Constants.LOGVV) {
+        if (XLConfig.DEBUG) {
             logVerboseQueryInfo(projection, selection, selectionArgs, sort, db);
         }
 
@@ -1072,14 +1056,9 @@ public final class DownloadProvider extends ContentProvider {
 
         if (ret != null) {
             ret.setNotificationUri(getContext().getContentResolver(), uri);
-            if (Constants.LOGVV) {
-                Log.v(Constants.TAG,
-                        "created cursor " + ret + " on behalf of " + Binder.getCallingPid());
-            }
+            XLConfig.LOGD("created cursor " + ret + " on behalf of " + Binder.getCallingPid());
         } else {
-            if (Constants.LOGV) {
-                Log.v(Constants.TAG, "query failed in downloads database");
-            }
+            XLConfig.LOGD("query failed in downloads database");
         }
 
         return ret;
@@ -1125,7 +1104,7 @@ public final class DownloadProvider extends ContentProvider {
         sb.append("sort is ");
         sb.append(sort);
         sb.append(".");
-        Log.v(Constants.TAG, sb.toString());
+        XLConfig.LOGD(sb.toString());
     }
 
     private String getDownloadIdFromUri(final Uri uri) {
@@ -1171,14 +1150,16 @@ public final class DownloadProvider extends ContentProvider {
     private void deleteRequestHeaders(SQLiteDatabase db, String where, String[] whereArgs) {
         String[] projection = new String[] {Downloads.Impl._ID};
         Cursor cursor = db.query(DB_TABLE, projection, where, whereArgs, null, null, null, null);
-        try {
-            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                long id = cursor.getLong(0);
-                String idWhere = Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + "=" + id;
-                db.delete(Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE, idWhere, null);
+        if (cursor != null) {
+            try {
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                    long id = cursor.getLong(0);
+                    String idWhere = Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + "=" + id;
+                    db.delete(Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE, idWhere, null);
+                }
+            } finally {
+                cursor.close();
             }
-        } finally {
-            cursor.close();
         }
     }
 
@@ -1211,6 +1192,7 @@ public final class DownloadProvider extends ContentProvider {
 //            }
             return -1;
         }
+
         Helpers.validateSelection(where, sAppReadableColumnsSet);
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -1274,20 +1256,19 @@ public final class DownloadProvider extends ContentProvider {
             case ALL_DOWNLOADS_ID:
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 if (filteredValues.size() > 0) {
-                	try{
+                	try {
                 		count = db.update(DB_TABLE, filteredValues, selection.getSelection(),
                             selection.getParameters());
-                	}catch(Exception e){
+                	} catch(Exception e){
+                        XLConfig.LOGD("error when update!", e);
                 		count = 0;
-                		e.printStackTrace();
                 	}
                 } else {
                     count = 0;
                 }
                 break;
-
             default:
-                Log.d(Constants.TAG, "updating unknown/invalid URI: " + uri);
+                XLConfig.LOGD("updating unknown/invalid URI: " + uri);
                 throw new UnsupportedOperationException("Cannot update URI: " + uri);
         }
 
@@ -1373,7 +1354,7 @@ public final class DownloadProvider extends ContentProvider {
                 break;
 
             default:
-                Log.d(Constants.TAG, "deleting unknown/invalid URI: " + uri);
+                XLConfig.LOGD("deleting unknown/invalid URI: " + uri);
                 throw new UnsupportedOperationException("Cannot delete URI: " + uri);
         }
         notifyContentChanged(uri, match);
@@ -1385,7 +1366,7 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public ParcelFileDescriptor openFile(final Uri uri, String mode) throws FileNotFoundException {
-        if (Constants.LOGVV) {
+        if (XLConfig.DEBUG) {
             logVerboseOpenFileInfo(uri, mode);
         }
 
@@ -1410,6 +1391,7 @@ public final class DownloadProvider extends ContentProvider {
         if (path == null) {
             throw new FileNotFoundException("No filename found.");
         }
+
         if (!Helpers.isFilenameValid(path, mDownloadsDataDir)) {
             throw new FileNotFoundException("Invalid filename: " + path);
         }
@@ -1424,6 +1406,7 @@ public final class DownloadProvider extends ContentProvider {
                         mHandler, new OnCloseListener() {
                             @Override
                             public void onClose(IOException e) {
+                                XLConfig.LOGD("in openFile onClose!", e);
                                 final ContentValues values = new ContentValues();
                                 values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, file.length());
                                 values.put(Downloads.Impl.COLUMN_LAST_MODIFICATION,
@@ -1473,33 +1456,33 @@ public final class DownloadProvider extends ContentProvider {
     }
 
     private void logVerboseOpenFileInfo(Uri uri, String mode) {
-        Log.v(Constants.TAG, "openFile uri: " + uri + ", mode: " + mode
+        XLConfig.LOGD("openFile uri: " + uri + ", mode: " + mode
                 + ", uid: " + Binder.getCallingUid());
         Cursor cursor = query(Downloads.Impl.CONTENT_URI,
                 new String[] { "_id" }, null, null, "_id");
         if (cursor == null) {
-            Log.v(Constants.TAG, "null cursor in openFile");
+            XLConfig.LOGD("null cursor in openFile");
         } else {
             if (!cursor.moveToFirst()) {
-                Log.v(Constants.TAG, "empty cursor in openFile");
+                XLConfig.LOGD("empty cursor in openFile");
             } else {
                 do {
-                    Log.v(Constants.TAG, "row " + cursor.getInt(0) + " available");
+                    XLConfig.LOGD("row " + cursor.getInt(0) + " available");
                 } while(cursor.moveToNext());
             }
             cursor.close();
         }
         cursor = query(uri, new String[] { "_data" }, null, null, null);
         if (cursor == null) {
-            Log.v(Constants.TAG, "null cursor in openFile");
+            XLConfig.LOGD("null cursor in openFile");
         } else {
             if (!cursor.moveToFirst()) {
-                Log.v(Constants.TAG, "empty cursor in openFile");
+                XLConfig.LOGD("empty cursor in openFile");
             } else {
                 String filename = cursor.getString(0);
-                Log.v(Constants.TAG, "filename in openFile: " + filename);
+                XLConfig.LOGD("filename in openFile: " + filename);
                 if (new java.io.File(filename).isFile()) {
-                    Log.v(Constants.TAG, "file exists in openFile");
+                    XLConfig.LOGD("file exists in openFile");
                 }
             }
             cursor.close();
@@ -1561,7 +1544,7 @@ public final class DownloadProvider extends ContentProvider {
                 whereClause.append(jointConditions[i-1]+" ");
             }
             whereClause.append(Downloads.Impl.COLUMN_STATUS);
-            whereClause.append(" "+operators[i]+" ? ");
+            whereClause.append(" " + operators[i] + " ? ");
         }
         whereClause.append(")");
         return whereClause.toString();

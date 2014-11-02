@@ -79,7 +79,7 @@ public class SizeLimitActivity extends Activity
         Cursor cursor = getContentResolver().query(mCurrentUri, null, null, null, null);
         try {
             if (!cursor.moveToFirst()) {
-                Log.e(Constants.TAG, "Empty cursor for URI " + mCurrentUri);
+                XLConfig.LOGD("Empty cursor for URI " + mCurrentUri);
                 dialogClosed();
                 return;
             }

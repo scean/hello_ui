@@ -21,7 +21,6 @@ import static android.app.DownloadManager.COLUMN_LOCAL_URI;
 import static android.app.DownloadManager.COLUMN_MEDIA_TYPE;
 import static android.app.DownloadManager.COLUMN_URI;
 import static android.provider.Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
-import static com.android.providers.downloads.Constants.TAG;
 
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
@@ -31,7 +30,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.Downloads.Impl.RequestHeaders;
-import android.util.Log;
 
 import java.io.File;
 
@@ -43,7 +41,7 @@ public class OpenHelper {
     public static boolean startViewIntent(Context context, long id, int intentFlags) {
         final Intent intent = OpenHelper.buildViewIntent(context, id);
         if (intent == null) {
-            Log.w(TAG, "No intent built for " + id);
+            XLConfig.LOGD("No intent built for " + id);
             return false;
         }
 
@@ -52,7 +50,7 @@ public class OpenHelper {
             context.startActivity(intent);
             return true;
         } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "Failed to start " + intent + ": " + e);
+            XLConfig.LOGD("Failed to start " + intent + ": " + e);
             return false;
         }
     }
@@ -68,7 +66,7 @@ public class OpenHelper {
 
         final Cursor cursor = downManager.query(new DownloadManager.Query().setFilterById(id));
         try {
-            if (!cursor.moveToFirst()) {
+            if (cursor == null || !cursor.moveToFirst()) {
                 return null;
             }
 
@@ -100,7 +98,9 @@ public class OpenHelper {
 
             return intent;
         } finally {
-            cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 
@@ -110,15 +110,17 @@ public class OpenHelper {
                 RequestHeaders.URI_SEGMENT);
         final Cursor headers = context.getContentResolver()
                 .query(headersUri, null, null, null, null);
-        try {
-            while (headers.moveToNext()) {
-                final String header = getCursorString(headers, RequestHeaders.COLUMN_HEADER);
-                if ("Referer".equalsIgnoreCase(header)) {
-                    return getCursorUri(headers, RequestHeaders.COLUMN_VALUE);
+        if (headers != null) {
+            try {
+                while (headers.moveToNext()) {
+                    final String header = getCursorString(headers, RequestHeaders.COLUMN_HEADER);
+                    if ("Referer".equalsIgnoreCase(header)) {
+                        return getCursorUri(headers, RequestHeaders.COLUMN_VALUE);
+                    }
                 }
+            } finally {
+                headers.close();
             }
-        } finally {
-            headers.close();
         }
         return null;
     }
@@ -144,22 +146,10 @@ public class OpenHelper {
     }
 
     private static Uri getCursorUri(Cursor cursor, String column) {
-	    Uri uri =Uri.parse("");
-	    try{
-		    uri =  Uri.parse(getCursorString(cursor, column));
-	    }catch (Exception e){
-
-	    }
-        return uri;
+        return Uri.parse(getCursorString(cursor, column));
     }
 
     private static File getCursorFile(Cursor cursor, String column) {
-	    File file = null;
-		try {
-			file = new File(cursor.getString(cursor.getColumnIndexOrThrow(column)));
-		}catch (Exception e){
-
-		}
-	    return file;
+        return new File(cursor.getString(cursor.getColumnIndexOrThrow(column)));
     }
 }

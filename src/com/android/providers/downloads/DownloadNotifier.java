@@ -20,7 +20,6 @@ import static android.app.DownloadManager.Request.VISIBILITY_VISIBLE;
 import static android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
 import static android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION;
 import static android.provider.Downloads.Impl.STATUS_RUNNING;
-import static com.android.providers.downloads.Constants.TAG;
 
 import android.app.DownloadManager;
 import android.app.Notification;
@@ -102,6 +101,7 @@ public class DownloadNotifier {
      */
     public void notifyDownloadSpeed(long id, long bytesPerSecond) {
         synchronized (mDownloadSpeed) {
+            XLConfig.LOGD("in notifyDownloadSpeed id=" + id + ", bytesPerSecond=" + bytesPerSecond);
             if (bytesPerSecond != 0) {
                 mDownloadSpeed.put(id, bytesPerSecond);
                 mDownloadTouch.put(id, SystemClock.elapsedRealtime());
@@ -338,7 +338,7 @@ public class DownloadNotifier {
             for (int i = 0; i < mDownloadSpeed.size(); i++) {
                 final long id = mDownloadSpeed.keyAt(i);
                 final long delta = SystemClock.elapsedRealtime() - mDownloadTouch.get(id);
-                Log.d(TAG, "Download " + id + " speed " + mDownloadSpeed.valueAt(i) + "bps, "
+                XLConfig.LOGD("Download " + id + " speed " + mDownloadSpeed.valueAt(i) + "bps, "
                         + delta + "ms ago");
             }
         }

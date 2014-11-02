@@ -39,7 +39,6 @@ import android.content.Context;
 import android.os.SystemClock;
 import android.provider.Downloads;
 import android.text.TextUtils;
-import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.net.Uri;
 import android.os.Process;
@@ -82,9 +81,9 @@ public class Helpers {
     /** Regex used to parse content-disposition headers */
     private static final Pattern CONTENT_DISPOSITION_PATTERN =
             Pattern.compile("attachment;\\s*filename\\s*=\\s*\"([^\"]*)\"");
-	private static final Object sUniqueLock = new Object();	
+	private static final Object sUniqueLock = new Object();
 	/** When download is not finished, filename has extra extension ".part" */
-    public static final String sDownloadingExtension = ".midownload";	
+    public static final String sDownloadingExtension = ".midownload";
     /** track event id for xiaomi analysis */
     private static final String TRACK_EVENT_DOWNLOAD_MANAGER = "download_manager_2";
     /** package name for xiaomi analysis */
@@ -140,6 +139,7 @@ public class Helpers {
                 return m.group(1);
             }
         } catch (IllegalStateException ex) {
+            XLConfig.LOGD("error when parseContentDisposition: ", ex);
              // This function is defined as returning null when it can't parse the header
         }
         return null;
@@ -167,9 +167,8 @@ public class Helpers {
             //path = Uri.parse(hint).getPath();
             try{
         		path = Uri.parse(hint).getPath();
-        	}catch(NullPointerException npe){
-        		npe.printStackTrace();
-        		Log.e(Constants.TAG, "hint is null!");
+        	} catch(NullPointerException npe){
+                XLConfig.LOGD("hint is null: ", npe);
         	}
         } else {
             base = storageManager.locateDestinationDirectory(mimeType, destination,
@@ -215,9 +214,7 @@ public class Helpers {
             filename = base.getPath() + File.separator + filename;
         }
 
-        if (Constants.LOGVV) {
-            Log.v(Constants.TAG, "target file: " + filename + extension);
-        }
+        XLConfig.LOGD("target file: " + filename + extension);
 
         synchronized (sUniqueLock) {
             final String path = chooseUniqueFilenameLocked(
@@ -241,9 +238,7 @@ public class Helpers {
 
         // First, try to use the hint from the application, if there's one
         if (filename == null && hint != null && !hint.endsWith("/")) {
-            if (Constants.LOGVV) {
-                Log.v(Constants.TAG, "getting filename from hint");
-            }
+            XLConfig.LOGD("getting filename from hint");
             int index = hint.lastIndexOf('/') + 1;
             if (index > 0) {
                 filename = hint.substring(index);
@@ -256,9 +251,7 @@ public class Helpers {
         if (filename == null && contentDisposition != null) {
             filename = parseContentDisposition(contentDisposition);
             if (filename != null) {
-                if (Constants.LOGVV) {
-                    Log.v(Constants.TAG, "getting filename from content-disposition");
-                }
+                XLConfig.LOGD("getting filename from content-disposition");
                 int index = filename.lastIndexOf('/') + 1;
                 if (index > 0) {
                     filename = filename.substring(index);
@@ -272,9 +265,7 @@ public class Helpers {
             if (decodedContentLocation != null
                     && !decodedContentLocation.endsWith("/")
                     && decodedContentLocation.indexOf('?') < 0) {
-                if (Constants.LOGVV) {
-                    Log.v(Constants.TAG, "getting filename from content-location");
-                }
+                XLConfig.LOGD("getting filename from content-location");
                 int index = decodedContentLocation.lastIndexOf('/') + 1;
                 if (index > 0) {
                     filename = decodedContentLocation.substring(index);
@@ -291,9 +282,7 @@ public class Helpers {
                     && !decodedUrl.endsWith("/") && decodedUrl.indexOf('?') < 0) {
                 int index = decodedUrl.lastIndexOf('/') + 1;
                 if (index > 0) {
-                    if (Constants.LOGVV) {
-                        Log.v(Constants.TAG, "getting filename from uri");
-                    }
+                    XLConfig.LOGD("getting filename from uri");
                     filename = decodedUrl.substring(index);
                 }
             }
@@ -301,9 +290,7 @@ public class Helpers {
 
         // Finally, if couldn't get filename from URI, get a generic filename
         if (filename == null) {
-            if (Constants.LOGVV) {
-                Log.v(Constants.TAG, "using default filename");
-            }
+            XLConfig.LOGD("using default filename");
             filename = Constants.DEFAULT_DL_FILENAME;
         }
 
@@ -319,33 +306,23 @@ public class Helpers {
         if (mimeType != null) {
             extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
             if (extension != null) {
-                if (Constants.LOGVV) {
-                    Log.v(Constants.TAG, "adding extension from type");
-                }
+                XLConfig.LOGD("adding extension from type");
                 extension = "." + extension;
             } else {
-                if (Constants.LOGVV) {
-                    Log.v(Constants.TAG, "couldn't find extension for " + mimeType);
-                }
+                XLConfig.LOGD("couldn't find extension for " + mimeType);
             }
         }
         if (extension == null) {
             if (mimeType != null && mimeType.toLowerCase().startsWith("text/")) {
                 if (mimeType.equalsIgnoreCase("text/html")) {
-                    if (Constants.LOGVV) {
-                        Log.v(Constants.TAG, "adding default html extension");
-                    }
+                    XLConfig.LOGD("adding default html extension");
                     extension = Constants.DEFAULT_DL_HTML_EXTENSION;
                 } else if (useDefaults) {
-                    if (Constants.LOGVV) {
-                        Log.v(Constants.TAG, "adding default text extension");
-                    }
+                    XLConfig.LOGD("adding default text extension");
                     extension = Constants.DEFAULT_DL_TEXT_EXTENSION;
                 }
             } else if (useDefaults) {
-                if (Constants.LOGVV) {
-                    Log.v(Constants.TAG, "adding default binary extension");
-                }
+                XLConfig.LOGD("adding default binary extension");
                 extension = Constants.DEFAULT_DL_BINARY_EXTENSION;
             }
         }
@@ -363,20 +340,14 @@ public class Helpers {
             if (typeFromExt == null || !typeFromExt.equalsIgnoreCase(mimeType)) {
                 extension = chooseExtensionFromMimeType(mimeType, false);
                 if (extension != null) {
-                    if (Constants.LOGVV) {
-                        Log.v(Constants.TAG, "substituting extension from type");
-                    }
+                    XLConfig.LOGD("substituting extension from type");
                 } else {
-                    if (Constants.LOGVV) {
-                        Log.v(Constants.TAG, "couldn't find extension for " + mimeType);
-                    }
+                    XLConfig.LOGD("couldn't find extension for " + mimeType);
                 }
             }
         }
         if (extension == null) {
-            if (Constants.LOGVV) {
-                Log.v(Constants.TAG, "keeping extension");
-            }
+            XLConfig.LOGD("keeping extension");
             extension = filename.substring(lastDotIndex);
         }
         return extension;
@@ -418,9 +389,7 @@ public class Helpers {
                 if (!new File(fullFilename).exists() && !new File(downloadingFilename).exists()) {
                     return fullFilename;
                 }
-                if (Constants.LOGVV) {
-                    Log.v(Constants.TAG, "file with sequence number " + sequence + " exists");
-                }
+                XLConfig.LOGD("file with sequence number " + sequence + " exists");
                 sequence += sRandom.nextInt(magnitude) + 1;
             }
         }
@@ -441,7 +410,7 @@ public class Helpers {
                     Environment.getExternalStorageDirectory().getCanonicalPath(),
             };
         } catch (IOException e) {
-            Log.w(Constants.TAG, "Failed to resolve canonical path: " + e);
+            XLConfig.LOGD("Failed to resolve canonical path: ", e);
             return false;
         }
 
@@ -468,11 +437,7 @@ public class Helpers {
                 throw new IllegalArgumentException("syntax error");
             }
         } catch (RuntimeException ex) {
-            if (Constants.LOGV) {
-                Log.d(Constants.TAG, "invalid selection [" + selection + "] triggered " + ex);
-            } else if (false) {
-                Log.d(Constants.TAG, "invalid selection triggered " + ex);
-            }
+            XLConfig.LOGD("invalid selection [" + selection + "] triggered ", ex);
             throw ex;
         }
 
@@ -815,8 +780,10 @@ public class Helpers {
     public static void trackDownloadEvent(Context context, String pkgName, long xlErrorCode,
             long xlTaskId, int errorCode, boolean useEngine, boolean inWhitelist, long size,
             float percent, float contribution, long timeUsage, String url, String refer) {
-		if(analyticsMark)
-			return;			
+        if(analyticsMark) {
+            return;
+        }
+
         // get ip and net type
         int netType = ConnectivityManager.TYPE_NONE;
         ConnectivityManager connManager = (ConnectivityManager)(context.getSystemService(Context.CONNECTIVITY_SERVICE));
@@ -838,15 +805,13 @@ public class Helpers {
         // track
         Analytics tracker = Analytics.getInstance();
         Map <String,String> trackData = new HashMap<String, String>();
-        if (DEBUG) {
-            Log.v(Constants.TAG, "track download event : error code = " + errorCode +
-                    " xl error code = " + xlErrorCode + ", xl task id = " + xlTaskId +
-                    ", use engine = " + useEngine + ", size = " + size + ", contribution = " + contribution +
-                    "%, percent = " + percent + "%, time usage = " + timeUsage + ", in white list = " + inWhitelist +
-                    ", refer = " + refer + ", miui version = " + Build.VERSION.INCREMENTAL +
-                    ", xunlei version = " + xlVersion + ", net type = " + netType + ", package = " + pkgName +
-                    ", xunlei switch = " + xunlei_switch);
-        }
+        XLConfig.LOGD("track download event : error code = " + errorCode +
+                      " xl error code = " + xlErrorCode + ", xl task id = " + xlTaskId +
+                      ", use engine = " + useEngine + ", size = " + size + ", contribution = " + contribution +
+                      "%, percent = " + percent + "%, time usage = " + timeUsage + ", in white list = " + inWhitelist +
+                      ", refer = " + refer + ", miui version = " + Build.VERSION.INCREMENTAL +
+                      ", xunlei version = " + xlVersion + ", net type = " + netType + ", package = " + pkgName +
+                      ", xunlei switch = " + xunlei_switch);
         trackData.put(TRACK_ID_MIUI_VERSION, Build.VERSION.INCREMENTAL);
         trackData.put(TRACK_ID_PACKAGE_NAME, pkgName);
         trackData.put(TRACK_ID_ERROR_CODE, Integer.toString(errorCode));
@@ -871,8 +836,10 @@ public class Helpers {
      * track for "unable to open database" because up to open files limit
      */
     public static void trackOpenTooManyFilesEvent(Context context) {
-		if(analyticsMark)
-			return;	
+        if(analyticsMark) {
+            return;
+        }
+
         final String track_event = "downloadprovider_error_open_too_many_file";
         final String track_id_prefix = "file_link_";
         // each track id contain 50 file pathes, and seperator is "|"
@@ -913,27 +880,29 @@ public class Helpers {
                     }
                     if (!TextUtils.isEmpty(pathes)) {
                         trackData.put(track_id, pathes);
-                        Log.v(Constants.TAG, i + ": pathes = " + pathes);
+                        XLConfig.LOGD(i + ": pathes = " + pathes);
                     }
                 }
                 tracker.startSession(context);
                 tracker.trackEvent(track_event, trackData);
                 tracker.endSession();
-                Log.v(Constants.TAG, "trackData's size = " + trackData.size());
+                XLConfig.LOGD("trackData's size = " + trackData.size());
             } else {
                 errString = "Failed to list files in directory " + fdDir + ".";
             }
         } else {
             errString = fdDir + " is not a directory.";
         }
-        Log.v(Constants.TAG, "trackOpenTooManyFileEvent, " + "pid = " + Process.myPid() + " : " + errString);
+        XLConfig.LOGD("trackOpenTooManyFileEvent, " + "pid = " + Process.myPid() + " : " + errString);
     }
 
     public static void trackDownloadServiceStatus(Context context, int status, String pkgName) {
-		if(analyticsMark)
-			return;	
-    	Map<String, String> trackData = new HashMap<String, String>();
-    	
+        if(analyticsMark) {
+            return;
+        }
+
+        Map<String, String> trackData = new HashMap<String, String>();
+
         String device = android.os.Build.MODEL;
         String imsi = "";
         String imei = "";
@@ -947,10 +916,10 @@ public class Helpers {
         if (wifiManager != null) {
             mac = wifiManager.getConnectionInfo().getMacAddress();
         }
-        
+
         boolean xlVipEnable = !getVipSwitchStatus(context);
         boolean xlEnable = !getXunleiUsagePermission(context);
-        
+
         String MIUIVersion = Build.VERSION.INCREMENTAL;
         String time = Long.toString(System.currentTimeMillis() / 1000);
         trackData.put("download_event", Integer.toString(10002));
@@ -959,40 +928,40 @@ public class Helpers {
         //trackData.put("xunlei_id", xlId);
         trackData.put("xunlei_open", String.valueOf(xlEnable ? 1 : 0));
         trackData.put("xunlei_vip_open", String.valueOf(xlVipEnable ? 1 : 0));
-      //  trackData.put("application_name", pkgName);
+        //trackData.put("application_name", pkgName);
         trackData.put("product_name", DownloadService.PRODUCT_NAME);
         trackData.put("product_version", DownloadService.PRODUCT_VERSION);
         trackData.put("phone_type", android.os.Build.MODEL);
         trackData.put("system_version", android.os.Build.VERSION.RELEASE);
         trackData.put("miui_version", MIUIVersion);
         //trackData.put("device", device);
-       // trackData.put("imsi", imsi);
-      //  trackData.put("imei", imei);
-       // trackData.put("mac", mac);
+        //trackData.put("imsi", imsi);
+        //trackData.put("imei", imei);
+        //trackData.put("mac", mac);
         trackData.put("network_type", Integer.toString(XLUtil.getNetwrokType(context)));
         trackData.put("time", time);
-        
+
         Analytics tracker = Analytics.getInstance();
         tracker.startSession(context);
         tracker.trackEvent("download_service_status_change_event", trackData);
         tracker.endSession();
-        
+
         traceLog(STAT_TAG_TASKSTATUS, "download_service_status_change_event", trackData);
     }
-    
+
     static void traceLog(String tag, String behavior, Map<String, String> trackData) {
-    	  if (DEBUG) {
-      		StringBuffer buffer = new StringBuffer();
-      		for (Map.Entry<String, String> entry : trackData.entrySet()) {
-      			buffer.append(entry.getKey());
-      			buffer.append(": ");
-      			buffer.append(entry.getValue());
-      			buffer.append("; ");
-      		}
-      		Log.d(tag, "event = " + behavior + ", data = " + buffer.toString());
-      	}
-      }
-    
+        if (DEBUG) {
+            StringBuffer buffer = new StringBuffer();
+            for (Map.Entry<String, String> entry : trackData.entrySet()) {
+                buffer.append(entry.getKey());
+                buffer.append(": ");
+                buffer.append(entry.getValue());
+                buffer.append("; ");
+            }
+            XLConfig.LOGD("event = " + behavior + ", data = " + buffer.toString());
+        }
+    }
+
     static public boolean getVipSwitchStatus(Context context) {
         long vipflag = DownloadService.XUNLEI_VIP_ENABLED;
         try {
@@ -1002,23 +971,21 @@ public class Helpers {
                     .getSharedPreferences(DownloadService.PREF_NAME_IN_UI, Context.MODE_WORLD_READABLE);
             vipflag = sharedPreferences.getLong(DownloadService.PREF_KEY_XUNLEI_VIP, DownloadService.XUNLEI_VIP_ENABLED);
         } catch (Exception e) {
-            // TODO: handle exception
-            XLConfig.LOGD(Constants.TAG, "xunlei(getVipSwitchStatus) ---> no vip flag in ui db.");
+            XLConfig.LOGD("xunlei(getVipSwitchStatus) ---> no vip flag in ui db.");
         }
-        
+
         return vipflag == DownloadService.XUNLEI_VIP_ENABLED;
     }
-    
+
     public static boolean isInternationalBuilder(){
         boolean res = false;
         if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) {
             res =true;
         }
-        return  res;
+        return res;
     }
-    
-    public static boolean getXunleiUsagePermission(Context context)
-    {
+
+    public static boolean getXunleiUsagePermission(Context context) {
         // get DownloadProvider's context
         if (isInternationalBuilder()) {
             return false;
@@ -1027,26 +994,28 @@ public class Helpers {
         final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads.ui";
         final String PREF_NAME = "download_pref";
         final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
-        
+
         Context ct = null;
         try {
             ct = context.createPackageContext(DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
         } catch (Exception e) {
             return false;
         }
-        
+
         SharedPreferences xPreferences = ct.getSharedPreferences(PREF_NAME, Context.MODE_MULTI_PROCESS);
         boolean xunlei_usage = xPreferences.getBoolean(PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
         return xunlei_usage;
     }
-    
+
     /**
      * track for online
      */
     public static void trackOnlineStatus(Context context, int status, int taskId, boolean xlEnable, String xmId,
                             String xlId, String pkgName, String product, String productVersion) {
-		if(analyticsMark)
-			return;							
+        if(analyticsMark) {
+            return;
+        }
+
         int network = -1;
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager != null) {
@@ -1062,7 +1031,7 @@ public class Helpers {
         tracker.startSession(context);
         tracker.trackEvent("download_xunlei_online_event", trackData);
         tracker.endSession();
-        
+
         traceLog(STAT_TAG_ONLINESTATUS, "download_xunlei_online_event", trackData);
     }
 
@@ -1072,22 +1041,24 @@ public class Helpers {
     public static void trackDownloadStart(Context context, int status, int taskId, boolean xlEnable, boolean xlVipEnable, String xmId,
                             String xlId, String pkgName, String product, String productVersion, int network,
                             int cid, int gcid, long filesize, String url, String filename, long duration) {
-		if(analyticsMark)
-			return;							
+        if(analyticsMark) {
+            return;
+        }
+
         // do track
         Analytics tracker = Analytics.getInstance();
         Map <String,String> trackData = new HashMap<String, String>();
         trackCommon(context, trackData, status, taskId, xlEnable, xmId, xlId, pkgName, product, productVersion, network);
-		//trackData.put("cid", Integer.toString(cid));
+        //trackData.put("cid", Integer.toString(cid));
         //trackData.put("gcid", Integer.toString(gcid));
         trackData.put("file_size", Long.toString(filesize));
         //trackData.put("source_url", url);
         trackData.put("file_name", filename);
-		// trackData.put("duration", Long.toString(duration));
+        // trackData.put("duration", Long.toString(duration));
         tracker.startSession(context);
         tracker.trackEvent("download_start_event", trackData);
         tracker.endSession();
-        
+
         traceLog(STAT_TAG_TASKSTATUS, "download_start_event", trackData);
     }
 
@@ -1098,8 +1069,10 @@ public class Helpers {
                             String xlId, String pkgName, String product, String productVersion, int network,
                             long duration, long totalBytes, long urlBytes, long huiyuanBytes, long p2sBytes,
                             long p2pBytes, int reason) {
-		if(analyticsMark)
-			return;							
+        if(analyticsMark) {
+            return;
+        }
+
         // do track
         Analytics tracker = Analytics.getInstance();
         Map <String,String> trackData = new HashMap<String, String>();
@@ -1108,13 +1081,13 @@ public class Helpers {
         trackData.put("total_bytes", Long.toString(totalBytes));
         trackData.put("seedurl_bytes", Long.toString(urlBytes));
         trackData.put("huiyuan_bytes", Long.toString(huiyuanBytes));
-//        trackData.put("p2s_bytes", Long.toString(p2sBytes));
-//        trackData.put("p2pBytes", Long.toString(p2pBytes));
+        // trackData.put("p2s_bytes", Long.toString(p2sBytes));
+        // trackData.put("p2pBytes", Long.toString(p2pBytes));
         trackData.put("reason", Integer.toString(reason));
         tracker.startSession(context);
         tracker.trackEvent("download_stop_event", trackData);
         tracker.endSession();
-        
+
         traceLog(STAT_TAG_TASKSTATUS, "download_stop_event", trackData);
     }
 
@@ -1125,8 +1098,10 @@ public class Helpers {
                             String xlId, String pkgName, String product, String productVersion, int network,
                             long duration, long totalBytes, long urlBytes, long huiyuanBytes, long p2sBytes,
                             long p2pBytes, int changeCode, int speedLevel) {
-		if(analyticsMark)
-			return;							
+        if(analyticsMark) {
+            return;
+        }
+
         // do track
         Analytics tracker = Analytics.getInstance();
         Map <String,String> trackData = new HashMap<String, String>();
@@ -1142,7 +1117,7 @@ public class Helpers {
         tracker.startSession(context);
         tracker.trackEvent("download_xunlei_speed_status_change_event", trackData);
         tracker.endSession();
-        
+
         traceLog(STAT_TAG_TASKSTATUS, "download_xunlei_speed_status_change_event", trackData);
     }
 
@@ -1151,8 +1126,10 @@ public class Helpers {
      */
     static void trackCommon(Context context, Map<String, String> trackData, int status, int taskId, boolean xlEnable,
                             String xmId, String xlId, String pkgName, String product, String productVersion, int network) {
-		if(analyticsMark)
-			return;							
+        if(analyticsMark) {
+            return;
+        }
+
         if (trackData == null) return;
         String device = android.os.Build.MODEL;
         String imsi = "";
@@ -1180,13 +1157,13 @@ public class Helpers {
         trackData.put("product_name", DownloadService.PRODUCT_NAME);
         trackData.put("product_version", DownloadService.PRODUCT_VERSION);
         trackData.put("application_name", pkgName);
-//        trackData.put("xunlei_product", product);
-//        trackData.put("xunlei_product_version", productVersion);
+        // trackData.put("xunlei_product", product);
+        // trackData.put("xunlei_product_version", productVersion);
         trackData.put("phone_type", android.os.Build.MODEL);
         trackData.put("system_version", android.os.Build.VERSION.RELEASE);
         trackData.put("miui_version", MIUIVersion);
-//        trackData.put("device", device);
-//        trackData.put("imsi", imsi);
+        // trackData.put("device", device);
+        // trackData.put("imsi", imsi);
        // trackData.put("imei", imei);
        // trackData.put("mac", mac);
         trackData.put("network_type", Integer.toString(network));

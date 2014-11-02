@@ -6,7 +6,7 @@ import android.text.TextUtils;
 public class XLConfig {
     public static final boolean DEBUG = true;
 
-    public static final String TAG = "DownloadProvider";
+    public static final String TAG = "DownloadManager";
 
     public static final String LOG_DIR = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) ? Environment.getExternalStorageDirectory().getAbsolutePath() + "/.dlprovider" : null;
 
@@ -33,12 +33,18 @@ public class XLConfig {
     public static final String ACTION_INTENT_XL_DOWNLOAD_START = "com.process.media.broadcast.xltask.startdownload";
 
     public static void LOGD(String message) {
-        LOGD(TAG, message);
+        DebugLog.d(TAG, message);
+    }
+
+    public static void LOGD(String message, Throwable t) {
+        DebugLog.d(TAG, message, t);
     }
 
     public static void LOGD(String tag, String message) {
-        if (!TextUtils.isEmpty(message)) {
-            DebugLog.d(tag, message);
-        }
+        DebugLog.d(tag, message);
+    }
+
+    public static void LOGD(String tag, String message, Throwable t) {
+        DebugLog.d(tag, message, t);
     }
 }

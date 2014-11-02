@@ -13,8 +13,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.io.File;
 import java.io.IOException;
-import miui.accounts.ExtraAccountManager;
 
+import miui.accounts.ExtraAccountManager;
 
 import com.xiaomi.mipush.sdk.PushMessageReceiver;
 import com.xiaomi.mipush.sdk.MiPushMessage;
@@ -23,6 +23,7 @@ import com.xiaomi.mipush.sdk.MiPushClient;
 
 public class DownloadPushMessageReceiver extends PushMessageReceiver {
     private static final String DEFAULT_FILENAME = "miui_attachment";
+
     @Override
     public void onReceiveMessage(Context context, MiPushMessage message) {
         try {
@@ -39,11 +40,11 @@ public class DownloadPushMessageReceiver extends PushMessageReceiver {
             request.allowScanningByMediaScanner();
             DownloadManager dm = (DownloadManager)context.getSystemService(Context.DOWNLOAD_SERVICE);
             dm.enqueue(request);
-            Log.v(Constants.TAG, "Created a pushed task : " + urlString);
+            XLConfig.LOGD("Created a pushed task : " + urlString);
         } catch (MalformedURLException e) {
-            Log.e(Constants.TAG, "Pushed url is invalid!");
+            XLConfig.LOGD("Pushed url is invalid!", e);
         } catch (NullPointerException e) {
-            Log.e(Constants.TAG, "Pushed empty url!");
+            XLConfig.LOGD("Pushed empty url!", e);
         }
     }
 
@@ -51,6 +52,7 @@ public class DownloadPushMessageReceiver extends PushMessageReceiver {
     public void onCommandResult(Context context, MiPushCommandMessage message) {
         long result = message.getResultCode();
         String command = message.getCommand();
+
         if (MiPushClient.COMMAND_REGISTER.equals(command)) {
             if (result == 0) {
                 try {
@@ -59,14 +61,14 @@ public class DownloadPushMessageReceiver extends PushMessageReceiver {
                         MiPushClient.setAlias(context, account.name, null);
                     }
                 } catch (Exception e) {
-                    Log.e(Constants.TAG, "Failed to get Xiaomi Account.");
+                    XLConfig.LOGD("Failed to get Xiaomi Account.", e);
                 }
             } else {
-                Log.e(Constants.TAG, "Failed to register MiPush!");
+                XLConfig.LOGD("Failed to register MiPush!");
             }
         } else if (MiPushClient.COMMAND_SET_ALIAS.equals(command)) {
             if (result != 0) {
-                Log.e(Constants.TAG, "Failed to set MiPush alias!");
+                XLConfig.LOGD("Failed to set MiPush alias!");
             }
         }
     }
@@ -119,9 +121,9 @@ public class DownloadPushMessageReceiver extends PushMessageReceiver {
                 }
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            XLConfig.LOGD("Error when getFileName!", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            XLConfig.LOGD("Error when getFileName", e);
         } finally {
             if (conn != null) {
                 conn.disconnect();

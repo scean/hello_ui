@@ -17,8 +17,6 @@
 package com.android.providers.downloads;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
-import static com.android.providers.downloads.Constants.LOGV;
-import static com.android.providers.downloads.Constants.TAG;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -99,7 +97,7 @@ public class DownloadScanner implements MediaScannerConnectionClient {
      * @see #hasPendingScans()
      */
     public void requestScan(DownloadInfo info) {
-        if (LOGV) Log.v(TAG, "requestScan() for " + info.mFileName);
+        XLConfig.LOGD("requestScan() for " + info.mFileName);
         synchronized (mConnection) {
             final ScanRequest req = new ScanRequest(info.mId, info.mFileName, info.mMimeType);
             mPending.put(req.path, req);
@@ -132,7 +130,7 @@ public class DownloadScanner implements MediaScannerConnectionClient {
             req = mPending.remove(path);
         }
         if (req == null) {
-            Log.w(TAG, "Missing request for path " + path);
+            XLConfig.LOGD("Missing request for path " + path);
             return;
         }
 

@@ -32,7 +32,7 @@ public class Constants {
      * The set that contains download ids that need to update their download progress.
      */
     public static HashSet<Long> sDownloadSetNeedToUpdateProgress = new HashSet<Long>();
-    /** Tag used for debugging/logging */
+
     public static final String TAG = "DownloadManager";
 
     /** The column that used to be used for the HTTP method of the request */
@@ -169,22 +169,6 @@ public class Constants {
      */
     public static final int RETRY_FIRST_DELAY = 3;
 
-    /** Enable separate connectivity logging */
-    static final boolean LOGX = false;
-
-    /** Enable verbose logging - use with "setprop log.tag.DownloadManager VERBOSE" */
-    private static final boolean LOCAL_LOGV = false;
-    public static final boolean LOGV = LOCAL_LOGV && Log.isLoggable(TAG, Log.VERBOSE);
-
-    /** Enable verbose logging for xunlei */
-    public static final boolean XL_LOG = false;
-    /** Enable super-verbose logging */
-    private static final boolean LOCAL_LOGVV = false;
-    public static final boolean LOGVV = LOCAL_LOGVV && LOGV;
-
-    /** SharedPreferences file name and key for xunlei switch controlled by user */
-    public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
-    public static final String PREF_NAME = "download_pref";
     public static final String STORAGE_AUTHORITY = "com.android.providers.downloads.documents";
     public static final String STORAGE_ROOT_ID = "downloads";
 }

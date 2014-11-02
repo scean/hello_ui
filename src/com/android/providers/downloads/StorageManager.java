@@ -16,9 +16,6 @@
 
 package com.android.providers.downloads;
 
-import static com.android.providers.downloads.Constants.LOGV;
-import static com.android.providers.downloads.Constants.TAG;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,10 +125,7 @@ class StorageManager {
     void verifySpace(int destination, String path, long length) throws StopRequestException {
         resetBytesDownloadedSinceLastCheckOnSpace();
         File dir = null;
-        if (Constants.LOGV) {
-            Log.i(Constants.TAG, "in verifySpace, destination: " + destination +
-                    ", path: " + path + ", length: " + length);
-        }
+        XLConfig.LOGD("in verifySpace, destination: " + destination + ", path: " + path + ", length: " + length);
         if (path == null) {
             throw new IllegalArgumentException("path can't be null");
         }
@@ -206,7 +200,7 @@ class StorageManager {
                  * few MB of space left on the filesystem.
                  */
                 if (root.equals(mSystemCacheDir)) {
-                    Log.w(Constants.TAG, "System cache dir ('/cache') is running low on space." +
+                    XLConfig.LOGD("System cache dir ('/cache') is running low on space." +
                             "space available (in bytes): " + bytesAvailable);
                 } else {
                     throw new StopRequestException(Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR,
@@ -220,7 +214,7 @@ class StorageManager {
             bytesAvailable = getAvailableBytesInDownloadsDataDir(mDownloadDataDir);
             if (bytesAvailable < sDownloadDataDirLowSpaceThreshold) {
                 // print a warning
-                Log.w(Constants.TAG, "Downloads data dir: " + root +
+                XLConfig.LOGD("Downloads data dir: " + root +
                         " is running low on space. space available (in bytes): " + bytesAvailable);
             }
             if (bytesAvailable < targetBytes) {
@@ -251,9 +245,7 @@ class StorageManager {
         for (int i = 0; i < size; i++) {
             space -= files[i].length();
         }
-        if (Constants.LOGV) {
-            Log.i(Constants.TAG, "available space (in bytes) in downloads data dir: " + space);
-        }
+        XLConfig.LOGD("available space (in bytes) in downloads data dir: " + space);
         return space;
     }
 
@@ -262,10 +254,8 @@ class StorageManager {
         // put a bit of margin (in case creating the file grows the system by a few blocks)
         long availableBlocks = (long) stat.getAvailableBlocks() - 4;
         long size = stat.getBlockSize() * availableBlocks;
-        if (Constants.LOGV) {
-            Log.i(Constants.TAG, "available space (in bytes) in filesystem rooted at: " +
+        XLConfig.LOGD("available space (in bytes) in filesystem rooted at: " +
                     root.getPath() + " is: " + size);
-        }
         return size;
     }
 
@@ -306,10 +296,8 @@ class StorageManager {
      * the total byte size is greater than targetBytes
      */
     private long discardPurgeableFiles(int destination, long targetBytes) {
-        if (true || Constants.LOGV) {
-            Log.i(Constants.TAG, "discardPurgeableFiles: destination = " + destination +
+        XLConfig.LOGD("discardPurgeableFiles: destination = " + destination +
                     ", targetBytes = " + targetBytes);
-        }
         String destStr  = (destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION) ?
                 String.valueOf(destination) :
                 String.valueOf(Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
@@ -333,13 +321,10 @@ class StorageManager {
                 if (TextUtils.isEmpty(data)) continue;
 
                 File file = new File(data);
-                if (Constants.LOGV) {
-                    Log.d(Constants.TAG, "purging " + file.getAbsolutePath() + " for "
-                            + file.length() + " bytes");
-                }
+                XLConfig.LOGD("purging " + file.getAbsolutePath() + " for " + file.length() + " bytes");
                 totalFreed += file.length();
                 file.delete();
-                Log.v(Constants.TAG, "StorageManager.discardPurgeableFiles: delete file: " + data);
+                XLConfig.LOGD("StorageManager.discardPurgeableFiles: delete file: " + data);
                 long id = cursor.getLong(cursor.getColumnIndex(Downloads.Impl._ID));
                 mContext.getContentResolver().delete(
                         ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
@@ -348,10 +333,7 @@ class StorageManager {
         } finally {
             cursor.close();
         }
-        if (true || Constants.LOGV) {
-            Log.i(Constants.TAG, "Purged files, freed " + totalFreed + " for " +
-                    targetBytes + " requested");
-        }
+        XLConfig.LOGD("Purged files, freed " + totalFreed + " for " + targetBytes + " requested");
         return totalFreed;
     }
 
@@ -363,9 +345,7 @@ class StorageManager {
      * This is not a very common occurrence. So, do this only once in a while.
      */
     private void removeSpuriousFiles() {
-        if (Constants.LOGV) {
-            Log.i(Constants.TAG, "in removeSpuriousFiles");
-        }
+        XLConfig.LOGD("in removeSpuriousFiles");
         // get a list of all files in system cache dir and downloads data dir
         List<File> files = new ArrayList<File>();
         File[] listOfFiles = mSystemCacheDir.listFiles();
@@ -387,10 +367,7 @@ class StorageManager {
                 while (cursor.moveToNext()) {
                     String filename = cursor.getString(0);
                     if (!TextUtils.isEmpty(filename)) {
-                        if (LOGV) {
-                            Log.i(Constants.TAG, "in removeSpuriousFiles, preserving file " +
-                                    filename);
-                        }
+                        XLConfig.LOGD("in removeSpuriousFiles, preserving file " + filename);
                         int status = cursor.getInt(1);
                         // if download is not finished, the file name has temporary extension.
                         if (status != Downloads.Impl.STATUS_SUCCESS) {
@@ -413,14 +390,12 @@ class StorageManager {
             try {
                 final StructStat stat = Libcore.os.stat(path);
                 if (stat.st_uid == myUid) {
-                    if (Constants.LOGVV) {
-                        Log.d(TAG, "deleting spurious file " + path);
-                    }
+                    XLConfig.LOGD("deleting spurious file " + path);
                     file.delete();
-                    Log.v(Constants.TAG, "StorageManager.removeSpuriousFiles: delete file: " + path);
+                    XLConfig.LOGD("StorageManager.removeSpuriousFiles: delete file: " + path);
                 }
             } catch (ErrnoException e) {
-                Log.w(TAG, "stat(" + path + ") result: " + e);
+                XLConfig.LOGD("stat(" + path + ") result: ", e);
             }
         }
     }
@@ -431,9 +406,7 @@ class StorageManager {
      * in memory - so that this method can limit the amount of data read.
      */
     private void trimDatabase() {
-        if (Constants.LOGV) {
-            Log.i(Constants.TAG, "in trimDatabase");
-        }
+        XLConfig.LOGD("in trimDatabase");
         Cursor cursor = null;
         try {
             cursor = mContext.getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
@@ -443,7 +416,7 @@ class StorageManager {
             if (cursor == null) {
                 // This isn't good - if we can't do basic queries in our database,
                 // nothing's gonna work
-                Log.e(Constants.TAG, "null cursor in trimDatabase");
+                XLConfig.LOGD("null cursor in trimDatabase");
                 return;
             }
             if (cursor.moveToFirst()) {
@@ -463,7 +436,7 @@ class StorageManager {
             // trimming the database raised an exception. alright, ignore the exception
             // and return silently. trimming database is not exactly a critical operation
             // and there is no need to propagate the exception.
-            Log.w(Constants.TAG, "trimDatabase failed with exception: " + e.getMessage());
+            XLConfig.LOGD("trimDatabase failed with exception: ", e);
             return;
         } finally {
             if (cursor != null) {

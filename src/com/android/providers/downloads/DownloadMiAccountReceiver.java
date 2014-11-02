@@ -1,7 +1,8 @@
 package com.android.providers.downloads;
 
+import java.io.File;
+
 import android.accounts.Account;
-import com.google.common.annotations.VisibleForTesting;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -17,11 +18,10 @@ import android.net.Uri;
 import android.provider.Downloads;
 import android.util.Log;
 import android.os.Bundle;
-import com.android.providers.downloads.DownloadService;
-
-import java.io.File;
 
 import miui.accounts.ExtraAccountManager;
+
+import com.google.common.annotations.VisibleForTesting;
 import com.xiaomi.mipush.sdk.MiPushClient;
 
 /**
@@ -35,9 +35,9 @@ public class DownloadMiAccountReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        if(ACTION_LOGIN_ACCOUNTS_POST_CHANGED.equals(action)) {  
+        if(ACTION_LOGIN_ACCOUNTS_POST_CHANGED.equals(action)) {
             Account account = ExtraAccountManager.getXiaomiAccount(context);
-            if(account != null) {//Xiaomi Account logged in
+            if (account != null) {//Xiaomi Account logged in
                 MiPushClient.registerPush(context, DownloadApplication.APP_ID, DownloadApplication.APP_KEY);
             } else {
                 MiPushClient.unregisterPush(context);
