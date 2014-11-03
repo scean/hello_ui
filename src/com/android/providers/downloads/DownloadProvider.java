@@ -811,6 +811,10 @@ public final class DownloadProvider extends ContentProvider {
             return -1;
         }
         long ret = -1;
+        url = url.replaceAll("'", "''");
+        if (!TextUtils.isEmpty(localUri)) {
+            localUri = localUri.replaceAll("'", "''");
+        }
         String selection = " (" + Downloads.Impl.COLUMN_URI + "=" + "'" + url + "' ) AND (" +
                             Downloads.Impl.COLUMN_FILE_NAME_HINT + "=" + "'" + localUri + "' )";
         Cursor cursor = query(uri, null, selection, null, null);
