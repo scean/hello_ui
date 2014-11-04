@@ -182,35 +182,35 @@ public class DownloadService extends Service {
     }
 */
     private static class MyExecutor{
-    	private static ExecutorService mExecutor;
-    	private static HashMap<String, ExecutorService> executorMap = new HashMap<String, ExecutorService>();
+        private static ExecutorService mExecutor;
+        private static HashMap<String, ExecutorService> executorMap = new HashMap<String, ExecutorService>();
 
-    	public static ExecutorService getExecutorInstance(String pkg){
-    		if (executorMap.containsKey(pkg)) {
+        public static ExecutorService getExecutorInstance(String pkg){
+            if (executorMap.containsKey(pkg)) {
                 return executorMap.get(pkg);
             }
 
-    		new MyExecutor();
-    		if (mExecutor != null)
-    			executorMap.put(pkg, mExecutor);
-    		return mExecutor;
-    	}
+            new MyExecutor();
+            if (mExecutor != null)
+                executorMap.put(pkg, mExecutor);
+            return mExecutor;
+        }
 
-    	private MyExecutor(){
-		  int maxConcurrent = Resources.getSystem().getInteger(
-	                com.android.internal.R.integer.config_MaxConcurrentDownloadsAllowed);
-          if (maxConcurrent > 5) {
-              maxConcurrent = 2;
-          }
+        private MyExecutor(){
+            int maxConcurrent = Resources.getSystem().getInteger(
+                    com.android.internal.R.integer.config_MaxConcurrentDownloadsAllowed);
+            if (maxConcurrent > 5) {
+                maxConcurrent = 2;
+            }
 
-          // Create a bounded thread pool for executing downloads; it creates
-          // threads as needed (up to maximum) and reclaims them when finished.
-          final ThreadPoolExecutor executor = new ThreadPoolExecutor(
-                  maxConcurrent, maxConcurrent, 10, TimeUnit.SECONDS,
-                  new LinkedBlockingQueue<Runnable>());
-          executor.allowCoreThreadTimeOut(true);
-          mExecutor = executor;
-    	}
+            // Create a bounded thread pool for executing downloads; it creates
+            // threads as needed (up to maximum) and reclaims them when finished.
+            final ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                    maxConcurrent, maxConcurrent, 10, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<Runnable>());
+            executor.allowCoreThreadTimeOut(true);
+            mExecutor = executor;
+        }
     }
 
     private DownloadScanner mScanner;
@@ -481,7 +481,7 @@ public class DownloadService extends Service {
         final ContentResolver resolver = getContentResolver();
         Cursor cursor = null;
         try {
-        	cursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+            cursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                     null, null, null, null);
             final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, cursor);
             final int idColumn = cursor.getColumnIndexOrThrow(Downloads.Impl._ID);
@@ -541,13 +541,13 @@ public class DownloadService extends Service {
                 nextActionMillis = Math.min(currentDownloadNextActionMillis, nextActionMillis);
             }
         } catch(SQLiteDiskIOException e) {
-        	XLConfig.LOGD("error when updateLocked: ", e);
+            XLConfig.LOGD("error when updateLocked: ", e);
         } catch (Exception e) {
-        	XLConfig.LOGD("error when updateLocked: ", e);
+            XLConfig.LOGD("error when updateLocked: ", e);
         } finally {
-        	if (cursor != null) {
-        		cursor.close();
-        	}
+            if (cursor != null) {
+                cursor.close();
+            }
         }
 
         // Clean up stale downloads that disappeared
@@ -664,10 +664,10 @@ public class DownloadService extends Service {
         public int OnTokenGet(int ret, String token) {
             if (token != null && mXlDownloadManager != null) {
                 XLConfig.LOGD("(subThread.run) ---> get token from api success, set it to vip hub");
-				try {
-					mXlDownloadManager.XLSetUserAccessToken(token);
-				} catch(NullPointerException e) {
-				}
+                try {
+                    mXlDownloadManager.XLSetUserAccessToken(token);
+                } catch(NullPointerException e) {
+                }
             }
             return 0;
         }
@@ -917,10 +917,10 @@ public class DownloadService extends Service {
     }
 
     public static XLCdnPara XLQueryCdn(XLCdnPara para) {
-    	boolean has = false;
+        boolean has = false;
         for (XLCdnPara xlCdnPara : mCDNQueryList) {
             if (xlCdnPara.mUrl.equals(para.mUrl)) {
-            	has = true;
+                has = true;
                 if (xlCdnPara.getCdnQueryedFlag()) {
                     XLConfig.LOGD("(XLQueryCdn) ---> Querying CDN task success! Remove it");
                     mCDNQueryList.remove(xlCdnPara);
@@ -929,7 +929,7 @@ public class DownloadService extends Service {
             }
         }
         if (!has){
-        	mCDNQueryList.add(para);
+            mCDNQueryList.add(para);
             XLConfig.LOGD("(XLAddCdnQueryTask) ---> retry to add new task success, CurrentSize=" + mCDNQueryList.size());
         }
         XLConfig.LOGD("(XLQueryCdn) ---> Querying CDN operation did not completed!");

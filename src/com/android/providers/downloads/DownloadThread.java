@@ -939,8 +939,8 @@ public class DownloadThread implements Runnable {
                     int network = XLUtil.getNetwrokType(mContext);
                     Helpers.trackDownloadStart(mContext, 202, (int) mTaskId,
                             !(1 == state.mXlTaskOpenMark), !getVipSwitchStatus(), "", "",
-                            state.mPackage, DownloadService.PRODUCT_NAME,
-                            DownloadService.PRODUCT_VERSION, network, 0, 0,
+                            state.mPackage, XLConfig.PRODUCT_NAME,
+                            XLConfig.PRODUCT_VERSION, network, 0, 0,
                             state.mTotalBytes, state.mRequestUri, fileName, 0);
                 }
             } else {
@@ -982,8 +982,8 @@ public class DownloadThread implements Runnable {
                     	 int network = XLUtil.getNetwrokType(mContext);
                          Helpers.trackDownloadStart(mContext, 200, (int) mTaskId,
                                  !(1 == state.mXlTaskOpenMark), !getVipSwitchStatus(), "", "",
-                                 state.mPackage, DownloadService.PRODUCT_NAME,
-                                 DownloadService.PRODUCT_VERSION, network, 0, 0,
+                                 state.mPackage, XLConfig.PRODUCT_NAME,
+                                 XLConfig.PRODUCT_VERSION, network, 0, 0,
                                  state.mTotalBytes, state.mRequestUri, fileName, 0);
                          ServerResourceParam respara = new ServerResourceParam(cdnPara.getCdn(), "", cdnPara.getCdnCookie(), 20, 0);
                          ret = mXlDownloadManager.XLAddTaskServerResource(mTaskId, respara);
@@ -992,8 +992,8 @@ public class DownloadThread implements Runnable {
                              int network1 = XLUtil.getNetwrokType(mContext);
                              Helpers.trackDownloadStart(mContext, 201, (int) mTaskId,
                                      !(1 == state.mXlTaskOpenMark), !getVipSwitchStatus(), "", "",
-                                     state.mPackage, DownloadService.PRODUCT_NAME,
-                                     DownloadService.PRODUCT_VERSION, network1, 0, 0,
+                                     state.mPackage, XLConfig.PRODUCT_NAME,
+                                     XLConfig.PRODUCT_VERSION, network1, 0, 0,
                                      state.mTotalBytes, state.mRequestUri, fileName, 0);
                          }
                         // if error happened

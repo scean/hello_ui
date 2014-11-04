@@ -852,7 +852,7 @@ public class DownloadInfo {
     }
 
     private static int checkDownloadEngine(String pkgName, String appointName, boolean xlEngineFlag) {
-        XLConfig.LOGD("(checkDownloadEngine) ---> pkgName=" + pkgName + 
+        XLConfig.LOGD("(checkDownloadEngine) ---> pkgName=" + pkgName +
                       ", appointName=" + appointName + ", xlEngineFlag=" + xlEngineFlag);
         int xlTaskOpenMark = 1;
         if (xlEngineFlag) {

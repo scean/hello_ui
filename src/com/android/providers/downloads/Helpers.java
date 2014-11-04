@@ -929,8 +929,8 @@ public class Helpers {
         trackData.put("xunlei_open", String.valueOf(xlEnable ? 1 : 0));
         trackData.put("xunlei_vip_open", String.valueOf(xlVipEnable ? 1 : 0));
         //trackData.put("application_name", pkgName);
-        trackData.put("product_name", DownloadService.PRODUCT_NAME);
-        trackData.put("product_version", DownloadService.PRODUCT_VERSION);
+        trackData.put("product_name", XLConfig.PRODUCT_NAME);
+        trackData.put("product_version", XLConfig.PRODUCT_VERSION);
         trackData.put("phone_type", android.os.Build.MODEL);
         trackData.put("system_version", android.os.Build.VERSION.RELEASE);
         trackData.put("miui_version", MIUIVersion);
@@ -1154,8 +1154,8 @@ public class Helpers {
         trackData.put("xunlei_vip_open", String.valueOf(xlVipEnable ? 1 : 0));
         //trackData.put("xiaomi_id", "");
         //trackData.put("xunlei_id", "");
-        trackData.put("product_name", DownloadService.PRODUCT_NAME);
-        trackData.put("product_version", DownloadService.PRODUCT_VERSION);
+        trackData.put("product_name", XLConfig.PRODUCT_NAME);
+        trackData.put("product_version", XLConfig.PRODUCT_VERSION);
         trackData.put("application_name", pkgName);
         // trackData.put("xunlei_product", product);
         // trackData.put("xunlei_product_version", productVersion);
