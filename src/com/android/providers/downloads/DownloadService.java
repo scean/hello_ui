@@ -330,8 +330,14 @@ public class DownloadService extends Service {
 
         XLConfig.LOGD("in DownloadService onDestroy");
         getContentResolver().unregisterContentObserver(mObserver);
-        mScanner.shutdown();
-        mUpdateThread.quit();
+
+        if (mScanner != null) {
+            mScanner.shutdown();
+        }
+
+        if (mUpdateThread != null) {
+            mUpdateThread.quit();
+        }
 
         if (mXunleiEngineEnable) {
             uninitXunleiEngine();

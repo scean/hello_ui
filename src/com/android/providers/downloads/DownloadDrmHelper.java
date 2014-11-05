@@ -63,6 +63,10 @@ public class DownloadDrmHelper {
      * if the file is protected content.
      */
     public static String getOriginalMimeType(Context context, File file, String currentMime) {
+        if (context == null || file == null) {
+            return currentMime;
+        }
+
         final DrmManagerClient client = new DrmManagerClient(context);
         try {
             final String rawFile = file.toString();
