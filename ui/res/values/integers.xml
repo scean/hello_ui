@@ -16,5 +16,6 @@
 
 <resources>
     <!-- Default value for DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE -->
-    <integer name="default_recommended_max_bytes_over_mobile">1048576</integer>
+	<integer name="default_recommended_max_bytes_over_mobile">1048576</integer>
+	<integer name="international_default_recommended_max_bytes_over_mobile">2147483647</integer>
 </resources>
