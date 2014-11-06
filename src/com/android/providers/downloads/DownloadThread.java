@@ -85,6 +85,7 @@ import com.xunlei.downloadplatforms.XLDownloadManager;
 import com.xunlei.downloadplatforms.XLDownloadConstant.XlErrorCode;
 import com.xunlei.downloadplatforms.XLDownloadConstant.XlTaskStatus;
 import com.xunlei.downloadplatforms.XLDownloadConstant.XlCreateTaskMode;
+import com.xunlei.downloadplatforms.XLDownloadConstant.XlDownloadHeaderState;
 import com.xunlei.downloadplatforms.entity.*;
 import com.xunlei.downloadplatforms.util.XLUtil;
 
@@ -116,7 +117,7 @@ public class DownloadThread implements Runnable {
     private final XLDownloadManager mXlDownloadManager;
     private SharedPreferences mPreference;
     private long mTaskId = -1;
-    private boolean mIsNewTask = true;
+    private boolean mIfMobileFileSizeChecked = false;
     private boolean mHasUpdateFilesizeToDB = false;
     private long mXlVipRecvBytes = 0;
 
@@ -129,6 +130,8 @@ public class DownloadThread implements Runnable {
 	private static final String TASK_CONCELED = "task_canceled";
     
     private XLCdnPara cdnpara;
+    
+    private final long MAX_GET_DOWNLOAD_HEADER_DELAY = 60;  //60 second
 
     public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo info,
             StorageManager storageManager, DownloadNotifier notifier, XLDownloadManager dm, SharedPreferences pf) {
@@ -316,7 +319,11 @@ public class DownloadThread implements Runnable {
                 throw new StopRequestException(STATUS_BAD_REQUEST, e);
             }
 
-            executeDownload(state);
+            if (state.mXlTaskOpenMark == 0) {
+                executeDownload(state);
+            } else {
+                executeDownload_xl(state);
+            }
 
             finalizeDestinationFile(state);
             finalStatus = Downloads.Impl.STATUS_SUCCESS;
@@ -343,27 +350,29 @@ public class DownloadThread implements Runnable {
             }
             finalStatus = error.getFinalStatus();
 
-            // Nobody below our level should request retries, since we handle
-            // failure counts at this level.
-            if (finalStatus == STATUS_WAITING_TO_RETRY) {
-                XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> STATUS_WAITING_TO_RETRY");
-                throw new IllegalStateException("Execution should always throw final error codes");
-            }
-            
             if (1 == state.mXlTaskOpenMark) {
-                if (finalStatus == Downloads.Impl.STATUS_PAUSED_BY_APP ||
-                        finalStatus == Downloads.Impl.STATUS_CANCELED ||
-                        finalStatus == Downloads.Impl.STATUS_QUEUED_FOR_WIFI ||
-                        finalStatus == Downloads.Impl.STATUS_WAITING_FOR_NETWORK) {
+//                if (finalStatus == Downloads.Impl.STATUS_PAUSED_BY_APP ||
+//                        finalStatus == Downloads.Impl.STATUS_CANCELED ||
+//                        finalStatus == Downloads.Impl.STATUS_QUEUED_FOR_WIFI ||
+//                        finalStatus == Downloads.Impl.STATUS_WAITING_FOR_NETWORK ||
+//                        finalStatus == Downloads.Impl.STATUS_TOO_MANY_REDIRECTS ||
+//                        finalStatus == Downloads.Impl.STATUS_CANNOT_RESUME) {
                     // user pause task or user delete task or no network
-                    Log.v(Constants.TAG,
-                            "xunlei(DownloadThread.run) ---> pause/cancel/network_changing happened, stop task!");
-                    if (mXlDownloadManager != null) {
+                    if (mXlDownloadManager != null && mTaskId != -1) {
+                        Log.v(Constants.TAG,
+                                "xunlei(DownloadThread.run) ---> pause/cancel/network_changing happened, stop task, id=" + mTaskId);
                         mXlDownloadManager.XLStopTask(mTaskId);
                         mXlDownloadManager.XLReleaseTask(mTaskId);
                     }
-                }
+//                }
             }
+            
+            // Nobody below our level should request retries, since we handle
+            // failure counts at this level.
+            if (finalStatus == STATUS_WAITING_TO_RETRY) {
+                throw new IllegalStateException("Execution should always throw final error codes");
+            }
+            
             reportDownloadZeroSpeed();
 
             // Some errors should be retryable, unless we fail too many times.
@@ -434,9 +443,9 @@ public class DownloadThread implements Runnable {
             finalStatus = Downloads.Impl.STATUS_UNKNOWN_ERROR;
             // falls through to the code that reports an error
             if (1 == state.mXlTaskOpenMark) {
-                Log.v(Constants.TAG,
-                        "xunlei(DownloadThread.run) ---> Exception happened, stop task!");
-                if (mXlDownloadManager != null) {
+                if (mXlDownloadManager != null && mTaskId != -1) {
+                    Log.v(Constants.TAG,
+                            "xunlei(DownloadThread.run) ---> Exception happened, stop task, id=" + mTaskId);
                     mXlDownloadManager.XLStopTask(mTaskId);
                     mXlDownloadManager.XLReleaseTask(mTaskId);
                 }
@@ -456,8 +465,6 @@ public class DownloadThread implements Runnable {
 
         } finally {
             
-            
-            
             if (finalStatus == STATUS_SUCCESS) {
                 TrafficStats.incrementOperationCount(1);
             }
@@ -467,7 +474,6 @@ public class DownloadThread implements Runnable {
 
             cleanupDestination(state, finalStatus);
             
-            XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> finally, status=" + finalStatus + ",STATUS_WAITING_TO_RETRY" + STATUS_WAITING_TO_RETRY);
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
 
             Log.i(Constants.TAG, "Download " + mInfo.mId + " finished with status "
@@ -498,22 +504,46 @@ public class DownloadThread implements Runnable {
                     Intent i = new Intent();
                     i.setClassName("com.android.providers.downloads", "com.android.providers.downloads.DownloadService");
                     mContext.startService(i);
-                    XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> finally, mContext.startService(i);");
                 } else {
                     Helpers.sDownloadsDomainCountMap.remove(mInfo.mUriDomain);
-                    XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> finally, xxxxxxxx");
                 }
             }
         }
         
     }
+    
+    private void executeDownload_xl(State state) throws StopRequestException {
+        XLConfig.LOGD(Constants.TAG, "executeDownload_xl ---> executeDownload_xl");
+        state.resetBeforeExecute();
+        setupDestinationFile(state);
+        
+        if (state.mCurrentBytes == state.mTotalBytes) {
+            Log.i(Constants.TAG, "Skipping initiating request for download " +
+                  mInfo.mId + "; already completed");
+            return;
+        }
+        
+        NetworkInfo info = mSystemFacade.getActiveNetworkInfo(mInfo.mUid);
+        // only do this proc in mobile network and new task
+        if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE && !state.mContinuingDownload) {
+            Long recommendedMaxBytesOverMobile = mSystemFacade.getRecommendedMaxBytesOverMobile();
+            if (!((recommendedMaxBytesOverMobile != null && recommendedMaxBytesOverMobile == DownloadInfo.MAX_BYTES_OVER_MOBILE))) {
+                Log.e(Constants.TAG, "jinghuang ---> checkFileSizeinMobile fun called!");
+                mIfMobileFileSizeChecked = true;
+                checkFileSizeinMobile(state);
+            }
+        }
+        
+        transferData_xl(state);
+    }
+    
      
     /**
      * Fully execute a single download request. Setup and send the request,
      * handle the response, and transfer the data to the destination file.
      */
     private void executeDownload(State state) throws StopRequestException {
-        XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> executeDownload");
+        XLConfig.LOGD(Constants.TAG, "executeDownload() ---> called");
         state.resetBeforeExecute();
         setupDestinationFile(state);
 
@@ -555,13 +585,8 @@ public class DownloadThread implements Runnable {
                 checkConnectivity(false);
                 conn = (HttpURLConnection) state.mUrl.openConnection();
                 conn.setInstanceFollowRedirects(false);
-                if (1 == state.mXlTaskOpenMark) {
-                	conn.setConnectTimeout(5000);
-                    conn.setReadTimeout(5000);
-                } else {
-                	conn.setConnectTimeout(DEFAULT_TIMEOUT );
-                    conn.setReadTimeout(DEFAULT_TIMEOUT );
-                }
+                conn.setConnectTimeout(DEFAULT_TIMEOUT);
+                conn.setReadTimeout(DEFAULT_TIMEOUT);
 
                 addRequestHeaders(state, conn);
 
@@ -573,11 +598,7 @@ public class DownloadThread implements Runnable {
                             throw new StopRequestException(
                                     STATUS_CANNOT_RESUME, "Expected partial, but received OK");
                         }
-
-                        XLConfig.LOGD(Constants.TAG, "jinghuang-a ---> + beforer processPro!");
                         processResponseHeaders(state, conn);
-
-                        XLConfig.LOGD(Constants.TAG, "jinghuang-a ---> + after processPro!");
                         transferData(state, conn);
                         return;
 
@@ -602,12 +623,8 @@ public class DownloadThread implements Runnable {
                         continue;
 
                     case HTTP_REQUESTED_RANGE_NOT_SATISFIABLE:
-                    	if (1 == state.mXlTaskOpenMark) {
-                    		transferData(state, conn);
-                    	} else {
-                    		throw new StopRequestException(
-                                    STATUS_CANNOT_RESUME, "Requested range not satisfiable");
-                    	}
+                        throw new StopRequestException(
+                                STATUS_CANNOT_RESUME, "Requested range not satisfiable");
 
                     case HTTP_UNAVAILABLE:
                         parseRetryAfterHeaders(state, conn);
@@ -654,45 +671,40 @@ public class DownloadThread implements Runnable {
         OutputStream out = null;
         FileDescriptor outFd = null;
         try {
-        	if (0 == state.mXlTaskOpenMark) {
-        		try {
-                    in = conn.getInputStream();
-                } catch (IOException e) {
-                    throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
-                }
+            try {
+                in = conn.getInputStream();
+            } catch (IOException e) {
+                throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
+            }
 
-                try {
-                    if (DownloadDrmHelper.isDrmConvertNeeded(state.mMimeType)) {
-                        drmClient = new DrmManagerClient(mContext);
-                        final RandomAccessFile file = new RandomAccessFile(
-                                new File(state.mDownloadingFileName), "rw");
-                        out = new DrmOutputStream(drmClient, file, state.mMimeType);
-                        outFd = file.getFD();
-                    } else {
-                        out = new FileOutputStream(state.mDownloadingFileName, true);
-                        outFd = ((FileOutputStream) out).getFD();
-                    }
-                } catch (IOException e) {
-                    throw new StopRequestException(STATUS_FILE_ERROR, e);
+            try {
+                if (DownloadDrmHelper.isDrmConvertNeeded(state.mMimeType)) {
+                    drmClient = new DrmManagerClient(mContext);
+                    final RandomAccessFile file = new RandomAccessFile(
+                            new File(state.mDownloadingFileName), "rw");
+                    out = new DrmOutputStream(drmClient, file, state.mMimeType);
+                    outFd = file.getFD();
+                } else {
+                    out = new FileOutputStream(state.mDownloadingFileName, true);
+                    outFd = ((FileOutputStream) out).getFD();
                 }
+            } catch (IOException e) {
+                throw new StopRequestException(STATUS_FILE_ERROR, e);
+            }
 
-                // Start streaming data, periodically watch for pause/cancel
-                // commands and checking disk space as needed.
-                transferData(state, in, out);
-                try {
-                    if (out instanceof DrmOutputStream) {
-                        ((DrmOutputStream) out).finish();
-                    }
-                } catch (IOException e) {
-                    throw new StopRequestException(STATUS_FILE_ERROR, e);
+            // Start streaming data, periodically watch for pause/cancel
+            // commands and checking disk space as needed.
+            transferData(state, in, out);
+            try {
+                if (out instanceof DrmOutputStream) {
+                    ((DrmOutputStream) out).finish();
                 }
-        	} else {
-        		transferData_xl(state);
-        	}
-            
+            } catch (IOException e) {
+                throw new StopRequestException(STATUS_FILE_ERROR, e);
+            }
 
         } finally {
-        	XLConfig.LOGD(Constants.TAG, "jinghuang ---> finally in transferData!");
+        	XLConfig.LOGD(Constants.TAG, "transferData ---> finally in transferData!");
         	if (0 == state.mXlTaskOpenMark) {
         		if (drmClient != null) {
                     drmClient.release();
@@ -725,12 +737,9 @@ public class DownloadThread implements Runnable {
         if (networkUsable != NetworkState.OK) {
             int status = Downloads.Impl.STATUS_WAITING_FOR_NETWORK;
             if (networkUsable == NetworkState.UNUSABLE_DUE_TO_SIZE) {
-                XLConfig.LOGD(Constants.TAG, "jinghuang-a ---> + throw error UNUSABLE_DUE_TO_SIZE");
                 status = Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
                 mInfo.notifyPauseDueToSize(true);
             } else if (networkUsable == NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE) {
-                
-                XLConfig.LOGD(Constants.TAG, "jinghuang-a ---> + throw error RECOMMENDED_UNUSABLE_DUE_TO_SIZE");
                 status = Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
             } else if (networkUsable == NetworkState.TYPE_DISALLOWED_BY_REQUESTOR) {
                 status = Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
@@ -816,28 +825,46 @@ public class DownloadThread implements Runnable {
         boolean hasGetCdn = false;
         boolean isMobileNetTask = false;
         boolean isResourceTypeCheckOver = false;
+        String fileName = null;
+        String path = null;
 
-        int index_of_fileName = state.mFilename.lastIndexOf("/");
-        String fileName = state.mFilename.substring(index_of_fileName + 1);
-        
-        int index = state.mDownloadingFileName.lastIndexOf("/");
-        String name = state.mDownloadingFileName.substring(index + 1);
-        String path = state.mDownloadingFileName.substring(0, index);
-        DownloadParam para = null;
         int taskmode;
-        if (mIsNewTask) {
+        if (!state.mContinuingDownload) {
             XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> new task!");
             taskmode = XlCreateTaskMode.NEW_TASK.ordinal();
         } else {
             XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> continue task!");
             taskmode = XlCreateTaskMode.CONTINUE_TASK.ordinal();
         }
-        if (name != null && path != null && state.mRequestUri != null) {
-            para = new DownloadParam(name, path,
-                    state.mRequestUri.toString(), getCookie(), getRefUrl(), "", "",
-                    taskmode, (int)state.mId);
-        }
+        
+        DownloadParam para = null;
+        if (state.mRequestUri != null) {
+            
+            XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> mIfMobileFileSizeChecked = "
+                    + mIfMobileFileSizeChecked + ", state.mContinuingDownload= "
+                    + state.mContinuingDownload);
 
+            if (mIfMobileFileSizeChecked || state.mContinuingDownload) {
+                int index = state.mDownloadingFileName.lastIndexOf("/");
+                fileName = state.mDownloadingFileName.substring(index + 1);
+                path = state.mDownloadingFileName.substring(0, index);
+                para = new DownloadParam(fileName, path,
+                        state.mRequestUri.toString(), getCookie(), getRefUrl(), "", "",
+                        taskmode, (int)state.mId);
+                XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> filename = " + fileName);
+            } else {
+                para = new DownloadParam("", "",
+                        state.mRequestUri.toString(), getCookie(), getRefUrl(), "", "",
+                        taskmode, (int)state.mId);
+                XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> filename = null");
+            }
+            
+        } else {
+            // throw exception
+            throw new StopRequestException(
+                    Downloads.Impl.STATUS_CANCELED, "xunlei - Download url is null.");
+        }
+        
         // cloud check
         if (XLUtil.getNetwrokType(mContext) == ConnectivityManager.TYPE_MOBILE) {
             XLCloudControlPara xlccpara = new XLCloudControlPara(state.mRequestUri);
@@ -853,7 +880,6 @@ public class DownloadThread implements Runnable {
             ret = mXlDownloadManager.XLCreateP2SPTask(para, cTaskId);
             if (ret != XlErrorCode.NO_ERROR) {
                 XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> XLCreateP2SPTask error.");
-                // throw exception
                 throw new StopRequestException(
                         Downloads.Impl.STATUS_CANCELED, "xunlei - XLCreateP2SPTask error.");
             }
@@ -878,7 +904,7 @@ public class DownloadThread implements Runnable {
         	// do start track
     		int network = XLUtil.getNetwrokType(mContext);
     		int status = 101;
-    		if (!mIsNewTask) {
+    		if (state.mContinuingDownload) {
     			status = 107;
     		}
     		
@@ -906,11 +932,22 @@ public class DownloadThread implements Runnable {
         }
         
         mXlDownloadManager.XLSetTaskAppInfo(mTaskId, XLConfig.APP_KEY, XLConfig.PRODUCT_NAME, XLConfig.PRODUCT_VERSION);
-        int tmp_ret = mXlDownloadManager.XLSetOriginUserAgent(mTaskId, userAgent(), userAgent().length());
-        XLConfig.LOGD(Constants.TAG, "return value from XLSetOriginUserAgent is " + tmp_ret);
+        mXlDownloadManager.XLSetOriginUserAgent(mTaskId, userAgent(), userAgent().length());
         mXlDownloadManager.XLStartTask(mTaskId);
         sendXLTaskStartBroadcast();
-
+        
+        if (!state.mContinuingDownload && !mIfMobileFileSizeChecked) {
+            Log.e(Constants.TAG, "jinghuang ---> getDownloadHeader called");
+            getDownloadHeader(mTaskId, state);
+            fileName = state.mFilename.substring(state.mFilename.lastIndexOf("/") + 1);
+            XLConfig.LOGD(Constants.TAG, "(transferData_xl) --->  getDownloadHeaderName=" + state.mDownloadingFileName);
+            ret = mXlDownloadManager.XLSetFileName(mTaskId, state.mDownloadingFileName, state.mDownloadingFileName.length());
+            if (XlErrorCode.NO_ERROR != ret) {
+                XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> XLSetFileName return error, ret = " + ret);
+                throw new StopRequestException(Downloads.Impl.STATUS_CANCELED, TASK_CONCELED);
+            }
+        }
+        
         //XLTaskInfoEX taskInfo = new XLTaskInfoEX();
         XLTaskInfo taskInfo = new XLTaskInfo();
         for (;;) {
@@ -929,7 +966,7 @@ public class DownloadThread implements Runnable {
             }
             
             ret = mXlDownloadManager.XLGetTaskInfo(mTaskId, queryMode, taskInfo);
-            if (9000 != ret) {
+            if (XlErrorCode.NO_ERROR != ret) {
                 XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> XLGetTaskInfo return error, ret = " + ret);
                 throw new StopRequestException(Downloads.Impl.STATUS_CANCELED, TASK_CONCELED);
             }
@@ -943,18 +980,14 @@ public class DownloadThread implements Runnable {
                     + ", QueryMode:" + queryMode 
                     + ", Query_index_status:" + taskInfo.mQueryIndexStatus);
             
-//            if (queryMode == 1 && taskInfo.mAdditionalResCount != 0) {
             if (queryMode == 1) {
                 state.mXlAccelerateSpeed = taskInfo.mAdditionalResVipSpeed;
                 mXlVipRecvBytes = taskInfo.mAdditionalResVipRecvBytes;     // this value should be written into db
                 XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> VipSpeed: "
-//                        + "mAdditionalRes.mResTypeCount=" + taskInfo.mAdditionalResCount
-//                        + "mAdditionalRes.mResTypeType=" + taskInfo.mAdditionalResType
                         + "mAdditionalRes.speed=" + taskInfo.mAdditionalResVipSpeed
                         + ", mAdditionalRes.recebytes=" + taskInfo.mAdditionalResVipRecvBytes);
                 if (!hasReportVipSpeed && state.mXlAccelerateSpeed > 0) {
                     hasReportVipSpeed = true;
-                    // do start track
                     int network = XLUtil.getNetwrokType(mContext);
                     Helpers.trackDownloadStart(mContext, 202, (int) mTaskId,
                             !(1 == state.mXlTaskOpenMark), !getVipSwitchStatus(), "", "",
@@ -971,29 +1004,24 @@ public class DownloadThread implements Runnable {
                 XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> taskid=" + mTaskId
                         + ", mCid=" + taskInfo.mCid
                         + ", mGcid=" + taskInfo.mGcid);
-               // XLCdnPara cdnpara = new XLCdnPara(state.mRequestUri.toString(), name, taskInfo.mCid,
-                 //       taskInfo.mGcid, taskInfo.mFileSize);
-                cdnpara = new XLCdnPara(state.mRequestUri.toString(), name, taskInfo.mCid,
+                cdnpara = new XLCdnPara(state.mRequestUri.toString(), fileName, taskInfo.mCid,
                         taskInfo.mGcid, taskInfo.mFileSize, getRefUrl(), getCookie());
-                // add xunlei cdn query task
                 addXlCdnQueryTask(cdnpara);
                 hasAddedXlCdnQueryTask = true;
             }
             
             if (queryMode == 1 && taskInfo.mQueryIndexStatus == 3) {
                 XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> taskid="
-                        + mTaskId + ", name=" + name
+                        + mTaskId + ", name=" + fileName
                         + ", can't query index from xunlei so");
                 synchronized (TokenHelper.getInstance().mutex) {
-                    ret = mXlDownloadManager.XLCommitCollectTask(state.mRequestUri.toString(), name, taskInfo.mFileSize, getRefUrl(), getCookie());
+                    ret = mXlDownloadManager.XLCommitCollectTask(state.mRequestUri.toString(), fileName, taskInfo.mFileSize, getRefUrl(), getCookie());
                 }
                 queryMode = 0;
             }
             
             // query cdn
             if (hasAddedXlCdnQueryTask && queryMode == 1 && !hasGetCdn ) {
-                // query cdn
-            	// XLCdnPara cdnpara = queryXlCdn(state.mRequestUri.toString());
             	XLCdnPara cdnPara = queryXlCdn(cdnpara);
                 if (cdnPara != null) {
                     hasGetCdn = true;
@@ -1038,8 +1066,8 @@ public class DownloadThread implements Runnable {
             if (taskInfo.mTaskStatus == XlTaskStatus.TASK_SUCCESS
                     || taskInfo.mTaskStatus == XlTaskStatus.TASK_STOPPED) {
 
-                if (mXlDownloadManager != null) {
-                    XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> if task success/stop/fail, then call stopTask!");
+                if (mXlDownloadManager != null && mTaskId != -1) {
+                    XLConfig.LOGD(Constants.TAG, "(transferData_xl) ---> if task success/stop/fail, then call stopTask, id=" + mTaskId);
                     mXlDownloadManager.XLStopTask(mTaskId);
                     mXlDownloadManager.XLReleaseTask(mTaskId);
                 }
@@ -1052,6 +1080,175 @@ public class DownloadThread implements Runnable {
                 // TODO: handle exception
             }
         }
+    }
+    
+    /**
+     * prase field value from http response
+     * @param field
+     * @param target
+     * @return
+     */
+    private String parseFieldValue(String field, final String target) {
+        int begin_index = target.indexOf(field);
+        int end_index = target.indexOf("\n", begin_index);
+        return target.substring(begin_index + field.length() + 1, end_index);
+    }
+    
+    /**
+     * @param state
+     * @param response
+     * @return
+     * @throws StopRequestException
+     */
+    private int processDownloadHeader(State state, final String response) throws StopRequestException {
+        
+        int responseCode = -1;
+        if (response.startsWith("HTTP/1.1")) {
+            int index = response.indexOf(" ");
+            String code = response.substring(index + 1, index + 1 + 3);
+            try {
+                responseCode = Integer.parseInt(code);
+            } catch (Exception e) {
+                // TODO: handle exception
+                XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> NumberFormatException happen in parse response code");
+            }
+            
+            XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> int responseCode=" + responseCode);
+            if (responseCode != HTTP_OK) {
+                return responseCode;
+            }
+        }
+        
+        if (response.contains("Content-Disposition:")) {
+            state.mContentDisposition = parseFieldValue("Content-Disposition:", response);
+        }
+        
+        if (response.contains("Content-Location:")) {
+            state.mContentLocation = parseFieldValue("Content-Location:", response);
+        }
+        
+        if (response.contains("Content-Type:")) {
+            state.mMimeType = parseFieldValue("Content-Type:", response);
+            XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> mMimeType=" + state.mMimeType);
+        }
+        
+        if (response.contains("ETag:")) {
+            state.mHeaderETag = parseFieldValue("ETag:", response);
+        }
+        
+        if (response.contains("Last-Modified:")) {
+            state.mHeaderIfRangeId = parseFieldValue("Last-Modified:", response);
+            XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> mHeaderIfRangeId=" + state.mHeaderIfRangeId);
+        }
+        
+        if (response.contains("Accept-Ranges:")) {
+            state.mHeaderAcceptRanges = parseFieldValue("Accept-Ranges:", response);
+        }
+        
+        if (response.contains("Retry-After:")) {
+            String retryfield = parseFieldValue("Retry-After:", response);
+            try {
+                state.mRetryAfter = Integer.parseInt(retryfield);
+            } catch (Exception e) {
+                // TODO: handle exception
+                XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> NumberFormatException happen in parse Retry-After field = " + retryfield);
+                state.mRetryAfter = -1;
+            }
+            
+        } else {
+            state.mRetryAfter = -1;
+        }
+        
+        String transferEncoding = null;
+        state.mContentLength = -1;
+        if (response.contains("Transfer-Encoding:")) {
+            transferEncoding = parseFieldValue("Transfer-Encoding:", response);;
+        } else {
+            if (response.contains("Content-Length:")) {
+                String lengthfield = parseFieldValue("Content-Length:", response);
+                try {
+                    state.mContentLength = Long.parseLong(lengthfield.trim());
+                } catch (NumberFormatException e) {
+                    XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> NumberFormatException happen in parse length field = " + lengthfield);
+                }
+            } 
+        }
+        
+        state.mTotalBytes = state.mContentLength;
+        mInfo.mTotalBytes = state.mContentLength;
+        
+        XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> filesize=" + state.mTotalBytes);
+        
+        final boolean noSizeInfo = state.mContentLength == -1
+                && (transferEncoding == null || !transferEncoding.equalsIgnoreCase("chunked"));
+        if (!mInfo.mNoIntegrity && noSizeInfo) {
+            throw new StopRequestException(STATUS_CANNOT_RESUME,
+                    "can't know size of download, giving up");
+        }
+        
+        return responseCode;
+    }
+    
+    /**
+     * used by xunlei engine
+     * return filename
+     * @param taskid
+     * @return
+     * @throws StopRequestException
+     */
+    private void getDownloadHeader(long taskid, State state) throws StopRequestException {
+        
+        int ret;
+        GetDownloadHead header = new GetDownloadHead();
+        int time = 0;
+        long timeStart = XLUtil.getCurrentUnixTime();
+        while(XLUtil.getCurrentUnixTime() < timeStart + MAX_GET_DOWNLOAD_HEADER_DELAY) {
+            try {
+                Thread.sleep(500);
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+            
+            ret = mXlDownloadManager.XLGetDownloadHeader(taskid, header);
+            if (XlErrorCode.NO_ERROR != ret) {
+                XLConfig.LOGD(Constants.TAG, "(getDownloadHeader) ---> XLGetDownloadHeader return error, ret = " + ret);
+                throw new StopRequestException(Downloads.Impl.STATUS_CANCELED, TASK_CONCELED);
+            }
+            
+            XLConfig.LOGD(Constants.TAG, "(getDownloadHeader) ---> xunlei return state=" + header.mHttpState + ", times=" + ++time);
+            if (header.mHttpState == XlDownloadHeaderState.GDHS_SUCCESS.ordinal()) {
+                
+                XLConfig.LOGD(Constants.TAG, "(getDownloadHeader) ---> response=" + header.mHttpResponse);
+                
+                final int responseCode = processDownloadHeader(state, header.mHttpResponse);
+                switch (responseCode) {
+                    case HTTP_OK:
+                        processResponseHeaders(state, null);
+                        return;
+                    case HTTP_REQUESTED_RANGE_NOT_SATISFIABLE:
+                        processResponseHeaders(state, null);
+                        return;
+                    case HTTP_UNAVAILABLE:
+                        parseRetryAfterHeaders(state, null);
+                        throw new StopRequestException(
+                                HTTP_UNAVAILABLE, "xunlei - http return 503 when getting download header.");
+                    case HTTP_INTERNAL_ERROR:
+                        throw new StopRequestException(
+                                HTTP_INTERNAL_ERROR, "xunlei - http return 500 when getting download header.");
+                    default:
+                        StopRequestException.throwUnhandledHttpError(
+                                responseCode, "xunlei - http return " + responseCode + " when getting download header.");
+                }
+                
+                break;
+            } else if (header.mHttpState == XlDownloadHeaderState.GDHS_ERROR.ordinal()) {
+                throw new StopRequestException(Downloads.Impl.STATUS_CANCELED, "XLGetDownloadHeader http error, header.mHttpState=" + header.mHttpState);
+            }
+            
+            checkPausedOrCanceled(state);
+        }
+        
+        throw new StopRequestException(STATUS_TOO_MANY_REDIRECTS, "xunlei - Too many redirects to get header.");
     }
 
     /**
@@ -1091,7 +1288,7 @@ public class DownloadThread implements Runnable {
             if (countTime >= Constants.MIN_PROGRESS_TIME)
             {
             	state.mDownloadingCurrentSpeed = countBytes;
-            	Log.i(Constants.TAG, "---------Android-download ---> bytesRead=" + countBytes +
+            	Log.i(Constants.TAG, "(transferData) ---> Android-download ---> bytesRead=" + countBytes +
                      ", time=" + countTime + ", speed=" + state.mDownloadingCurrentSpeed + 
                      " currentBytes = " + state.mCurrentBytes);
             	reportProgress(state);
@@ -1319,8 +1516,9 @@ public class DownloadThread implements Runnable {
             throws StopRequestException {
         // TODO: fallocate the entire file if header gave us specific length
 
-    	//Log.i("DownloadManager-jinghuang", "---> processResponseHeaders called");
-        readResponseHeaders(state, conn);
+        if (conn != null) {
+            readResponseHeaders(state, conn); 
+        }
         // update header values into database
         updateDatabaseFromHeaders(state);
         state.mFilename = Helpers.generateSaveFile(
@@ -1411,7 +1609,9 @@ public class DownloadThread implements Runnable {
     }
 
     private void parseRetryAfterHeaders(State state, HttpURLConnection conn) {
-        state.mRetryAfter = conn.getHeaderFieldInt("Retry-After", -1);
+        if (conn != null) {
+            state.mRetryAfter = conn.getHeaderFieldInt("Retry-After", -1);
+        }
         if (state.mRetryAfter < 0) {
             state.mRetryAfter = 0;
         } else {
@@ -1447,9 +1647,6 @@ public class DownloadThread implements Runnable {
                 if (Constants.LOGV) {
                     Log.i(Constants.TAG, "resuming download for id: " + mInfo.mId +
                             ", and state.mFilename: " + state.mFilename);
-                }
-                if (1 == state.mXlTaskOpenMark) {
-                    mIsNewTask = false;
                 }
                 long fileLength = f.length();
                 if (fileLength == 0) {
@@ -1500,9 +1697,6 @@ public class DownloadThread implements Runnable {
             } else {
                 // if file does not exist, means it was deleted before it is finished.
                 state.mCurrentBytes = mInfo.mCurrentBytes = 0;
-                if (1 == state.mXlTaskOpenMark) {
-                    mIsNewTask = true;
-                }
             }
         }
     }
@@ -1727,8 +1921,6 @@ public class DownloadThread implements Runnable {
                     if (header != null) {
                         String len = header.getValue();
                         state.mContentLength = Long.parseLong(len);    // get file size form http content
-                        XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> total bytes = " + state.mContentLength);
-                        XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> test, index=" + index);
 
                         fileSize = state.mContentLength;
                         state.mTotalBytes = state.mContentLength;
@@ -1773,7 +1965,6 @@ public class DownloadThread implements Runnable {
 	    int status = Downloads.Impl.STATUS_WAITING_FOR_NETWORK;
 
 	    if (index >= Constants.MAX_REDIRECTS) {
-	        XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> except 1");
 	        throw new StopRequestException(STATUS_TOO_MANY_REDIRECTS, "Too many redirects");
 	    }
 
@@ -1781,7 +1972,6 @@ public class DownloadThread implements Runnable {
         if (maxBytesOverMobile != null && fileSize > maxBytesOverMobile) {
             status = Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
             mInfo.notifyPauseDueToSize(true);
-            XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> except 2");
             throw new StopRequestException(status, "download size exceeds limit for mobile network");
         }
 
@@ -1790,7 +1980,6 @@ public class DownloadThread implements Runnable {
             if (recommendedMaxBytesOverMobile != null
                 && fileSize > recommendedMaxBytesOverMobile) {
                 status = Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
-                XLConfig.LOGD(Constants.TAG, "jinghuang4 ---> except 3, status=" + status);
                 throw new StopRequestException(status, "download size exceeds recommended limit for mobile network");
             }
         }

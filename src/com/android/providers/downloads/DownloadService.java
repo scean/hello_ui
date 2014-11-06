@@ -320,6 +320,11 @@ public class DownloadService extends Service {
             XLConfig.LOGD(Constants.TAG, "xunlei Service ---> receive broadcast, executive getting token process");
             startGetXlTokenEx(true);
             break;
+        case 2:
+            if (mXlDownloadManager != null)
+                mXlDownloadManager.XLNotifyNetWorkType(XLUtil.getNetwrokType(getApplicationContext()) + 1);
+            XLConfig.LOGD(Constants.TAG, "xunlei Service ---> XLNotifyNetWorkType networkType = " + (XLUtil.getNetwrokType(getApplicationContext()) + 1));
+            break;
 
         }
         int returnValue = super.onStartCommand(intent, flags, startId);
