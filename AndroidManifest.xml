@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.providers.downloads"
-        android:sharedUserId="android.media">
+        android:sharedUserId="android.media"
+        android:versionName="4.11.14.600001">
 
     <!-- Allows access to the Download Manager -->
     <permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER"
