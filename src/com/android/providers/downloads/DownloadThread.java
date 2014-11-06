@@ -1103,7 +1103,7 @@ public class DownloadThread implements Runnable {
     private int processDownloadHeader(State state, final String response) throws StopRequestException {
         
         int responseCode = -1;
-        if (response.startsWith("HTTP/1.1")) {
+        if (response.startsWith("HTTP")) {
             int index = response.indexOf(" ");
             String code = response.substring(index + 1, index + 1 + 3);
             try {
@@ -1117,6 +1117,8 @@ public class DownloadThread implements Runnable {
             if (responseCode != HTTP_OK) {
                 return responseCode;
             }
+        } else {
+            throw new StopRequestException(STATUS_CANNOT_RESUME, "xunlei http return error, not start with http");
         }
         
         if (response.contains("Content-Disposition:")) {
