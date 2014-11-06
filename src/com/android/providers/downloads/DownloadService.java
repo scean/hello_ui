@@ -280,7 +280,7 @@ public class DownloadService extends Service {
         }
 
         if (!miui.os.Build.IS_TABLET) {
-        	mCdnThread = new CdnQueryingThread();
+            mCdnThread = new CdnQueryingThread();
             mCdnThread.start();
         }
 
@@ -309,12 +309,18 @@ public class DownloadService extends Service {
             XLConfig.LOGD("xunlei Service ---> receive broadcast, executive getting token process");
             startGetXlTokenEx(true);
             break;
+        case 2:
+            if (mXlDownloadManager != null) {
+                mXlDownloadManager.XLNotifyNetWorkType(XLUtil.getNetwrokType(getApplicationContext()) + 1);
+            }
+            XLConfig.LOGD(Constants.TAG, "xunlei Service ---> XLNotifyNetWorkType networkType = " + (XLUtil.getNetwrokType(getApplicationContext()) + 1));
+            break;
         }
 
         int returnValue = super.onStartCommand(intent, flags, startId);
         mLastStartId = startId;
         if (mCMD_Param != 1) {
-        	enqueueUpdate();
+            enqueueUpdate();
         }
         return returnValue;
     }
@@ -711,7 +717,7 @@ public class DownloadService extends Service {
         }
 
         if (!miui.os.Build.IS_TABLET) {
-        	Thread xlViphubThread = new Thread() {
+            Thread xlViphubThread = new Thread() {
                 @Override
                 public void run() {
                     String xml_token = mPreferences.getString(XLConfig.PREF_KEY_XUNLEI_TOKEN, "");
@@ -847,9 +853,9 @@ public class DownloadService extends Service {
                                 }
                                 xlCdnPara.setCdnQueryedFlag(true);
                             } else {
-                            	if (707 == ret || 706 == ret) {
-                            		TokenHelper.getInstance().RequestToken(true);
-                            	}
+                                if (707 == ret || 706 == ret) {
+                                    TokenHelper.getInstance().RequestToken(true);
+                                }
                                 // query return error, 7002
                                 XLConfig.LOGD("(CdnQueryingThread) ---> Queryying return error!!!(name:"
                                         + xlCdnPara.mName + "), ret=" + ret + ", queryTimes=" + times);
