@@ -143,7 +143,7 @@ public class Constants {
      * The number of times that the download manager will retry its network
      * operations when no progress is happening before it gives up.
      */
-    public static final int MAX_RETRIES = 20;
+    public static final int MAX_RETRIES = 5;
 
     /**
      * The minimum amount of time that the download manager accepts for

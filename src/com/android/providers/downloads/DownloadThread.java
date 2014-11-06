@@ -342,6 +342,7 @@ public class DownloadThread implements Runnable {
             // Nobody below our level should request retries, since we handle
             // failure counts at this level.
             if (finalStatus == STATUS_WAITING_TO_RETRY) {
+                XLConfig.LOGD("in runInternal throw IllegalStateException");
                 throw new IllegalStateException("Execution should always throw final error codes");
             }
 
@@ -362,11 +363,12 @@ public class DownloadThread implements Runnable {
 
             // Some errors should be retryable, unless we fail too many times.
             if (isStatusRetryable(finalStatus)) {
-                if (state.mGotData) {
-                    numFailed = 1;
-                } else {
-                    numFailed += 1;
-                }
+                // if (state.mGotData) {
+                //     numFailed = 1;
+                // } else {
+                //     numFailed += 1;
+                // }
+                numFailed += 1;
 
                 if (numFailed < Constants.MAX_RETRIES) {
                     final NetworkInfo info = mSystemFacade.getActiveNetworkInfo(mInfo.mUid);
@@ -1065,7 +1067,7 @@ public class DownloadThread implements Runnable {
             if (countTime >= Constants.MIN_PROGRESS_TIME) {
             	state.mDownloadingCurrentSpeed = countBytes;
             	XLConfig.LOGD("---------Android-download ---> bytesRead=" + countBytes +
-                     ", time=" + countTime + ", speed=" + state.mDownloadingCurrentSpeed + 
+                     ", time=" + countTime + ", speed=" + state.mDownloadingCurrentSpeed +
                      " currentBytes = " + state.mCurrentBytes);
             	reportProgress(state);
             	countTime = 0;
@@ -1245,6 +1247,8 @@ public class DownloadThread implements Runnable {
     }
 
     private boolean cannotResume(State state) {
+        XLConfig.LOGD("cannotResume state=" + state + ", mCurrentBytes=" + state.mCurrentBytes + ", mNoIntegrity=" + mInfo.mNoIntegrity
+                + ", mHeaderEtag=" + state.mHeaderETag + ", mHeaderIfRangeId=" + state.mHeaderIfRangeId + ", mMimeType=" + state.mMimeType);
         return (state.mCurrentBytes > 0 && !mInfo.mNoIntegrity && state.mHeaderETag == null
                 && state.mHeaderIfRangeId == null) || DownloadDrmHelper.isDrmConvertNeeded(state.mMimeType);
     }
