@@ -72,13 +72,13 @@ public class DownloadInfo {
 
         public DownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade,
                                             StorageManager storageManager, DownloadNotifier notifier, boolean xlEngineFlag, XLDownloadManager dm, SharedPreferences pf) {
-            final DownloadInfo info = new DownloadInfo(
-                                                       context, systemFacade, storageManager, notifier, dm, pf);
+            final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier, dm, pf);
             updateFromDatabase(info);
 
             // if a new task, rewrite this flag
             info.mXlTaskOpenMark = checkDownloadEngine(info.mPackage, info.mAppointName, xlEngineFlag);
             readRequestHeaders(info);
+            XLConfig.LOGD("in newDownloadInfo " + info);
             return info;
         }
 
@@ -437,9 +437,7 @@ public class DownloadInfo {
         if (mRetryAfter > 0) {
             return mLastMod + mRetryAfter;
         }
-        return mLastMod +
-            Constants.RETRY_FIRST_DELAY *
-            (1000 + mFuzz) * (1 << (mNumFailed - 1));
+        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + mFuzz) * (1 << (mNumFailed - 1));
     }
 
     /**
@@ -466,11 +464,9 @@ public class DownloadInfo {
         case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
             // running, without a chance to update the database
             return true;
-
         case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
         case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
             return checkCanUseNetwork(false) == NetworkState.OK;
-
         case Downloads.Impl.STATUS_WAITING_TO_RETRY:
             // download was waiting for a delayed restart
             final long now = mSystemFacade.currentTimeMillis();
@@ -616,6 +612,8 @@ public class DownloadInfo {
         synchronized (this) {
             final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
             final boolean isReady = isReadyToDownload(isActive);
+            XLConfig.LOGD("in startDownloadIfReady isActive=" + isActive + ", isReady=" + isReady +
+                        ", info.mId=" + mId + ", mStatus=" + Downloads.Impl.statusToString(mStatus));
             if (isReady && !isActive) {
                 if (mStatus != Impl.STATUS_RUNNING) {
                     mStatus = Impl.STATUS_RUNNING;
@@ -629,8 +627,7 @@ public class DownloadInfo {
                                                              (Helpers.sDownloadsDomainCountMap.get(mUriDomain)+1) : 1);
                     }
                 }
-                mTask = new DownloadThread(
-                                           mContext, mSystemFacade, this, mStorageManager, mNotifier, mXlDownloadManager, mPreference);
+                mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier, mXlDownloadManager, mPreference);
                 mSubmittedTask = executor.submit(mTask);
             }
             return isReady;
@@ -784,8 +781,8 @@ public class DownloadInfo {
      */
     String getNotificationStringOfInsufficientSpace() {
         int notifyResId = isOnExternalStorage(getLocalUri()) ?
-            R.string.dialog_insufficient_space_on_external :
-            R.string.dialog_insufficient_space_on_cache;
+                    R.string.dialog_insufficient_space_on_external :
+                    R.string.dialog_insufficient_space_on_cache;
         return mContext.getString(notifyResId);
     }
 
@@ -794,19 +791,21 @@ public class DownloadInfo {
      */
     public static int queryDownloadStatus(ContentResolver resolver, long id) {
         final Cursor cursor = resolver.query(
-                                             ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
-                                             new String[] { Downloads.Impl.COLUMN_STATUS }, null, null, null);
-        try {
-            if (cursor.moveToFirst()) {
-                return cursor.getInt(0);
-            } else {
-                // TODO: increase strictness of value returned for unknown
-                // downloads; this is safe default for now.
-                return Downloads.Impl.STATUS_PENDING;
+                        ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
+                        new String[] { Downloads.Impl.COLUMN_STATUS }, null, null, null);
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    return cursor.getInt(0);
+                }
+            } finally {
+                cursor.close();
             }
-        } finally {
-            cursor.close();
         }
+
+        // TODO: increase strictness of value returned for unknown
+        // downloads; this is safe default for now.
+        return Downloads.Impl.STATUS_PENDING;
     }
 
     /*private*/ boolean isOnExternalStorage(String localUriString) {
@@ -868,5 +867,33 @@ public class DownloadInfo {
         }
         XLConfig.LOGD("(checkDownloadEngine) ---> after check, xlTaskOpenMark=" + xlTaskOpenMark);
         return xlTaskOpenMark;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("DownloadInfo:\n\t");
+        sb.append("mId=").append(mId).append("\n\t");
+        sb.append("mLastMod=").append(mLastMod).append("\n\t");
+        sb.append("mPackage=").append(mPackage).append("\n\t");
+        sb.append("mUid=").append(mUid).append("\n\t");
+        sb.append("mUri=").append(mUri).append("\n\t");
+        sb.append("mMimeType=").append(mMimeType).append("\n\t");
+        sb.append("mCookies=").append((mCookies != null) ? "yes" : "no").append("\n\t");
+        sb.append("mReferer=").append((mReferer != null) ? "yes" : "no").append("\n\t");
+        sb.append("mUserAgent=").append(mUserAgent).append("\n\t");
+        sb.append("mFileName=").append(mFileName).append("\n\t");
+        sb.append("mDestination=").append(mDestination).append("\n\t");
+        sb.append("mStatus=").append(Downloads.Impl.statusToString(mStatus)).append("\n\t");
+        sb.append("mCurrentBytes=").append(mCurrentBytes).append("\n\t");
+        sb.append("mTotalBytes=").append(mTotalBytes).append("\n\t");
+        sb.append("mNumFailed=").append(mNumFailed).append("\n\t");
+        sb.append("mRetryAfter=").append(mRetryAfter).append("\n\t");
+        sb.append("mETag=").append(mETag).append("\n\t");
+        sb.append("mIsPublicApi=").append(mIsPublicApi).append("\n\t");
+        sb.append("mAllowedNetworkTypes=").append(mAllowedNetworkTypes).append("\n\t");
+        sb.append("mAllowRoaming=").append(mAllowRoaming).append("\n\t");
+        sb.append("mAllowMetered=").append(mAllowMetered);
+        return sb.toString();
     }
 }

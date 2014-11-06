@@ -124,8 +124,6 @@ public class DownloadService extends Service {
     // TODO: migrate WakeLock from individual DownloadThreads out into
     // DownloadReceiver to protect our entire workflow.
 
-    private static final boolean DEBUG_LIFECYCLE = false;
-
     @VisibleForTesting
     SystemFacade mSystemFacade;
 
@@ -301,12 +299,9 @@ public class DownloadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent == null) {
-            return super.onStartCommand(intent, flags, startId);
-        }
-
         XLConfig.LOGD("in DownloadService onStartCommand");
-        int mCMD_Param = (int)intent.getIntExtra("CMD_TYPE", 0);
+
+        int mCMD_Param = intent != null ? intent.getIntExtra("CMD_TYPE", 0) : 0;
         switch(mCMD_Param) {
         case 0:
             break;
@@ -402,9 +397,7 @@ public class DownloadService extends Service {
 
             final int startId = msg.arg1;
 
-            if (DEBUG_LIFECYCLE) {
-                XLConfig.LOGD("Updating for startId " + startId);
-            }
+            // XLConfig.LOGD("in handlerMessage, Updating for startId " + startId + ", what=" + msg.what);
 
             // Since database is current source of truth, our "active" status
             // depends on database state. We always get one final update pass
@@ -446,16 +439,13 @@ public class DownloadService extends Service {
                 // Enqueue delayed update pass to catch finished operations that
                 // didn't trigger an update pass; these are bugs.
                 enqueueFinalUpdate();
-
             } else {
                 // No active tasks, and any pending update messages can be
                 // ignored, since any updates important enough to initiate tasks
                 // will always be delivered with a new startId.
 
                 if (stopSelfResult(startId)) {
-                    if (DEBUG_LIFECYCLE) {
-                        XLConfig.LOGD("Nothing left; stopped");
-                    }
+                    XLConfig.LOGD("Nothing left; stopped");
                     getContentResolver().unregisterContentObserver(mObserver);
                     mScanner.shutdown();
                     mUpdateThread.quit();
@@ -532,10 +522,7 @@ public class DownloadService extends Service {
                     // get current download task's next action millis
                     currentDownloadNextActionMillis = info.nextActionMillis(now);
 
-                    if (DEBUG_LIFECYCLE && (activeDownload || activeScan)) {
-                        XLConfig.LOGD("Download " + info.mId + ": activeDownload=" + activeDownload
-                                + ", activeScan=" + activeScan);
-                    }
+                    XLConfig.LOGD("Download " + info.mId + ": activeDownload=" + activeDownload + ", activeScan=" + activeScan);
 
                     isActive |= activeDownload;
                     isActive |= activeScan;

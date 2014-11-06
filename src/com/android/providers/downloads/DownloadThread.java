@@ -238,7 +238,7 @@ public class DownloadThread implements Runnable {
             mXlTaskOpenMark = info.mXlTaskOpenMark;
             mId = info.mId;
             mPackage = info.mPackage;
-            if(mPackage !=null && mPackage.contains("com.google.android.gm")) {
+            if(mPackage != null && mPackage.contains("com.google.android.gm")) {
                 mXlTaskOpenMark = 0;
             }
         }
@@ -267,7 +267,7 @@ public class DownloadThread implements Runnable {
         // probably started again while racing with UpdateThread.
         if (DownloadInfo.queryDownloadStatus(mContext.getContentResolver(), mInfo.mId)
                 == Downloads.Impl.STATUS_SUCCESS) {
-            XLConfig.LOGD("Download " + mInfo.mId + " already finished; skipping");
+            XLConfig.LOGD("in runInternal, Download " + mInfo.mId + " already finished; skipping");
             return;
         }
 
@@ -293,7 +293,7 @@ public class DownloadThread implements Runnable {
             // while performing download, register for rules updates
             netPolicy.registerListener(mPolicyListener);
 
-            XLConfig.LOGD("Download " + mInfo.mId + " starting");
+            XLConfig.LOGD("in runInternal, Download " + mInfo.mId + " starting");
 
             // Remember which network this download started on; used to
             // determine if errors were due to network changes.
@@ -311,6 +311,7 @@ public class DownloadThread implements Runnable {
                 // TODO: migrate URL sanity checking into client side of API
                 state.mUrl = new URL(state.mRequestUri);
             } catch (MalformedURLException e) {
+                XLConfig.LOGD("in runInternal, throw status_bad_request exception.", e);
                 throw new StopRequestException(STATUS_BAD_REQUEST, e);
             }
 
@@ -335,13 +336,12 @@ public class DownloadThread implements Runnable {
             // remove the cause before printing, in case it contains PII
             errorMsg = error.getMessage();
             String msg = "Aborting request for download " + mInfo.mId + ": " + errorMsg;
-            XLConfig.LOGD(msg, error);
             finalStatus = error.getFinalStatus();
+            XLConfig.LOGD("in runInternal catch StopRequestException: finalStatus=" + finalStatus + ", msg=" + msg, error);
 
             // Nobody below our level should request retries, since we handle
             // failure counts at this level.
             if (finalStatus == STATUS_WAITING_TO_RETRY) {
-                XLConfig.LOGD("jinghuang4 ---> STATUS_WAITING_TO_RETRY");
                 throw new IllegalStateException("Execution should always throw final error codes");
             }
 
@@ -542,7 +542,7 @@ public class DownloadThread implements Runnable {
             // Open connection and follow any redirects until we have a useful
             // response with body.
             HttpURLConnection conn = null;
-           try {
+            try {
                 checkConnectivity(false);
                 conn = (HttpURLConnection) state.mUrl.openConnection();
                 conn.setInstanceFollowRedirects(false);
@@ -557,6 +557,7 @@ public class DownloadThread implements Runnable {
                 addRequestHeaders(state, conn);
 
                 final int responseCode = conn.getResponseCode();
+                XLConfig.LOGD("responseCode = " + responseCode + ", continuingDownload=" + state.mContinuingDownload);
 
                 switch (responseCode) {
                     case HTTP_OK:
@@ -565,10 +566,8 @@ public class DownloadThread implements Runnable {
                                     STATUS_CANNOT_RESUME, "Expected partial, but received OK");
                         }
 
-                        XLConfig.LOGD("jinghuang-a ---> + beforer processPro!");
                         processResponseHeaders(state, conn);
 
-                        XLConfig.LOGD("jinghuang-a ---> + after processPro!");
                         transferData(state, conn);
                         return;
 
@@ -1535,16 +1534,19 @@ public class DownloadThread implements Runnable {
             if (uid == mInfo.mUid) {
                 mPolicyDirty = true;
             }
+            XLConfig.LOGD("onUidRulesChanged uid=" + uid + ", mInfo.uid=" + mInfo.mUid);
         }
 
         @Override
         public void onMeteredIfacesChanged(String[] meteredIfaces) {
+            XLConfig.LOGD("onMeteredIfacesChanged");
             // caller is NPMS, since we only register with them
             mPolicyDirty = true;
         }
 
         @Override
         public void onRestrictBackgroundChanged(boolean restrictBackground) {
+            XLConfig.LOGD("onRestrictBackgroundChanged");
             // caller is NPMS, since we only register with them
             mPolicyDirty = true;
         }
