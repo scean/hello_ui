@@ -1082,81 +1082,91 @@ public class DownloadThread implements Runnable {
                 responseCode = Integer.parseInt(code);
             } catch (Exception e) {
                 // TODO: handle exception
-                XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> NumberFormatException happen in parse response code");
+                XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> NumberFormatException happen in parse response code = " + code);
             }
 
             XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> int responseCode=" + responseCode);
-            if (responseCode != HTTP_OK) {
-                return responseCode;
-            }
-        } else {
-            throw new StopRequestException(STATUS_CANNOT_RESUME, "xunlei http return error, not start with http");
-        }
 
-        if (response.contains("Content-Disposition:")) {
-            state.mContentDisposition = parseFieldValue("Content-Disposition:", response);
-        }
-
-        if (response.contains("Content-Location:")) {
-            state.mContentLocation = parseFieldValue("Content-Location:", response);
-        }
-
-        if (response.contains("Content-Type:")) {
-            state.mMimeType = parseFieldValue("Content-Type:", response);
-            XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> mMimeType=" + state.mMimeType);
-        }
-
-        if (response.contains("ETag:")) {
-            state.mHeaderETag = parseFieldValue("ETag:", response);
-        }
-
-        if (response.contains("Last-Modified:")) {
-            state.mHeaderIfRangeId = parseFieldValue("Last-Modified:", response);
-            XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> mHeaderIfRangeId=" + state.mHeaderIfRangeId);
-        }
-
-        if (response.contains("Accept-Ranges:")) {
-            state.mHeaderAcceptRanges = parseFieldValue("Accept-Ranges:", response);
-        }
-
-        if (response.contains("Retry-After:")) {
-            String retryfield = parseFieldValue("Retry-After:", response);
-            try {
-                state.mRetryAfter = Integer.parseInt(retryfield);
-            } catch (Exception e) {
-                // TODO: handle exception
-                XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> NumberFormatException happen in parse Retry-After field = " + retryfield);
-                state.mRetryAfter = -1;
-            }
-        } else {
-            state.mRetryAfter = -1;
-        }
-
-        String transferEncoding = null;
-        state.mContentLength = -1;
-        if (response.contains("Transfer-Encoding:")) {
-            transferEncoding = parseFieldValue("Transfer-Encoding:", response);;
-        } else {
-            if (response.contains("Content-Length:")) {
-                String lengthfield = parseFieldValue("Content-Length:", response);
-                try {
-                    state.mContentLength = Long.parseLong(lengthfield.trim());
-                } catch (NumberFormatException e) {
-                    XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> NumberFormatException happen in parse length field = " + lengthfield);
+            if (responseCode == HTTP_OK ||
+                    responseCode == HTTP_PARTIAL ||
+                    responseCode == HTTP_REQUESTED_RANGE_NOT_SATISFIABLE) {
+                if (response.contains("Content-Disposition:")) {
+                    state.mContentDisposition = parseFieldValue("Content-Disposition:", response);
                 }
-            } 
-        }
 
-        state.mTotalBytes = state.mContentLength;
-        mInfo.mTotalBytes = state.mContentLength;
+                if (response.contains("Content-Location:")) {
+                    state.mContentLocation = parseFieldValue("Content-Location:", response);
+                }
 
-        XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> filesize=" + state.mTotalBytes);
+                if (response.contains("Content-Type:")) {
+                    state.mMimeType = parseFieldValue("Content-Type:", response);
+                    XLConfig.LOGD("(processDownloadHeader) ---> mMimeType=" + state.mMimeType);
+                }
 
-        final boolean noSizeInfo = state.mContentLength == -1
-                && (transferEncoding == null || !transferEncoding.equalsIgnoreCase("chunked"));
-        if (!mInfo.mNoIntegrity && noSizeInfo) {
-            throw new StopRequestException(STATUS_CANNOT_RESUME,
-                    "can't know size of download, giving up");
+                if (response.contains("ETag:")) {
+                    state.mHeaderETag = parseFieldValue("ETag:", response);
+                }
+
+                if (response.contains("Last-Modified:")) {
+                    state.mHeaderIfRangeId = parseFieldValue("Last-Modified:", response);
+                    XLConfig.LOGD("(processDownloadHeader) ---> mHeaderIfRangeId=" + state.mHeaderIfRangeId);
+                }
+
+                if (response.contains("Accept-Ranges:")) {
+                    state.mHeaderAcceptRanges = parseFieldValue("Accept-Ranges:", response);
+                }
+
+                if (response.contains("Retry-After:")) {
+                    String retryfield = parseFieldValue("Retry-After:", response);
+                    try {
+                        state.mRetryAfter = Integer.parseInt(retryfield);
+                    } catch (Exception e) {
+                        XLConfig.LOGD("(processDownloadHeader) ---> NumberFormatException happen in parse Retry-After field = " + retryfield);
+                        state.mRetryAfter = -1;
+                    }
+                } else {
+                    state.mRetryAfter = -1;
+                }
+
+                String transferEncoding = null;
+                state.mContentLength = -1;
+                if (response.contains("Transfer-Encoding:")) {
+                    transferEncoding = parseFieldValue("Transfer-Encoding:", response);;
+                } else {
+                    String lengthfield = "";
+                    if (responseCode == HTTP_PARTIAL) {
+                        if (response.contains("Content-Range:")) {
+                            String value = parseFieldValue("Content-Range:", response);
+                            int begin_index = value.indexOf("/");
+                            int end_index = value.indexOf("\n", begin_index);
+                            lengthfield = value.substring(begin_index + 1, end_index);
+                            XLConfig.LOGD("(processDownloadHeader) ---> 206 lengthfield=" + lengthfield);
+                        }
+                    } else {
+                        if (response.contains("Content-Length:")) {
+                            lengthfield = parseFieldValue("Content-Length:", response);
+                        }
+                    }
+
+                    try {
+                        state.mContentLength = Long.parseLong(lengthfield.trim());
+                    } catch (NumberFormatException e) {
+                        XLConfig.LOGD("(processDownloadHeader) ---> NumberFormatException happen in parse length field = " + lengthfield);
+                    }
+                }
+
+                state.mTotalBytes = state.mContentLength;
+                mInfo.mTotalBytes = state.mContentLength;
+
+                XLConfig.LOGD("(processDownloadHeader) ---> filesize=" + state.mTotalBytes);
+
+                final boolean noSizeInfo = state.mContentLength == -1
+                        && (transferEncoding == null || !transferEncoding.equalsIgnoreCase("chunked"));
+                if (!mInfo.mNoIntegrity && noSizeInfo) {
+                    throw new StopRequestException(STATUS_CANNOT_RESUME,
+                            "can't know size of download, giving up");
+                }
+            }
         }
 
         return responseCode;
@@ -1187,14 +1197,13 @@ public class DownloadThread implements Runnable {
                 throw new StopRequestException(Downloads.Impl.STATUS_CANCELED, TASK_CONCELED);
             }
 
-            XLConfig.LOGD(Constants.TAG, "(getDownloadHeader) ---> xunlei return state=" + header.mHttpState + ", times=" + ++time);
+            XLConfig.LOGD("(getDownloadHeader) ---> xunlei return state=" + header.mHttpState + ", times=" + ++time);
             if (header.mHttpState == XlDownloadHeaderState.GDHS_SUCCESS.ordinal()) {
-                XLConfig.LOGD(Constants.TAG, "(getDownloadHeader) ---> response=" + header.mHttpResponse);
+                XLConfig.LOGD("(getDownloadHeader) ---> response=" + header.mHttpResponse);
                 final int responseCode = processDownloadHeader(state, header.mHttpResponse);
                 switch (responseCode) {
                     case HTTP_OK:
-                        processResponseHeaders(state, null);
-                        return;
+                    case HTTP_PARTIAL:
                     case HTTP_REQUESTED_RANGE_NOT_SATISFIABLE:
                         processResponseHeaders(state, null);
                         return;

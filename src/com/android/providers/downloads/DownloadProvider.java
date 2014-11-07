@@ -200,7 +200,7 @@ public final class DownloadProvider extends ContentProvider {
 
     @VisibleForTesting
     SystemFacade mSystemFacade;
-	public static final class XLColumns {
+    public static final class XLColumns {
         /**
          *  add four column by xl hsh for xl vip sevice
          */
@@ -240,7 +240,7 @@ public final class DownloadProvider extends ContentProvider {
          * This task   for Thumbnail
          */
         public static final String COLUMN_TASK_FOR_THUMBNAIL= "download_task_thumbnail";
-	}
+    }
     /**
      * This class encapsulates a SQL where clause and its parameters.  It makes it possible for
      * shared methods (like {@link DownloadProvider#getWhereClause(Uri, String, String[], int)})
@@ -286,7 +286,6 @@ public final class DownloadProvider extends ContentProvider {
      */
     private final class DatabaseHelper extends SQLiteOpenHelper {
 
-        private SQLiteDatabase mSqldb;
         public DatabaseHelper(final Context context) {
             super(context, DB_NAME, null, DB_VERSION);
         }
@@ -297,13 +296,13 @@ public final class DownloadProvider extends ContentProvider {
         @Override
         public void onCreate(final SQLiteDatabase db) {
             XLConfig.LOGD("populating new database");
-            mSqldb = db;
             onUpgrade(db, 0, DB_VERSION);
         }
 
         @Override
         public void onDowngrade (SQLiteDatabase db, int oldV, int newV) {
             XLConfig.LOGD("db downgrade");
+            deleteDownloadsTable(db);
         }
 
         /**
@@ -505,11 +504,11 @@ public final class DownloadProvider extends ContentProvider {
             }
         }
 
-        public void deleteDownloadsTable() {
+        public void deleteDownloadsTable(SQLiteDatabase db) {
             try {
-                if (mSqldb != null) {
-                    mSqldb.execSQL("DROP TABLE " + DB_TABLE);
-                    mSqldb.execSQL("DROP TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
+                if (db != null) {
+                    db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
+                    db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
                 }
             } catch (SQLException e) {
                 XLConfig.LOGD("couldn't delete table in downloads database", e);
@@ -1005,10 +1004,9 @@ public final class DownloadProvider extends ContentProvider {
         SQLiteDatabase db = null;
 
         try {
-        	 db = mOpenHelper.getReadableDatabase();
+            db = mOpenHelper.getReadableDatabase();
         } catch (SQLiteException e){
-        	((DatabaseHelper)mOpenHelper).deleteDownloadsTable();
-        	return null;
+            return null;
         }
 
         int match = sURIMatcher.match(uri);
@@ -1258,13 +1256,13 @@ public final class DownloadProvider extends ContentProvider {
             case ALL_DOWNLOADS_ID:
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 if (filteredValues.size() > 0) {
-                	try {
-                		count = db.update(DB_TABLE, filteredValues, selection.getSelection(),
+                    try {
+                        count = db.update(DB_TABLE, filteredValues, selection.getSelection(),
                             selection.getParameters());
-                	} catch(Exception e){
+                    } catch(Exception e){
                         XLConfig.LOGD("error when update!", e);
-                		count = 0;
-                	}
+                        count = 0;
+                    }
                 } else {
                     count = 0;
                 }
