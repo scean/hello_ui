@@ -309,6 +309,7 @@ public final class DownloadProvider extends ContentProvider {
             if (Constants.LOGVV) {
                 Log.v(Constants.TAG, "db downgrade");
             }
+            ((DatabaseHelper)mOpenHelper).deleteDownloadsTable();
         }
         
         /**
