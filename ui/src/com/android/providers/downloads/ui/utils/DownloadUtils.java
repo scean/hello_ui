@@ -219,11 +219,16 @@ public class DownloadUtils {
 	 */
 	public static Long getRecommendedMaxBytesOverMobile(Context context) {
 		Long maxBytesValue = DownloadManager.getRecommendedMaxBytesOverMobile(context);
-		;
 		if (maxBytesValue == null) {
 			// Third party mobile have not the record DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE
 			// in database, so add the record if the record does not exist.
-			maxBytesValue = (long) context.getResources().getInteger(R.integer.default_recommended_max_bytes_over_mobile);
+            if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) 
+            //if (true) 
+            {
+                maxBytesValue = (long) context.getResources().getInteger(R.integer.international_default_recommended_max_bytes_over_mobile);
+            }
+            else
+                maxBytesValue = (long) context.getResources().getInteger(R.integer.default_recommended_max_bytes_over_mobile);
 			DownloadManager.setRecommendedMaxBytesOverMobile(context, maxBytesValue);
 		}
 		return maxBytesValue;

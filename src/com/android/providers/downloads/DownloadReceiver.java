@@ -81,7 +81,12 @@ public class DownloadReceiver extends BroadcastReceiver {
                     .getSystemService(Context.CONNECTIVITY_SERVICE);
             final NetworkInfo info = connManager.getActiveNetworkInfo();
             if (info != null && info.isConnected()) {
-                startService(context);
+                XLConfig.LOGD(Constants.TAG, "DownloadReceiver.onReceive() ---> network Changed!");
+                Intent i = new Intent(context, DownloadService.class);
+                i.putExtra("CMD_TYPE", 2);
+                
+                context.startService(i);
+                //startService(context);
             }
         } else if (action.equals(Constants.ACTION_RETRY)) {
             startService(context);
