@@ -671,12 +671,12 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         XLUtil.logDebug(TAG, "onActivityResult ---requestCode, requestCode ,  mTrueAuthMark" + requestCode + "," + resultCode + "," + mTrueAuthMark);
         if (requestCode == 50) {
             if (resultCode == 110) {
-                AccountInfoInstance mAccount = AccountInfoInstance.getInstance(getApplicationContext(), XLUtil.getStringPackagePreference(getApplicationContext()));
+//                AccountInfoInstance mAccount = AccountInfoInstance.getInstance(getApplicationContext(), XLUtil.getStringPackagePreference(getApplicationContext()));
                 mTrueAuthMark = true;
-                mAccount.setAccountListener(mlisten);
-                XLUtil.logDebug(TAG, "onActivityResult --- requestCode 110  mTrueAuthMark" + mTrueAuthMark);
-                //DownloadUtils.trackBehaviorEvent(getApplicationContext(), "get_flow", 0, 0);
-                mAccount.RequestAddFlowInfo(XLUtil.getStringPackagePreference(getApplicationContext()), true);
+//                mAccount.setAccountListener(mlisten);
+//                XLUtil.logDebug(TAG, "onActivityResult --- requestCode 110  mTrueAuthMark" + mTrueAuthMark);
+//                //DownloadUtils.trackBehaviorEvent(getApplicationContext(), "get_flow", 0, 0);
+//                mAccount.RequestAddFlowInfo(XLUtil.getStringPackagePreference(getApplicationContext()), true);
             } else if (resultCode == 120) {
                 Message msg = mUiHandler.obtainMessage();
                 msg.what = 24;

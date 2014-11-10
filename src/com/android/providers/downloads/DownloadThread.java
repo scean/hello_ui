@@ -1064,6 +1064,9 @@ public class DownloadThread implements Runnable {
     private String parseFieldValue(String field, final String target) {
         int begin_index = target.indexOf(field);
         int end_index = target.indexOf("\n", begin_index);
+        if (end_index == -1) {
+            end_index = target.length();
+        }
         return target.substring(begin_index + field.length() + 1, end_index);
     }
 
@@ -1132,6 +1135,9 @@ public class DownloadThread implements Runnable {
                 state.mContentLength = -1;
                 if (response.contains("Transfer-Encoding:")) {
                     transferEncoding = parseFieldValue("Transfer-Encoding:", response);;
+                    transferEncoding = transferEncoding.substring(0, transferEncoding.length() - 1);
+                    XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> transferEncoding=" + transferEncoding + ", length=" + transferEncoding.length());
+                    XLConfig.LOGD(Constants.TAG, "(processDownloadHeader) ---> flag=" + transferEncoding.equalsIgnoreCase("chunked"));
                 } else {
                     String lengthfield = "";
                     if (responseCode == HTTP_PARTIAL) {
@@ -1139,6 +1145,9 @@ public class DownloadThread implements Runnable {
                             String value = parseFieldValue("Content-Range:", response);
                             int begin_index = value.indexOf("/");
                             int end_index = value.indexOf("\n", begin_index);
+                            if (end_index == -1) {
+                                end_index = value.length();
+                            }
                             lengthfield = value.substring(begin_index + 1, end_index);
                             XLConfig.LOGD("(processDownloadHeader) ---> 206 lengthfield=" + lengthfield);
                         }

@@ -630,12 +630,12 @@ public class XLSpeedUpActivity extends BaseActivity {
 						}
 					}
 				});
-				// 授权结束去领取流量
-				if (mAccountInstance != null) {
-					XLUtil.logDebug(TAG, "request add flow2:" + mToken);
-					//   DownloadUtils.trackBehaviorEvent(getApplicationContext(), "get_flow", 0, 0);
-					mAccountInstance.RequestAddFlowInfo(XLUtil.getStringPackagePreference(getApplicationContext()), true);
-				}
+//				// 授权结束去领取流量
+//				if (mAccountInstance != null) {
+//					XLUtil.logDebug(TAG, "request add flow2:" + mToken);
+//					//   DownloadUtils.trackBehaviorEvent(getApplicationContext(), "get_flow", 0, 0);
+//					mAccountInstance.RequestAddFlowInfo(XLUtil.getStringPackagePreference(getApplicationContext()), true);
+//				}
 
 			} else {
 				DownloadUtils.trackBehaviorEvent(getApplicationContext(), "bind_account_fail", 0, 0);
