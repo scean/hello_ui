@@ -624,12 +624,10 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         //android.app.ActionBar actionBar = getActionBar();
         boolean xunlei_usage = getXunleiUsagePermission();
         boolean netStatus = DownloadUtils.isNetworkAvailable(getApplicationContext());
-		
 
 		if (Build.IS_TABLET || miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) 
 		//if(true)
 		{
-            		
         }
 		else
 		{
@@ -637,6 +635,8 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 	        String xunlei_token = XLUtil.getStringPackagePreference(getApplicationContext());
 	        Account account = ExtraAccountManager.getXiaomiAccount(DownloadList.this);
 	        NotificationLogic.VipExpireStatus vipstatus = mNotificationLogic.isOutDateVip();
+
+            AppConfig.LOGD("netStatus=" + netStatus + ", xunlei_usage=" + xunlei_usage + ", xunlei_token=" + xunlei_token + ", vipMark=" + nVipMark + ", vipStatus=" + vipstatus);
 
 	        if (netStatus && xunlei_usage && xunlei_token.equals("") == false && account != null && nVipMark == 3 && (vipstatus != NotificationLogic.VipExpireStatus.OUTDATE)) {
 	            setSpeedUpIcon(getActionBar());

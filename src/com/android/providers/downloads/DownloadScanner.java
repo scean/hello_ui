@@ -146,7 +146,7 @@ public class DownloadScanner implements MediaScannerConnectionClient {
         final Uri downloadUri = ContentUris.withAppendedId(
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, req.id);
         final int rows = resolver.update(downloadUri, values, null, null);
-        if (rows == 0) {
+        if (rows == 0 && uri != null) {
             // Local row disappeared during scan; download was probably deleted
             // so clean up now-orphaned media entry.
             resolver.delete(uri, null, null);
