@@ -1847,13 +1847,28 @@ public class DownloadThread implements Runnable {
         while (index++ < Constants.MAX_REDIRECTS) {
             try {
                 client = AndroidHttpClient.newInstance(userAgent(), mContext);
-                request = new HttpGet(state.mRequestUri);
+                request = new HttpGet(state.mUrl.toString());
 
                 for (Pair<String, String> headers : mInfo.getHeaders()) {
                     request.addHeader(headers.first, headers.second);
                 }
 
                 response = client.execute(request);
+                int code = response.getStatusLine().getStatusCode();
+                XLConfig.LOGD("checkFileSizeinMobile responseCode=" + code);
+                if (code == HTTP_MOVED_PERM || code == HTTP_MOVED_TEMP || code == HTTP_SEE_OTHER
+                        || code == HTTP_TEMP_REDIRECT) {
+                    Header[] headers = response.getHeaders("Location");
+                    if (headers != null || headers.length > 0) {
+                        final String location = headers[0].getValue();
+                        state.mUrl = new URL(state.mUrl, location);
+                        if (code == HTTP_MOVED_PERM) {
+                            // Push updated URL back to database
+                            state.mRequestUri = state.mUrl.toString();
+                        }
+                    }
+                    continue;
+                }
 
                 header = response.getFirstHeader("Content-Disposition");
                 if (header != null) {
