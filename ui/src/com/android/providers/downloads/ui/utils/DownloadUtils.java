@@ -529,7 +529,7 @@ public class DownloadUtils {
 
         SharedPreferences xPreferences = ct.getSharedPreferences(AppConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
         if (!xPreferences.contains(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT)) {
-            xPreferences.edit().putBoolean(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true).commit();
+            xPreferences.edit().putBoolean(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT, true).commit();
         }
     }
 
