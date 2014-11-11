@@ -273,7 +273,7 @@ public class DownloadService extends Service {
                 true, mObserver);
 
         // get mXunleiEngineEnable from DB
-        mXunleiEngineEnable = getXunleiUsagePermission();
+        mXunleiEngineEnable = Helpers.getXunleiUsagePermission(getApplicationContext());
         if (mXunleiEngineEnable) {
             startGetXlTokenEx(false);
             initXunleiEngine();
@@ -673,26 +673,6 @@ public class DownloadService extends Service {
     };
 
     /**
-     * get xunlei engine enable flag from xml(modifiled by ui)
-     * @return
-     */
-    private boolean getXunleiUsagePermission() {
-        boolean xunlei_usage;
-        if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) {
-            xunlei_usage = false;
-        } else {
-            SharedPreferences pf = getApplicationContext().getSharedPreferences(XLConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
-            if (!pf.contains(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION)) {
-                SharedPreferences.Editor et = pf.edit();
-                et.putBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
-                et.commit();
-            }
-            xunlei_usage  = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
-        }
-        XLConfig.LOGD("(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
-        return xunlei_usage;
-    }
-    /**
      * init Xunlei service
      */
     private synchronized void initXunleiEngine() {
@@ -751,7 +731,7 @@ public class DownloadService extends Service {
      */
     private void checkXunleiEngineStatus() {
 //        XLConfig.LOGD(Constants.TAG, "(checkXunleiEngineStatus) ---> check xunlei engine status.");
-        Boolean curFlag = getXunleiUsagePermission();
+        Boolean curFlag = Helpers.getXunleiUsagePermission(getApplicationContext());
         if (mXunleiEngineEnable != curFlag) {
             mXunleiEngineEnable = curFlag;
             if (mXunleiEngineEnable) {

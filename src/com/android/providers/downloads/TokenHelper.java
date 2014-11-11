@@ -168,7 +168,7 @@ public class TokenHelper {
         mBinderService = binder;
     }
     private void bindMiService(){
-        boolean mXunleiEngineEnable = getXunleiUsagePermission();
+        boolean mXunleiEngineEnable = Helpers.getXunleiUsagePermission(mContext);
         if (mXunleiEngineEnable) {
             Intent intent = new Intent("android.intent.action.BIND_XIAOMI_ACCOUNT_SERVICE");
             mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -181,27 +181,7 @@ public class TokenHelper {
             mContext.unbindService(serviceConnection);
         }
     }
-    /**
-     * get xunlei engine enable flag from xml(modifiled by ui)
-     * @return
-     */
-    private boolean getXunleiUsagePermission() {
-        boolean xunlei_usage;
-        if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) {
-            xunlei_usage = false;
-        } else {
 
-            SharedPreferences pf = mContext.getSharedPreferences(XLConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
-            if (!pf.contains(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION)) {
-                SharedPreferences.Editor et = pf.edit();
-                et.putBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
-                et.commit();
-            }
-            xunlei_usage  = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
-        }
-        XLConfig.LOGD("(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
-        return xunlei_usage;
-    }
     private void saveDefaultAccountName(Account account){
         if(account != null) {
             mDefaultAccountName = account.name;

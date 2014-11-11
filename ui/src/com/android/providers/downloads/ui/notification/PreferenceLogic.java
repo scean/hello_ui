@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.android.providers.downloads.ui.DownloadList;
+import com.android.providers.downloads.ui.app.AppConfig;
 import com.android.providers.downloads.ui.activity.DownloadSettingActivity;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
 import com.android.providers.downloads.ui.utils.XLUtil;
@@ -40,8 +41,6 @@ public class PreferenceLogic {
      * 赠送流量用完前提示
      */
     private final String BEFORE_GIVEN_FLOW_OUT = "before_given_flow_out";
-    // 使用迅雷下载引擎
-    private final String PREF_KEY_XUNLEI_USAGE_PERMISSION = DownloadSettingActivity.PREF_KEY_XUNLEI_USAGE_PERMISSION;
 
     /**赠送流量提醒**/
     private final String GIVEN_FLOW = "given_flow";
@@ -64,9 +63,9 @@ public class PreferenceLogic {
         if (null == mSharedPreferences) {
             Context ct = null;
             try {
-                ct = mContext.createPackageContext(DownloadList.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
+                ct = mContext.createPackageContext(AppConfig.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
                 mSharedPreferences = ct.getSharedPreferences(
-                        DownloadList.PREF_NAME, Context.MODE_MULTI_PROCESS);
+                        AppConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
             } catch (Exception e) {
             }
         }
@@ -349,20 +348,13 @@ public class PreferenceLogic {
     }
 
     public void setIsHaveUseXunleiDownload(boolean value){
-        saveBooleanPre(PREF_KEY_XUNLEI_USAGE_PERMISSION, value);
+        saveBooleanPre(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, value);
+        DownloadUtils.setXunleiUsagePermissionChanged();
     }
 
     // 是否使用迅雷下载引擎
     public boolean getIsHaveUseXunleiDownload() {
-        if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) {
-            return false;
-        } else {
-            SharedPreferences mPreferces = getSharedPreference();
-            if (mPreferces != null) {
-                return mPreferces.getBoolean(PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
-            }
-            return true;
-        }
+        return DownloadUtils.getXunleiUsagePermission(mContext);
     }
 
     public void setFirstReceive(boolean isFirst) {

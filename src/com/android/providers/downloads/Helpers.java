@@ -985,28 +985,6 @@ public class Helpers {
         return res;
     }
 
-    public static boolean getXunleiUsagePermission(Context context) {
-        // get DownloadProvider's context
-        if (isInternationalBuilder()) {
-            return false;
-        }
-
-        final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads.ui";
-        final String PREF_NAME = "download_pref";
-        final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
-
-        Context ct = null;
-        try {
-            ct = context.createPackageContext(DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
-        } catch (Exception e) {
-            return false;
-        }
-
-        SharedPreferences xPreferences = ct.getSharedPreferences(PREF_NAME, Context.MODE_MULTI_PROCESS);
-        boolean xunlei_usage = xPreferences.getBoolean(PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
-        return xunlei_usage;
-    }
-
     /**
      * track for online
      */
@@ -1168,5 +1146,24 @@ public class Helpers {
        // trackData.put("mac", mac);
         trackData.put("network_type", Integer.toString(network));
         trackData.put("time", time);
+    }
+
+    /**
+     * If not set PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT, then return default value true, otherwise return the value stored.
+     * The value of PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT is set by ui when xunlei_usage switch changed.
+     */
+    public static boolean getXunleiUsagePermission(Context context) {
+        if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) {
+            return false;
+        }
+
+        boolean xunlei_usage = true;
+        SharedPreferences pf = context.getSharedPreferences(XLConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
+        if (pf.contains(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT)) {
+            xunlei_usage = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
+        }
+
+        XLConfig.LOGD("(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
+        return xunlei_usage;
     }
 }

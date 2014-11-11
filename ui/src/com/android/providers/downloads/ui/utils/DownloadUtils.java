@@ -55,9 +55,6 @@ public class DownloadUtils {
     public static final int SETTING_ONLINE_EVENT = 10003;
     public static final int SPEEDUP_ONLINE_EVENT = 10004;
 
-    public static final String PREF_NAME = "download_pref";
-    public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
-    public static final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads";
     private static final String STAT_TAG_ONLINESTATUS = "DownloadUtils.Stat.OnLineStatus";
     public static final String PRODUCT_NAME = "MIUI V6 Download";
     private static final String STAT_TAG_BEHAVIOR = "DownloadUtils.Stat.Behavior";
@@ -502,20 +499,39 @@ public class DownloadUtils {
     }
 
     public static boolean getXunleiUsagePermission(Context ctx) {
-        // get DownloadProvider's context
         if (isInternationalBuilder()) {
             return false;
         }
 
         Context ct = null;
         try {
-            ct = ctx.createPackageContext(DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
+            ct = ctx.createPackageContext(AppConfig.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
         } catch (Exception e) {
+            AppConfig.LOGD("error when create download provider package context", e);
             return false;
         }
-        SharedPreferences xPreferences = ct.getSharedPreferences(PREF_NAME, Context.MODE_MULTI_PROCESS);
-        boolean xunleiUsage = xPreferences.getBoolean(PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
+
+        boolean xunleiUsage = true;
+        SharedPreferences xPreferences = ct.getSharedPreferences(AppConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
+        if (xPreferences.contains(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT)) {
+            xunleiUsage = xPreferences.getBoolean(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
+        }
         return xunleiUsage;
+    }
+
+    public static void setXunleiUsagePermissionChanged() {
+        Context ct = null;
+        try {
+            ct = ctx.createPackageContext(AppConfig.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
+        } catch (Exception e) {
+            AppConfig.LOGD("error when create download provider package context", e);
+            return false;
+        }
+
+        SharedPreferences xPreferences = ct.getSharedPreferences(AppConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
+        if (!xPreferences.contains(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT)) {
+            xPreferences.edit().putBoolean(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true).commit();
+        }
     }
 
     public static boolean getXunleiVipSwitchStatus(Context ctx) {

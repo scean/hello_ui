@@ -92,7 +92,6 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     public static final int FILTER_OTHER = 5;
     public static final int FILTER_SUM = 6;
     private RadioGroup mGroup;
-    public static final String PREF_NAME = "download_pref";
     public static final String PREF_KEY_FILTER_BAR_VISIBILITY = "filter_bar_visible";
     private boolean mFilterBarVisible;
     private View mGroupContainer;
@@ -108,12 +107,9 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 
     private int mResuestType = 0;
     private Handler mHandler = new Handler();
-    public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
-    public static final String PREF_KEY_XUNLEI_TOKEN = "xunlei_token";
+
     private String mTokenType = "";
-    public static final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads";
     public static final String ACTION_INTENT_DOWNLOADLIST_BROADCAST = "com.process.media.broadcast.downloadlist";
-	public static final String PREF_KEY_XUNLEI_USER_ID = "xunlei_user_id";
     private LoginSucessReceiver mLoginReceiver;
 
     private View titleBar;

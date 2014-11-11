@@ -45,6 +45,7 @@ import android.util.Log;
 
 import miui.widget.NumberPicker;
 
+import com.android.providers.downloads.ui.app.AppConfig;
 import com.android.providers.downloads.ui.notification.PreferenceLogic;
 import com.android.providers.downloads.ui.utils.DownloadUtils;
 import com.android.providers.downloads.ui.R;
@@ -65,12 +66,12 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
     // checkbox
     private CheckBoxPreference mXunleiUsagePref;
     private PreferenceCategory mPreferenceCategory;
-    public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
+
     public static final String PREF_KEY_CATEGORY = "CategoryCheckbox";
-    public static final String PREF_NAME = "download_pref";
+
     private static final Uri sRecommendedBytesLimitUri = Uri.parse("content://downloads/download_bytes_limit_over_mobile");
-    private static final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads";
     private static final int ONLINE_EVENT_ID = DownloadUtils.SETTING_ONLINE_EVENT;
+
     private boolean mPaused = false;    // 弹框的情况不统计下线（onPause）
 
     @Override
@@ -92,7 +93,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
                         ONLINE_EVENT_ID);
             }
         }
-        
+
         @Override
         protected void onPause() {
             // TODO Auto-generated method stub
@@ -105,7 +106,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
             // TODO Auto-generated method stub
             super.onStop();
             mPaused = false;
-            
+
             Context ctx = getApplicationContext();
             DownloadUtils.trackOnlineStatus(ctx, BaseActivity.STATUS_OFFLINE,
                     !DownloadUtils.getXunleiUsagePermission(ctx), !DownloadUtils.getXunleiVipSwitchStatus(ctx),
@@ -154,7 +155,6 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
                             }).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-
                                         PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(false);
                                         DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, false);
                                 }
@@ -162,21 +162,18 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
                                 @Override
                                 public void onCancel(DialogInterface dialog) {
                                     mXunleiUsagePref.setChecked(true);
-                                    
                                 }
                             });
                     dialog.show();
                 } else {
                     mXunleiUsagePref.setChecked(checked);
-                        PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(checked);
-                        DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, checked);
+                    PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(checked);
+                    DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, checked);
                 }
                 return true;
             }
         });// */
-        if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) 
-        //if (true) 
-        {
+        if (miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) {
             if(mPreferenceCategory != null)
                 mPreferenceCategory.removePreference(mXunleiUsagePref);
         }
