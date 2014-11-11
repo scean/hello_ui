@@ -139,7 +139,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
         // setup checkbox
         boolean xunlei_usage = PreferenceLogic.getInstance(this).getIsHaveUseXunleiDownload();
         mPreferenceCategory = (PreferenceCategory) findPreference(PREF_KEY_CATEGORY);
-        mXunleiUsagePref = (CheckBoxPreference) findPreference(PREF_KEY_XUNLEI_USAGE_PERMISSION);
+        mXunleiUsagePref = (CheckBoxPreference) findPreference(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION);
         mXunleiUsagePref.setChecked(xunlei_usage);
         mXunleiUsagePref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override

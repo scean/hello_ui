@@ -242,8 +242,7 @@ public class XLSpeedUpActivity extends BaseActivity {
 			xunleiID = account.uid;
 		}
 
-		XLUtil.saveStringPackagePreferenc(getApplicationContext(), DownloadList.PREF_KEY_XUNLEI_USER_ID, xunleiID);
-
+		XLUtil.saveStringPackagePreferenc(getApplicationContext(), AppConfig.PREF_KEY_XUNLEI_USER_ID, xunleiID);
 	}
 
 	private void initConfigJS() {

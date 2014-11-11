@@ -925,7 +925,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     }
 
     public void saveFilterBarStatus() {
-        SharedPreferences preferences = this.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences preferences = this.getSharedPreferences(AppConfig.PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(PREF_KEY_FILTER_BAR_VISIBILITY, mFilterBarVisible);
         editor.commit();

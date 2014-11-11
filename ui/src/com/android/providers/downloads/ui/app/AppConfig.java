@@ -7,7 +7,7 @@ import com.android.providers.downloads.ui.utils.DebugLog;
 
 public class AppConfig {
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     public static final String TAG = "DownloadProviderUI";
 
@@ -18,6 +18,7 @@ public class AppConfig {
     public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
     public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT = "xunlei_usage_permission_is_default";
     public static final String PREF_KEY_XUNLEI_USER_ID = "xunlei_user_id";
+    public static final String PREF_KEY_VIP_FLAG_IS_DEFAULT = "xunlei_key_vip_flag_is_default";
 
     public static void LOGD(String message) {
         LOGD(TAG, message);

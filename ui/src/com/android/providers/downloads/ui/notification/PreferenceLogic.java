@@ -13,6 +13,7 @@ import com.android.providers.downloads.ui.app.AppConfig;
 import com.android.providers.downloads.ui.activity.DownloadSettingActivity;
 import com.android.providers.downloads.ui.pay.ConfigJSInstance;
 import com.android.providers.downloads.ui.utils.XLUtil;
+import com.android.providers.downloads.ui.utils.DownloadUtils;
 import com.android.providers.downloads.ui.utils.DateUtil;
 
 public class PreferenceLogic {
@@ -77,7 +78,7 @@ public class PreferenceLogic {
             Context ct = null;
             try {
                 ct = mContext.createPackageContext(
-                        DownloadList.DOWNLOADPROVIDER_PKG_NAME,
+                        AppConfig.DOWNLOADPROVIDER_PKG_NAME,
                         Context.CONTEXT_IGNORE_SECURITY);
                 mSharedPreferences = ct.getSharedPreferences("sp_notification",
                         Context.MODE_PRIVATE);
@@ -349,7 +350,7 @@ public class PreferenceLogic {
 
     public void setIsHaveUseXunleiDownload(boolean value){
         saveBooleanPre(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, value);
-        DownloadUtils.setXunleiUsagePermissionChanged();
+        DownloadUtils.setXunleiUsagePermissionChanged(mContext);
     }
 
     // 是否使用迅雷下载引擎

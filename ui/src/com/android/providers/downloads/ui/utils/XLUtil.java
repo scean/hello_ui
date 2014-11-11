@@ -411,13 +411,16 @@ public class XLUtil {
 		Editor editor = pref.edit();
 		editor.putString(key, str);
 		editor.commit();
-
 	}
+
+    public static void setVipFlagIsChanged(Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        pref.edit().putBoolean(AppConfig.PREF_KEY_VIP_FLAG_IS_DEFAULT, true).commit();
+    }
 
 	public static String getStringPreferences(Context context, String key) {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
 		return pref.getString(key, "");
-
 	}
 
 	public static String getStringPackage(Context context, String package_name, String pre_name, String key) {
@@ -465,10 +468,8 @@ public class XLUtil {
 	}
 
 	public synchronized static String getStringPackagePreference(Context context) {
-
 		String str = "";
 		str = getStringPackage(context, "com.android.providers.downloads", PREF_NAME, PREF_KEY_XUNLEI_TOKEN);
-
 		return str;
 	}
 

@@ -507,7 +507,7 @@ public class DownloadUtils {
         try {
             ct = ctx.createPackageContext(AppConfig.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
         } catch (Exception e) {
-            AppConfig.LOGD("error when create download provider package context", e);
+            AppConfig.LOGD("error when create download provider package context " + e.getMessage());
             return false;
         }
 
@@ -519,13 +519,12 @@ public class DownloadUtils {
         return xunleiUsage;
     }
 
-    public static void setXunleiUsagePermissionChanged() {
+    public static void setXunleiUsagePermissionChanged(Context context) {
         Context ct = null;
         try {
-            ct = ctx.createPackageContext(AppConfig.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
+            ct = context.createPackageContext(AppConfig.DOWNLOADPROVIDER_PKG_NAME, Context.CONTEXT_IGNORE_SECURITY);
         } catch (Exception e) {
-            AppConfig.LOGD("error when create download provider package context", e);
-            return false;
+            AppConfig.LOGD("error when create download provider package context " + e.getMessage());
         }
 
         SharedPreferences xPreferences = ct.getSharedPreferences(AppConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
