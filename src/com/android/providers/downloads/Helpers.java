@@ -157,7 +157,8 @@ public class Helpers {
             String mimeType,
             int destination,
             long contentLength,
-            StorageManager storageManager) throws StopRequestException {
+            StorageManager storageManager,
+            boolean ifCreateFile) throws StopRequestException {
         if (contentLength < 0) {
             contentLength = 0;
         }
@@ -180,11 +181,11 @@ public class Helpers {
         if (DownloadDrmHelper.isDrmConvertNeeded(mimeType)) {
             path = DownloadDrmHelper.modifyDrmFwLockFileExtension(path);
         }
-        path = getFullPath(path, mimeType, destination, base);
+        path = getFullPath(path, mimeType, destination, base, ifCreateFile);
         return path;
     }
 
-    static String getFullPath(String filename, String mimeType, int destination, File base)
+    static String getFullPath(String filename, String mimeType, int destination, File base, boolean ifCreateFile)
             throws StopRequestException {
         String extension = null;
         int dotIndex = filename.lastIndexOf('.');
@@ -222,11 +223,13 @@ public class Helpers {
             String downloadingPath = path + sDownloadingExtension;
             // Claim this filename inside lock to prevent other threads from
             // clobbering us. We're not paranoid enough to use O_EXCL.
-            try {
-                new File(downloadingPath).createNewFile();
-            } catch (IOException e) {
-                throw new StopRequestException(Downloads.Impl.STATUS_FILE_ERROR,
-                        "Failed to create target file " + path, e);
+            if (ifCreateFile) {
+                try {
+                    new File(downloadingPath).createNewFile();
+                } catch (IOException e) {
+                    throw new StopRequestException(Downloads.Impl.STATUS_FILE_ERROR,
+                                                   "Failed to create target file " + path, e);
+                }
             }
             return path;
         }

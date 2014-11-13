@@ -1499,7 +1499,7 @@ public class DownloadThread implements Runnable {
         // TODO: fallocate the entire file if header gave us specific length
 
         if (conn != null) {
-            readResponseHeaders(state, conn); 
+            readResponseHeaders(state, conn);
         }
         // update header values into database
         updateDatabaseFromHeaders(state);
@@ -1512,7 +1512,8 @@ public class DownloadThread implements Runnable {
                 state.mMimeType,
                 mInfo.mDestination,
                 state.mContentLength,
-                mStorageManager);
+                mStorageManager,
+                true);
         state.mDownloadingFileName = state.mFilename + Helpers.sDownloadingExtension;
         // correct mimetype
         correctMimeType(state);
@@ -1923,7 +1924,8 @@ public class DownloadThread implements Runnable {
                                                                    state.mMimeType,
                                                                    mInfo.mDestination,
                                                                    state.mContentLength,
-                                                                   mStorageManager);
+                                                                   mStorageManager,
+                                                                   state.mXlTaskOpenMark == 1);
                         state.mDownloadingFileName = state.mFilename + Helpers.sDownloadingExtension;
                         // correct mimetype
                         correctMimeType(state);
