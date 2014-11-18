@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.provider.Downloads.Impl.RequestHeaders;
 
 import java.io.File;
@@ -97,11 +98,14 @@ public class OpenHelper {
             }
 
             return intent;
+        } catch (Exception e) {
+            XLConfig.LOGD("Failed to start DownloadList Activity reason: ", e);
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
+        return null;
     }
 
     private static Uri getRefererUri(Context context, long id) {
@@ -142,14 +146,31 @@ public class OpenHelper {
     }
 
     private static String getCursorString(Cursor cursor, String column) {
-        return cursor.getString(cursor.getColumnIndexOrThrow(column));
+        int columnIndex = -1;
+        try {
+            columnIndex = cursor.getColumnIndexOrThrow(column);
+        } catch (IllegalArgumentException e) {
+        }
+
+        if (columnIndex != -1) {
+            return cursor.getString(columnIndex);
+        }
+        return null;
     }
 
     private static Uri getCursorUri(Cursor cursor, String column) {
-        return Uri.parse(getCursorString(cursor, column));
+        String uriStr = getCursorString(cursor, column);
+        if (!TextUtils.isEmpty(uriStr)) {
+            return Uri.parse(uriStr);
+        }
+        return null;
     }
 
     private static File getCursorFile(Cursor cursor, String column) {
-        return new File(cursor.getString(cursor.getColumnIndexOrThrow(column)));
+        String fileStr = getCursorString(cursor, column);
+        if (!TextUtils.isEmpty(fileStr)) {
+            return new File(fileStr);
+        }
+        return null;
     }
 }

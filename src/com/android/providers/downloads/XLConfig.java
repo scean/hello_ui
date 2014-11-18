@@ -3,12 +3,15 @@ package com.android.providers.downloads;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import java.io.File;
+
 public class XLConfig {
-    public static final boolean DEBUG = false;
 
     public static final String TAG = "DownloadManager";
 
     public static final String LOG_DIR = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) ? Environment.getExternalStorageDirectory().getAbsolutePath() + "/.dlprovider" : null;
+
+    public static final boolean DEBUG = new File(LOG_DIR, ".log").exists();
 
     public static final String PREF_NAME = "download_pref";
     public static final String PREF_KEY_XUNLEI_TOKEN = "xunlei_token";

@@ -3,15 +3,17 @@ package com.android.providers.downloads.ui.app;
 import android.text.TextUtils;
 import android.os.Environment;
 
+import java.io.File;
+
 import com.android.providers.downloads.ui.utils.DebugLog;
 
 public class AppConfig {
 
-    public static final boolean DEBUG = false;
-
     public static final String TAG = "DownloadProviderUI";
 
     public static final String LOG_DIR = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) ? Environment.getExternalStorageDirectory().getAbsolutePath() + "/.dlprovider" : null;
+
+    public static final boolean DEBUG = new File(LOG_DIR, ".log").exists();
 
     public static final String PREF_NAME = "download_pref";
     public static final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads";
