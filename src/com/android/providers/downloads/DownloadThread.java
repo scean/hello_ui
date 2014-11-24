@@ -521,6 +521,8 @@ public class DownloadThread implements Runnable {
             }
         }
 
+        checkConnectivity(false);
+
         transferData_xl(state);
     }
 
