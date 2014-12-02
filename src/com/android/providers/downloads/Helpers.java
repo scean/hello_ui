@@ -1169,4 +1169,41 @@ public class Helpers {
         XLConfig.LOGD("(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
         return xunlei_usage;
     }
+
+    public static void setXunleiUsagePermission(Context context, boolean usage) {
+        SharedPreferences pf = context.getSharedPreferences(XLConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
+        pf.edit().putBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, usage)
+            .putBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT, true).commit();
+    }
+
+    public static void openPrivacyTipDialog(Context context) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setClassName(PrivacyTipActivity.class.getPackage().getName(), PrivacyTipActivity.class.getName());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
+    public static boolean isPrivacyTipShown(Context context) {
+        Context ct = null;
+        try {
+            ct = context.createPackageContext(XLConfig.PACKAGE_NAME_FOR_UI, Context.CONTEXT_IGNORE_SECURITY);
+        } catch (Exception e) {
+            XLConfig.LOGD("error when create download provider package context ", e);
+        }
+        SharedPreferences pf = ct.getSharedPreferences(XLConfig.PREF_NAME_IN_UI, Context.MODE_MULTI_PROCESS);
+        return pf.getBoolean(XLConfig.PREF_KEY_IS_PRIVACY_TIP_SHOWN, false);
+    }
+
+    public static void setPrivacyTipShown(Context context) {
+        Context ct = null;
+        try {
+            ct = context.createPackageContext(XLConfig.PACKAGE_NAME_FOR_UI, Context.CONTEXT_IGNORE_SECURITY);
+        } catch (Exception e) {
+            XLConfig.LOGD("error when create download provider package context ", e);
+        }
+
+        SharedPreferences pf = ct.getSharedPreferences(XLConfig.PREF_NAME_IN_UI, Context.MODE_MULTI_PROCESS);
+        pf.edit().putBoolean(XLConfig.PREF_KEY_IS_PRIVACY_TIP_SHOWN, true).commit();
+    }
+
 }

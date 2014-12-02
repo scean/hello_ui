@@ -144,7 +144,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
         mXunleiUsagePref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                boolean checked = (Boolean) newValue;
+                final boolean checked = (Boolean) newValue;
                 if (!checked) {
                     Builder dialog = new AlertDialog.Builder(DownloadSettingActivity.this).setIcon(android.R.drawable.ic_dialog_alert).setIconAttribute(android.R.attr.alertDialogIcon)
                             .setTitle(R.string.turn_off_xunlei_title).setMessage(R.string.turn_off_xunlei_message).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -166,9 +166,32 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
                             });
                     dialog.show();
                 } else {
-                    mXunleiUsagePref.setChecked(checked);
-                    PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(checked);
-                    DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, checked);
+                    if (!DownloadUtils.isPrivacyTipShown(DownloadSettingActivity.this)) {
+                        Builder dialog = new AlertDialog.Builder(DownloadSettingActivity.this).setTitle(R.string.privacy_tip_title).setMessage(R.string.privacy_tip_content).setNegativeButton(R.string.privacy_tip_cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    mXunleiUsagePref.setChecked(false);
+                                }
+                            }).setPositiveButton(R.string.privacy_tip_ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    mXunleiUsagePref.setChecked(checked);
+                                    PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(checked);
+                                    DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, checked);
+                                }
+                            }).setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    mXunleiUsagePref.setChecked(false);
+                                }
+                            });
+                        dialog.show();
+                        DownloadUtils.setPrivacyTipShown(DownloadSettingActivity.this);
+                    } else {
+                        mXunleiUsagePref.setChecked(checked);
+                        PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(checked);
+                        DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, checked);
+                    }
                 }
                 return true;
             }

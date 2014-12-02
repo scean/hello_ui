@@ -534,10 +534,18 @@ public class DownloadUtils {
     }
 
     public static boolean getXunleiVipSwitchStatus(Context ctx) {
-        SharedPreferences xPreferences = ctx.getSharedPreferences(
-                "com.android.providers.downloads.ui_preferences",
-                Context.MODE_WORLD_WRITEABLE);
+        SharedPreferences xPreferences = ctx.getSharedPreferences(AppConfig.PREF_NAME_UI, Context.MODE_WORLD_WRITEABLE);
         long vipflag = xPreferences.getLong("xl_optdownload_flag", 3);
         return vipflag == 3;
+    }
+
+    public static boolean isPrivacyTipShown(Context context) {
+        SharedPreferences pf = context.getSharedPreferences(AppConfig.PREF_NAME_UI, Context.MODE_WORLD_WRITEABLE);
+        return pf.getBoolean(AppConfig.PREF_KEY_IS_PRIVACY_TIP_SHOWN, false);
+    }
+
+    public static void setPrivacyTipShown(Context context) {
+        SharedPreferences pf = context.getSharedPreferences(AppConfig.PREF_NAME_UI, Context.MODE_WORLD_WRITEABLE);
+        pf.edit().putBoolean(AppConfig.PREF_KEY_IS_PRIVACY_TIP_SHOWN, true).commit();
     }
 }

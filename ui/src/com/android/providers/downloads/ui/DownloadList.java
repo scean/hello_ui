@@ -129,7 +129,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         if (!Build.IS_TABLET){
            registerXiaomiLoginReceiver(); 
         }
-        //execTokenGetOperation();
+
         checkFromNotificationData();
         if (Build.IS_TABLET) {
 			this.setImmersionMenuEnabled(false);
@@ -238,27 +238,47 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     }
 
     public void showAlertOpenXunleiDialog() {
-        Builder builder = new AlertDialog.Builder(DownloadList.this);
-        builder.setTitle(DownloadList.this.getResources().getString(R.string.download_list_open_xl_title));
-        builder.setMessage(DownloadList.this.getResources().getString(R.string.download_list_open_xl_message));
-        builder.setPositiveButton(DownloadList.this.getResources().getString(R.string.download_list_open_xl_ok), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                setXunleiUsagePermission(true);
-                mImgXlSmall.setVisibility(View.VISIBLE);
-                updateVipIconDisplay();
-                dialog.dismiss();
-            }
-        });
-        builder.setNegativeButton(DownloadList.this.getResources().getString(R.string.download_list_open_xl_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // TODO Auto-generated method stub
-                dialog.dismiss();
-            }
-        });
-
-        builder.show();
+        boolean isPrivacyTipShown = DownloadUtils.isPrivacyTipShown(this);
+        if (isPrivacyTipShown) {
+            Builder builder = new AlertDialog.Builder(DownloadList.this);
+            builder.setTitle(DownloadList.this.getResources().getString(R.string.download_list_open_xl_title));
+            builder.setMessage(DownloadList.this.getResources().getString(R.string.download_list_open_xl_message));
+            builder.setPositiveButton(DownloadList.this.getResources().getString(R.string.download_list_open_xl_ok), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    setXunleiUsagePermission(true);
+                    mImgXlSmall.setVisibility(View.VISIBLE);
+                    updateVipIconDisplay();
+                    dialog.dismiss();
+                }
+            });
+            builder.setNegativeButton(DownloadList.this.getResources().getString(R.string.download_list_open_xl_cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+        } else {
+            Builder dialog = new AlertDialog.Builder(this).setTitle(R.string.privacy_tip_title).setMessage(R.string.privacy_tip_content).setNegativeButton(R.string.privacy_tip_cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            }).setPositiveButton(R.string.privacy_tip_ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    setXunleiUsagePermission(true);
+                    mImgXlSmall.setVisibility(View.VISIBLE);
+                    updateVipIconDisplay();
+                }
+            }).setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                }
+            });
+            dialog.show();
+            DownloadUtils.setPrivacyTipShown(this);
+        }
     }
 
     public void OnMiuiLoginDeal() {
@@ -619,6 +639,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         //String appPkgName = getIntent().getStringExtra(DownloadManager.INTENT_EXTRA_APPLICATION_PACKAGENAME);
         //android.app.ActionBar actionBar = getActionBar();
         boolean xunlei_usage = getXunleiUsagePermission();
+        boolean isPrivacyTipShown = DownloadUtils.isPrivacyTipShown(this);
         boolean netStatus = DownloadUtils.isNetworkAvailable(getApplicationContext());
 
 		if (Build.IS_TABLET || miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) 
@@ -647,7 +668,28 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             mImgXlSmall.setVisibility(View.VISIBLE);
         }
 
+        if (!isPrivacyTipShown && xunlei_usage) {
+            Builder dialog = new AlertDialog.Builder(this).setTitle(R.string.privacy_tip_title).setMessage(R.string.privacy_tip_content).setNegativeButton(R.string.privacy_tip_cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    PreferenceLogic.getInstance(DownloadList.this).setIsHaveUseXunleiDownload(false);
+                    setNoSpeedUpIcon(getActionBar());
+                    mImgXlSmall.setVisibility(View.GONE);
+                }
+            }).setPositiveButton(R.string.privacy_tip_ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            }).setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                }
+            });
+            dialog.show();
+            DownloadUtils.setPrivacyTipShown(this);
+        }
     }
+
 	@Override
 	protected void onPause(){
 		super.onPause();
@@ -888,7 +930,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 
     private void setXunleiUsagePermission(boolean value) {
         PreferenceLogic.getInstance(this).setIsHaveUseXunleiDownload(value);
-        
+
         if (value) {
         	DownloadUtils.trackBehaviorEvent(getApplicationContext(), "xunlei_open", 0, 0);
         } else {

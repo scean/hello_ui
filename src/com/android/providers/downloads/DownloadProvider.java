@@ -605,6 +605,15 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public Uri insert(final Uri uri, final ContentValues values) {
+        // Check whether need to show privacy tip dialog.
+        checkPrivacyTip();
+        while (!Helpers.isPrivacyTipShown(getContext()) && Helpers.getXunleiUsagePermission(getContext())) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+            }
+        }
+
         checkInsertPermissions(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
@@ -1575,6 +1584,15 @@ public final class DownloadProvider extends ContentProvider {
         if ( values != null ) {
             values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_RUNNING);
             values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
+        }
+    }
+
+    private void checkPrivacyTip() {
+        Context context = getContext();
+        boolean isTipShown = Helpers.isPrivacyTipShown(context);
+        boolean useXunleiEngine = Helpers.getXunleiUsagePermission(context);
+        if (!isTipShown && useXunleiEngine) {
+            Helpers.openPrivacyTipDialog(context);
         }
     }
 }

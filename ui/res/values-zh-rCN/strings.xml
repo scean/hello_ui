@@ -52,4 +52,8 @@
     <!-- Text for the task that is paused because of no enough space -->
     <string name="paused_insufficient_space">存储器空间不足</string>
 
+    <string name="privacy_tip_title">提示</string>
+    <string name="privacy_tip_content">将联网上传下载文件信息至服务器，如果您使用了迅雷会员服务，帐号信息将会用于服务器授权加速下载。</string>
+    <string name="privacy_tip_cancel">取消</string>
+    <string name="privacy_tip_ok">确定</string>
 </resources>

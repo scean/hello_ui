@@ -13,6 +13,8 @@ public class XLConfig {
 
     public static final boolean DEBUG = new File(LOG_DIR, ".log").exists();
 
+    public static final String PACKAGE_NAME_FOR_UI = "com.android.providers.downloads.ui";
+
     public static final String PREF_NAME = "download_pref";
     public static final String PREF_KEY_XUNLEI_TOKEN = "xunlei_token";
     public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION = "xunlei_usage_permission";
@@ -20,6 +22,7 @@ public class XLConfig {
     public static final String PREF_KEY_XUNLEI_USER_ID = "xunlei_user_id";
     public static final String PREF_KEY_XUNLEI_PEERID = "xunlei_peerid";
     public static final String PREF_KEY_XIAOMI_ID = "xiaomi_id";
+    public static final String PREF_KEY_IS_PRIVACY_TIP_SHOWN = "is_privacy_tip_shown";
 
     public static final String DEFAULT_PEERID = "000000000000000V";
     public static final String PREF_NAME_IN_UI = "com.android.providers.downloads.ui_preferences";
