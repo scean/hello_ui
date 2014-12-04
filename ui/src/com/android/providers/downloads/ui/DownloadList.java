@@ -118,8 +118,6 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
     private boolean shouldDisabled=false;
 	private static boolean mThisActivityIsShowing =false;
 
-    private AlertDialog mPrivacyDialog;
-
     @Override
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -265,7 +263,6 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             Builder dialog = new AlertDialog.Builder(this).setTitle(R.string.privacy_tip_title).setMessage(R.string.privacy_tip_content).setNegativeButton(R.string.privacy_tip_cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    DownloadUtils.setPrivacyTipShown(DownloadList.this);
                 }
             }).setPositiveButton(R.string.privacy_tip_ok, new DialogInterface.OnClickListener() {
                 @Override
@@ -489,7 +486,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 
     public void OnClickXlIcon() {
 		if (Build.IS_TABLET) {
-		 return;			            		
+		 return;
        }
         DownloadUtils.trackBehaviorEvent(DownloadList.this, "download_manager_speedup_click", 0, 0);
         // open xunlei mark
@@ -643,7 +640,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         //String appPkgName = getIntent().getStringExtra(DownloadManager.INTENT_EXTRA_APPLICATION_PACKAGENAME);
         //android.app.ActionBar actionBar = getActionBar();
         boolean xunlei_usage = getXunleiUsagePermission();
-        boolean isPrivacyTipShown = DownloadUtils.isPrivacyTipShown(this);
+        boolean isAppActived = DownloadUtils.isAppActived(this);
 
         boolean netStatus = DownloadUtils.isNetworkAvailable(getApplicationContext());
 
@@ -673,33 +670,26 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             mImgXlSmall.setVisibility(View.VISIBLE);
         }
 
-        if (!isPrivacyTipShown && xunlei_usage) {
-            if (mPrivacyDialog == null) {
-                mPrivacyDialog = new AlertDialog.Builder(this).setTitle(R.string.privacy_tip_title).setMessage(R.string.privacy_tip_content).setNegativeButton(R.string.privacy_tip_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            PreferenceLogic.getInstance(DownloadList.this).setIsHaveUseXunleiDownload(false);
-                            setNoSpeedUpIcon(getActionBar());
-                            mImgXlSmall.setVisibility(View.GONE);
-                            DownloadUtils.setPrivacyTipShown(DownloadList.this);
-                            Intent intent = new Intent(AppConfig.ACTION_PRIVACY_ACCEPT);
-                            DownloadList.this.sendBroadcast(intent);
-                        }
-                    }).setPositiveButton(R.string.privacy_tip_ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                DownloadUtils.setPrivacyTipShown(DownloadList.this);
-                                Intent intent = new Intent(AppConfig.ACTION_PRIVACY_ACCEPT);
-                                DownloadList.this.sendBroadcast(intent);
-                            }
-                        }).create();
-            }
-            mPrivacyDialog.setCancelable(false);
-            mPrivacyDialog.show();
-        } else if(mPrivacyDialog != null) {
-            mPrivacyDialog.dismiss();
-            mPrivacyDialog = null;
+        if (!isAppActived && !xunlei_usage) {
+            AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.privacy_tip_title).setMessage(R.string.privacy_tip_content).setNegativeButton(R.string.privacy_tip_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setNoSpeedUpIcon(getActionBar());
+                        mImgXlSmall.setVisibility(View.GONE);
+                    }
+                }).setPositiveButton(R.string.privacy_tip_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        PreferenceLogic.getInstance(DownloadList.this).setIsHaveUseXunleiDownload(true);
+                        setSpeedUpIcon(getActionBar());
+                        mImgXlSmall.setVisibility(View.VISIBLE);
+                        DownloadUtils.setPrivacyTipShown(DownloadList.this);
+                }
+            }).create();
+            dialog.show();
         }
+
+        DownloadUtils.setAppActived(this);
     }
 
 	@Override
@@ -747,10 +737,6 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 	    AccountInfoInstance.getInstance(getApplicationContext(),XLUtil.getStringPackagePreference(getApplicationContext())).removeAccountListener(mlisten);
         if (!Build.IS_TABLET){
             unregisterReceiver(mLoginReceiver);
-        }
-        if (mPrivacyDialog != null) {
-            mPrivacyDialog.dismiss();
-            mPrivacyDialog = null;
         }
     }
 

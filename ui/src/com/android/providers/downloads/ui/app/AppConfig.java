@@ -25,6 +25,7 @@ public class AppConfig {
     public static final String PREF_KEY_XUNLEI_USER_ID = "xunlei_user_id";
     public static final String PREF_KEY_VIP_FLAG_IS_DEFAULT = "xunlei_key_vip_flag_is_default";
     public static final String PREF_KEY_IS_PRIVACY_TIP_SHOWN = "is_privacy_tip_shown";
+    public static final String PREF_KEY_IS_APP_ACTIVED = "is_app_actived";
 
     public static void LOGD(String message) {
         LOGD(TAG, message);

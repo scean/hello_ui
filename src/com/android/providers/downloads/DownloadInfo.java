@@ -461,7 +461,6 @@ public class DownloadInfo {
         switch (mStatus) {
         case 0: // status hasn't been initialized yet, this is a new download
         case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
-            return Helpers.isPrivacyTipShown(mContext) || !Helpers.getXunleiUsagePermission(mContext);
         case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
             // running, without a chance to update the database
             return true;

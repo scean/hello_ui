@@ -511,10 +511,10 @@ public class DownloadUtils {
             return false;
         }
 
-        boolean xunleiUsage = true;
+        boolean xunleiUsage = false;
         SharedPreferences xPreferences = ct.getSharedPreferences(AppConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
         if (xPreferences.contains(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT)) {
-            xunleiUsage = xPreferences.getBoolean(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
+            xunleiUsage = xPreferences.getBoolean(AppConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, false);
         }
         return xunleiUsage;
     }
@@ -547,5 +547,15 @@ public class DownloadUtils {
     public static void setPrivacyTipShown(Context context) {
         SharedPreferences pf = context.getSharedPreferences(AppConfig.PREF_NAME_UI, Context.MODE_MULTI_PROCESS);
         pf.edit().putBoolean(AppConfig.PREF_KEY_IS_PRIVACY_TIP_SHOWN, true).commit();
+    }
+
+    public static boolean isAppActived(Context context) {
+        SharedPreferences pf = context.getSharedPreferences(AppConfig.PREF_NAME_UI, Context.MODE_MULTI_PROCESS);
+        return pf.getBoolean(AppConfig.PREF_KEY_IS_APP_ACTIVED, false);
+    }
+
+    public static void setAppActived(Context context) {
+        SharedPreferences pf = context.getSharedPreferences(AppConfig.PREF_NAME_UI, Context.MODE_MULTI_PROCESS);
+        pf.edit().putBoolean(AppConfig.PREF_KEY_IS_APP_ACTIVED, true).commit();
     }
 }

@@ -171,7 +171,6 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     mXunleiUsagePref.setChecked(false);
-                                    DownloadUtils.setPrivacyTipShown(DownloadSettingActivity.this);
                                 }
                             }).setPositiveButton(R.string.privacy_tip_ok, new DialogInterface.OnClickListener() {
                                 @Override

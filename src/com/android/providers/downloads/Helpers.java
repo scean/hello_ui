@@ -1162,14 +1162,23 @@ public class Helpers {
             return false;
         }
 
-        boolean xunlei_usage = true;
+        // boolean xunlei_usage = true;
+        // SharedPreferences pf = context.getSharedPreferences(XLConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
+        // if (pf.contains(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT)) {
+        //     xunlei_usage = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
+        // }
+
+        // XLConfig.LOGD("(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
+        // return xunlei_usage;
+
+        boolean xunleiUsage = false;
         SharedPreferences pf = context.getSharedPreferences(XLConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
         if (pf.contains(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT)) {
-            xunlei_usage = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
+            xunleiUsage = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, false);
         }
 
-        XLConfig.LOGD("(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
-        return xunlei_usage;
+        XLConfig.LOGD("(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunleiUsage);
+        return xunleiUsage;
     }
 
     public static void setXunleiUsagePermission(Context context, boolean usage) {

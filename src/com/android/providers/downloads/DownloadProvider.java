@@ -780,9 +780,6 @@ public final class DownloadProvider extends ContentProvider {
         insertRequestHeaders(db, rowID, values);
         notifyContentChanged(uri, match);
 
-        // Whether to show privacy tip dialog.
-        checkPrivacyTip(pckg);
-
         // Always start service to handle notifications and/or scanning
         final Context context = getContext();
         context.startService(new Intent(context, DownloadService.class));
@@ -1584,28 +1581,4 @@ public final class DownloadProvider extends ContentProvider {
         }
     }
 
-    private void checkPrivacyTip(String pkgName) {
-        Context context = getContext();
-        boolean isTipShown = Helpers.isPrivacyTipShown(context);
-        boolean useXunleiEngine = Helpers.getXunleiUsagePermission(context);
-        if (!isTipShown && useXunleiEngine) {
-            if (Helpers.isRunningForeground(context, pkgName)) {
-                Helpers.openPrivacyTipDialog(context);
-            } else {
-                final Notification.Builder builder = new Notification.Builder(context);
-                builder.setWhen(System.currentTimeMillis());
-                builder.setSmallIcon(android.R.drawable.stat_sys_warning);
-                builder.setContentTitle(context.getResources().getString(R.string.privacy_notif_title));
-                builder.setContentText(context.getResources().getString(R.string.privacy_notif_content));
-                builder.setAutoCancel(true);
-
-                Intent pageView = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
-                pageView.putExtra(DownloadManager.INTENT_EXTRA_APPLICATION_PACKAGENAME, XLConfig.PACKAGE_NAME_FOR_UI);
-                pageView.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                builder.setContentIntent(PendingIntent.getActivity(context, 0, pageView, PendingIntent.FLAG_UPDATE_CURRENT));
-                final Notification notif = builder.build();
-                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify("privacy", 0, notif);
-            }
-        }
-    }
 }
