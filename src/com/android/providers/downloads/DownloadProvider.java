@@ -1595,8 +1595,6 @@ public final class DownloadProvider extends ContentProvider {
                 final Notification.Builder builder = new Notification.Builder(context);
                 builder.setWhen(System.currentTimeMillis());
                 builder.setSmallIcon(android.R.drawable.stat_sys_warning);
-                builder.setOngoing(false);
-                builder.setAutoCancel(true);
                 builder.setContentTitle(context.getResources().getString(R.string.privacy_notif_title));
                 builder.setContentText(context.getResources().getString(R.string.privacy_notif_content));
 
