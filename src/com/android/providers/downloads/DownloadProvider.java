@@ -1597,6 +1597,7 @@ public final class DownloadProvider extends ContentProvider {
                 builder.setSmallIcon(android.R.drawable.stat_sys_warning);
                 builder.setContentTitle(context.getResources().getString(R.string.privacy_notif_title));
                 builder.setContentText(context.getResources().getString(R.string.privacy_notif_content));
+                builder.setAutoCancel(true);
 
                 Intent pageView = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
                 pageView.putExtra(DownloadManager.INTENT_EXTRA_APPLICATION_PACKAGENAME, XLConfig.PACKAGE_NAME_FOR_UI);
