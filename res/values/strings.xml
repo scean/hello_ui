@@ -243,6 +243,6 @@
     <string name="privacy_tip_cancel">Cancel</string>
     <string name="privacy_tip_ok">OK</string>
 
-    <string name="privacy_notif_title">Xunlei Accelerator</string>
-    <string name="privacy_notif_content">Xunlei Download Accelerator is on. Touch to view details.</string>
+    <string name="privacy_notif_title"> Xunlei Download Accelerator is on</string>
+    <string name="privacy_notif_content">Touch to view details.</string>
 </resources>
