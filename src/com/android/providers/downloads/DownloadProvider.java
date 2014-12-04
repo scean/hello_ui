@@ -32,7 +32,9 @@ import java.util.Map;
 
 import libcore.io.IoUtils;
 import android.app.DownloadManager;
+import android.app.PendingIntent;
 import android.app.DownloadManager.ExtraDownloads;
+import android.app.NotificationManager;
 import android.app.DownloadManager.Request;
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -43,6 +45,7 @@ import android.content.UriMatcher;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.app.Notification;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.SQLException;
@@ -778,7 +781,7 @@ public final class DownloadProvider extends ContentProvider {
         notifyContentChanged(uri, match);
 
         // Whether to show privacy tip dialog.
-        checkPrivacyTip();
+        checkPrivacyTip(pckg);
 
         // Always start service to handle notifications and/or scanning
         final Context context = getContext();
@@ -1581,12 +1584,29 @@ public final class DownloadProvider extends ContentProvider {
         }
     }
 
-    private void checkPrivacyTip() {
+    private void checkPrivacyTip(String pkgName) {
         Context context = getContext();
         boolean isTipShown = Helpers.isPrivacyTipShown(context);
         boolean useXunleiEngine = Helpers.getXunleiUsagePermission(context);
         if (!isTipShown && useXunleiEngine) {
-            Helpers.openPrivacyTipDialog(context);
+            if (Helpers.isRunningForeground(context, pkgName)) {
+                Helpers.openPrivacyTipDialog(context);
+            } else {
+                final Notification.Builder builder = new Notification.Builder(context);
+                builder.setWhen(System.currentTimeMillis());
+                builder.setSmallIcon(android.R.drawable.stat_sys_warning);
+                builder.setOngoing(false);
+                builder.setAutoCancel(true);
+                builder.setContentTitle(context.getResources().getString(R.string.privacy_notif_title));
+                builder.setContentText(context.getResources().getString(R.string.privacy_notif_content));
+
+                Intent pageView = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
+                pageView.putExtra(DownloadManager.INTENT_EXTRA_APPLICATION_PACKAGENAME, XLConfig.PACKAGE_NAME_FOR_UI);
+                pageView.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                builder.setContentIntent(PendingIntent.getActivity(context, 0, pageView, PendingIntent.FLAG_UPDATE_CURRENT));
+                final Notification notif = builder.build();
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify("privacy", 0, notif);
+            }
         }
     }
 }

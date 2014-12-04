@@ -64,6 +64,7 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.MODIFY_NETWORK_ACCOUNTING" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="com.xiaomi.permission.AUTH_SERVICE" />
     <uses-permission android:name="com.xiaomi.permission.CLOUD_MANAGER" />
 

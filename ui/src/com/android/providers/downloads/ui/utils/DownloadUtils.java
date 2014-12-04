@@ -541,7 +541,6 @@ public class DownloadUtils {
 
     public static boolean isPrivacyTipShown(Context context) {
         SharedPreferences pf = context.getSharedPreferences(AppConfig.PREF_NAME_UI, Context.MODE_MULTI_PROCESS);
-        System.out.println("contains: " + pf.contains(AppConfig.PREF_KEY_IS_PRIVACY_TIP_SHOWN));
         return pf.getBoolean(AppConfig.PREF_KEY_IS_PRIVACY_TIP_SHOWN, false);
     }
 

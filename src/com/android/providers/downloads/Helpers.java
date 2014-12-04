@@ -16,6 +16,8 @@
 
 package com.android.providers.downloads;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -1204,6 +1206,16 @@ public class Helpers {
 
         SharedPreferences pf = ct.getSharedPreferences(XLConfig.PREF_NAME_IN_UI, Context.MODE_MULTI_PROCESS);
         pf.edit().putBoolean(XLConfig.PREF_KEY_IS_PRIVACY_TIP_SHOWN, true).commit();
+    }
+
+    public static boolean isRunningForeground (Context context, String pkgName) {
+        ActivityManager am = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+        ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
+        String currentPackageName = cn.getPackageName();
+        if(!TextUtils.isEmpty(currentPackageName) && currentPackageName.equals(pkgName)) {
+            return true ;
+        }
+        return false ;
     }
 
 }
