@@ -74,7 +74,6 @@ public class PrivacyTipActivity extends Activity
     }
 
     private void dialogClosed() {
-        Helpers.setPrivacyTipShown(this);
         mDialog = null;
         finish();
     }
@@ -83,7 +82,13 @@ public class PrivacyTipActivity extends Activity
     public void onClick(DialogInterface dialog, int which) {
         if (which == AlertDialog.BUTTON_NEGATIVE) {
             Helpers.setXunleiUsagePermission(this, false);
+            Helpers.setPrivacyTipShown(this);
+            Intent intent = new Intent(Constants.ACTION_PRIVACY_ACCEPT);
+            sendBroadcast(intent);
         } else if (which == AlertDialog.BUTTON_POSITIVE) {
+            Helpers.setPrivacyTipShown(this);
+            Intent intent = new Intent(Constants.ACTION_PRIVACY_ACCEPT);
+            sendBroadcast(intent);
         }
         dialogClosed();
     }

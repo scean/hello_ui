@@ -36,6 +36,7 @@ import android.provider.Downloads;
 import android.text.TextUtils;
 import android.widget.Toast;
 import android.content.ActivityNotFoundException;
+import android.provider.Downloads;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -101,6 +102,12 @@ public class DownloadReceiver extends BroadcastReceiver {
                     }
                 });
             }
+        } else if (action.equals(Constants.ACTION_PRIVACY_ACCEPT)) {
+            // Modify all pending tasks' xl_mask
+            ContentValues values = new ContentValues();
+            values.put(DownloadManager.ExtraDownloads.COLUMN_XL_TASK_OPEN_MARK, Helpers.getXunleiUsagePermission(context) ? 1 : 0);
+            context.getContentResolver().update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, Downloads.Impl.COLUMN_STATUS + " = ?", new String[] { String.valueOf(Downloads.Impl.STATUS_PENDING) });
+            startService(context);
         }
     }
 

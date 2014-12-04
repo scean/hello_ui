@@ -112,6 +112,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.intent.action.DOWNLOAD_WAKEUP" />
+                <action android:name="com.android.providers.downloads.PRIVACY_ACCEPT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_MOUNTED" />
@@ -177,7 +179,7 @@
                   android:theme="@miui:style/Theme.NoDisplay"/>
         <activity android:name=".PrivacyTipActivity"
                   android:exported="true"
-                  android:launchMode="singleTask"
+                  android:launchMode="singleInstance"
                   android:theme="@miui:style/Theme.NoDisplay"/>
     </application>
 </manifest>

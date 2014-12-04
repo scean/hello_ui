@@ -605,15 +605,6 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public Uri insert(final Uri uri, final ContentValues values) {
-        // Check whether need to show privacy tip dialog.
-        checkPrivacyTip();
-        while (!Helpers.isPrivacyTipShown(getContext()) && Helpers.getXunleiUsagePermission(getContext())) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-        }
-
         checkInsertPermissions(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
@@ -785,6 +776,9 @@ public final class DownloadProvider extends ContentProvider {
 
         insertRequestHeaders(db, rowID, values);
         notifyContentChanged(uri, match);
+
+        // Whether to show privacy tip dialog.
+        checkPrivacyTip();
 
         // Always start service to handle notifications and/or scanning
         final Context context = getContext();

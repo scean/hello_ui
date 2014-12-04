@@ -15,6 +15,8 @@ public class AppConfig {
 
     public static final boolean DEBUG = new File(LOG_DIR, ".log").exists();
 
+    public static final String ACTION_PRIVACY_ACCEPT = "com.android.providers.downloads.PRIVACY_ACCEPT";
+
     public static final String PREF_NAME = "download_pref";
     public static final String PREF_NAME_UI = "com.android.providers.downloads.ui_preferences";
     public static final String DOWNLOADPROVIDER_PKG_NAME = "com.android.providers.downloads";

@@ -65,6 +65,8 @@ public class Constants {
     /** the intent that gets sent when deleting the notification of a completed download */
     public static final String ACTION_HIDE = "android.intent.action.DOWNLOAD_HIDE";
 
+    public static final String ACTION_PRIVACY_ACCEPT = "com.android.providers.downloads.PRIVACY_ACCEPT";
+
     /** The default base name for downloaded files if we can't get one at the HTTP level */
     public static final String DEFAULT_DL_FILENAME = "downloadfile";
 
