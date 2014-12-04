@@ -63,8 +63,8 @@
     <string name="dialog_insufficient_space_on_external">"外部存储器的空间不足"</string>
     <string name="dialog_insufficient_space_on_cache">"内部下载存储器的空间不足"</string>
 
-    <string name="privacy_tip_title">开启下载加速功能？</string>
-    <string name="privacy_tip_content">MIUI内置下载管理已经集成了迅雷加速下载服务，可以极大的帮助您提高下载速度。加速过程中需要上传下载任务的URLe用于资源的匹配，如果您开启迅雷高速下载也将上传您的小米帐号信息用于会员身份的识别。</string>
+    <string name="privacy_tip_title">启用迅雷加速服务</string>
+    <string name="privacy_tip_content">MIUI下载管理已集成迅雷加速服务，可极大提升下载速度。加速过程中需获取您的下载URL或小米帐号，用于匹配加速资源和识别会员加速身份。</string>
     <string name="privacy_tip_cancel">取消</string>
     <string name="privacy_tip_ok">确定</string>
 </resources>
