@@ -681,7 +681,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         PreferenceLogic.getInstance(DownloadList.this).setIsHaveUseXunleiDownload(true);
-                        setSpeedUpIcon(getActionBar());
+                        updateVipIconDisplay();
                         mImgXlSmall.setVisibility(View.VISIBLE);
                         DownloadUtils.setPrivacyTipShown(DownloadList.this);
                 }
