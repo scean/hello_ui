@@ -20,4 +20,12 @@
     <string name="dialog_insufficient_space_on_cache">"內部下載儲存器的空間不足"</string>
     <string name="auto_restart_under_wifi">"Wi-Fi下將自動開始下載此檔案"</string>
     <string name="task_already_exist">任務已存在</string>
+
+    <string name="privacy_tip_title">迅雷加速服務啟用</string>
+    <string name="privacy_tip_content">MIUI下載管理已集成迅雷加速服務，可極大提升下載速度。加速過程中需獲取您的下載URL或小米帳號，用於匹配加速資源和識別會員加速身份。</string>
+    <string name="privacy_tip_cancel">取消</string>
+    <string name="privacy_tip_ok">確認</string>
+
+    <string name="privacy_notif_title">提示</string>
+    <string name="privacy_notif_content">即將啓用迅雷加速服務，點擊查看詳情</string>
 </resources>

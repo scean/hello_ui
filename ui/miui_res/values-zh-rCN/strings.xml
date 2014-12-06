@@ -141,6 +141,9 @@
     <string name="download_list_intoAuthAlert">请等待</string>
 	<string name="unbind_xunlei_success">已成功解绑迅雷账号</string>
 	<string name="unbind_xunlei_2_success">已成功换绑迅雷账号</string>
-    
 
+    <string name="privacy_tip_title">启用迅雷加速服务</string>
+    <string name="privacy_tip_content">MIUI下载管理已集成迅雷加速服务，可极大提升下载速度。加速过程中需获取您的下载URL或小米帐号，用于匹配加速资源和识别会员加速身份。</string>
+    <string name="privacy_tip_cancel">取消</string>
+    <string name="privacy_tip_ok">确定</string>
 </resources>
