@@ -22,7 +22,11 @@ public class XLConfig {
     public static final String PREF_KEY_XUNLEI_USER_ID = "xunlei_user_id";
     public static final String PREF_KEY_XUNLEI_PEERID = "xunlei_peerid";
     public static final String PREF_KEY_XIAOMI_ID = "xiaomi_id";
+
+    // 标记第三方添加任务是否弹出过隐私弹框
     public static final String PREF_KEY_IS_PRIVACY_TIP_SHOWN = "is_privacy_tip_shown";
+    // 标记下载管理UI是否弹出过隐私弹框
+    public static final String PREF_KEY_IS_UI_PRIVACY_TIP_SHOWN = "is_ui_privacy_tip_shown";
 
     public static final String DEFAULT_PEERID = "000000000000000V";
     public static final String PREF_NAME_IN_UI = "com.android.providers.downloads.ui_preferences";

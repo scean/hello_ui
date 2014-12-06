@@ -166,7 +166,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
                             });
                     dialog.show();
                 } else {
-                    if (!DownloadUtils.isPrivacyTipShown(DownloadSettingActivity.this)) {
+                    if (!DownloadUtils.isUiPrivacyTipShown(DownloadSettingActivity.this)) {
                         Builder dialog = new AlertDialog.Builder(DownloadSettingActivity.this).setTitle(R.string.privacy_tip_title).setMessage(R.string.privacy_tip_content).setNegativeButton(R.string.privacy_tip_cancel, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -178,7 +178,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
                                     mXunleiUsagePref.setChecked(checked);
                                     PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(checked);
                                     DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, checked);
-                                    DownloadUtils.setPrivacyTipShown(DownloadSettingActivity.this);
+                                    DownloadUtils.setUiPrivacyTipShown(DownloadSettingActivity.this);
                                 }
                             }).setOnCancelListener(new DialogInterface.OnCancelListener() {
                                 @Override

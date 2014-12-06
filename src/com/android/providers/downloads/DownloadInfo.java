@@ -379,6 +379,10 @@ public class DownloadInfo {
         mXlDownloadManager = dm;
         mPreference = pf;
     }
+    
+    public void setXlDownloadManager(XLDownloadManager dm) {
+        mXlDownloadManager = dm;
+    }
 
     public Collection<Pair<String, String>> getHeaders() {
         return Collections.unmodifiableList(mRequestHeaders);
@@ -461,6 +465,8 @@ public class DownloadInfo {
         switch (mStatus) {
         case 0: // status hasn't been initialized yet, this is a new download
         case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
+            // 如果弹过隐私弹框或者是原生下载，那么不阻塞，否则要阻塞任务，知道确认了隐私弹框
+            return Helpers.isPrivacyTipShown(mContext) || mXlTaskOpenMark == 0;
         case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
             // running, without a chance to update the database
             return true;
@@ -893,7 +899,8 @@ public class DownloadInfo {
         sb.append("mIsPublicApi=").append(mIsPublicApi).append("\n\t");
         sb.append("mAllowedNetworkTypes=").append(mAllowedNetworkTypes).append("\n\t");
         sb.append("mAllowRoaming=").append(mAllowRoaming).append("\n\t");
-        sb.append("mAllowMetered=").append(mAllowMetered);
+        sb.append("mAllowMetered=").append(mAllowMetered).append("\n\t");
+        sb.append("mXlTaskOpenMark=").append(mXlTaskOpenMark).append("\n\t");
         return sb.toString();
     }
 }

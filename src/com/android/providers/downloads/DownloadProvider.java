@@ -610,6 +610,10 @@ public final class DownloadProvider extends ContentProvider {
     public Uri insert(final Uri uri, final ContentValues values) {
         checkInsertPermissions(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        
+        Context context = getContext();
+        boolean isPrivacyTipShown = Helpers.isPrivacyTipShown(context);
+        boolean isXunleiEngineOn = Helpers.getXunleiUsagePermission(context);
 
         // note we disallow inserting into ALL_DOWNLOADS
         int match = sURIMatcher.match(uri);
@@ -769,6 +773,15 @@ public final class DownloadProvider extends ContentProvider {
             copyBoolean(Downloads.Impl.COLUMN_ALLOW_METERED, values, filteredValues);
         }
 
+        // Set whether use xunlei engine mask.
+        boolean isRunningForeground = Helpers.isRunningForeground(context, pckg);
+        // 如果没有弹过隐私弹窗，并且提交任务的app在后台，那么使用原生下载开始任务
+        if (!isRunningForeground && !isPrivacyTipShown) {
+            filteredValues.put(DownloadManager.ExtraDownloads.COLUMN_XL_TASK_OPEN_MARK, false);
+        } else {
+            filteredValues.put(DownloadManager.ExtraDownloads.COLUMN_XL_TASK_OPEN_MARK, Helpers.getXunleiUsagePermission(context));
+        }
+
         XLConfig.LOGD("in insert filteredValues: \n\t" + filteredValues.toString());
 
         long rowID = db.insert(DB_TABLE, null, filteredValues);
@@ -777,11 +790,15 @@ public final class DownloadProvider extends ContentProvider {
             return null;
         }
 
+        // 如果没有弹过隐私弹狂，并且在前台，那么弹出隐私弹框
+        if (isRunningForeground && !isPrivacyTipShown) {
+            Helpers.openPrivacyTipDialog(context);
+        }
+
         insertRequestHeaders(db, rowID, values);
         notifyContentChanged(uri, match);
 
         // Always start service to handle notifications and/or scanning
-        final Context context = getContext();
         context.startService(new Intent(context, DownloadService.class));
         return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, rowID);
     }
@@ -1581,4 +1598,7 @@ public final class DownloadProvider extends ContentProvider {
         }
     }
 
+    private void checkPrivacyTip(String pkgName) {
+        
+    }
 }

@@ -65,7 +65,10 @@ public class PrivacyTipActivity extends Activity
             .setMessage(R.string.privacy_tip_content)
             .setPositiveButton(R.string.privacy_tip_ok, this)
             .setNegativeButton(R.string.privacy_tip_cancel, this);
-        mDialog = builder.setOnCancelListener(this).show();
+        mDialog = builder.create();
+        mDialog.setCanceledOnTouchOutside(false);
+        mDialog.setCancelable(false);
+        mDialog.show();
     }
 
     @Override
@@ -87,6 +90,7 @@ public class PrivacyTipActivity extends Activity
             sendBroadcast(intent);
         } else if (which == AlertDialog.BUTTON_POSITIVE) {
             Helpers.setPrivacyTipShown(this);
+            Helpers.setUiPrivacyTipShown(this);
             Intent intent = new Intent(Constants.ACTION_PRIVACY_ACCEPT);
             sendBroadcast(intent);
         }

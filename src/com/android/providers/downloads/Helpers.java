@@ -1171,10 +1171,10 @@ public class Helpers {
         // XLConfig.LOGD("(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunlei_usage);
         // return xunlei_usage;
 
-        boolean xunleiUsage = false;
+        boolean xunleiUsage = true;
         SharedPreferences pf = context.getSharedPreferences(XLConfig.PREF_NAME, Context.MODE_MULTI_PROCESS);
         if (pf.contains(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT)) {
-            xunleiUsage = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, false);
+            xunleiUsage = pf.getBoolean(XLConfig.PREF_KEY_XUNLEI_USAGE_PERMISSION, true);
         }
 
         XLConfig.LOGD("(getXunleiUsagePermission) ---> get xunlei permission from xml:" + xunleiUsage);
@@ -1215,6 +1215,29 @@ public class Helpers {
 
         SharedPreferences pf = ct.getSharedPreferences(XLConfig.PREF_NAME_IN_UI, Context.MODE_MULTI_PROCESS);
         pf.edit().putBoolean(XLConfig.PREF_KEY_IS_PRIVACY_TIP_SHOWN, true).commit();
+    }
+
+    public static boolean isUiPrivacyTipShown(Context context) {
+        Context ct = null;
+        try {
+            ct = context.createPackageContext(XLConfig.PACKAGE_NAME_FOR_UI, Context.CONTEXT_IGNORE_SECURITY);
+        } catch (Exception e) {
+            XLConfig.LOGD("error when create download provider package context ", e);
+        }
+        SharedPreferences pf = ct.getSharedPreferences(XLConfig.PREF_NAME_IN_UI, Context.MODE_MULTI_PROCESS);
+        return pf.getBoolean(XLConfig.PREF_KEY_IS_UI_PRIVACY_TIP_SHOWN, false);
+    }
+
+    public static void setUiPrivacyTipShown(Context context) {
+        Context ct = null;
+        try {
+            ct = context.createPackageContext(XLConfig.PACKAGE_NAME_FOR_UI, Context.CONTEXT_IGNORE_SECURITY);
+        } catch (Exception e) {
+            XLConfig.LOGD("error when create download provider package context ", e);
+        }
+
+        SharedPreferences pf = ct.getSharedPreferences(XLConfig.PREF_NAME_IN_UI, Context.MODE_MULTI_PROCESS);
+        pf.edit().putBoolean(XLConfig.PREF_KEY_IS_UI_PRIVACY_TIP_SHOWN, true).commit();
     }
 
     public static boolean isRunningForeground (Context context, String pkgName) {

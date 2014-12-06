@@ -24,7 +24,10 @@ public class AppConfig {
     public static final String PREF_KEY_XUNLEI_USAGE_PERMISSION_IS_DEFAULT = "xunlei_usage_permission_is_default";
     public static final String PREF_KEY_XUNLEI_USER_ID = "xunlei_user_id";
     public static final String PREF_KEY_VIP_FLAG_IS_DEFAULT = "xunlei_key_vip_flag_is_default";
+    // 标记第三方添加任务是否弹出过隐私弹框
     public static final String PREF_KEY_IS_PRIVACY_TIP_SHOWN = "is_privacy_tip_shown";
+    // 标记下载管理UI是否弹出过隐私弹框
+    public static final String PREF_KEY_IS_UI_PRIVACY_TIP_SHOWN = "is_ui_privacy_tip_shown";
     public static final String PREF_KEY_IS_APP_ACTIVED = "is_app_actived";
 
     public static void LOGD(String message) {

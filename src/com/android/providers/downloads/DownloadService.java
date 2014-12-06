@@ -579,7 +579,11 @@ public class DownloadService extends Service {
         checkXunleiEngineStatus();
         final DownloadInfo info = reader.newDownloadInfo(
                 this, mSystemFacade, mStorageManager, mNotifier, mXunleiEngineEnable, mXlDownloadManager, mPreferences);
-        CheckingXLEngineFlagWrite2DB(info);
+        if (info.mXlTaskOpenMark == 1 && null == mXlDownloadManager) {
+            XLConfig.LOGD("(insertDownloadLocked) ---> xunlei task resume but engine uninit, init xunlei engine again.");
+            initXunleiEngine();
+            info.setXlDownloadManager(mXlDownloadManager);
+        }
         mDownloads.put(info.mId, info);
 
         XLConfig.LOGD("processing inserted download " + info.mId);
@@ -981,11 +985,4 @@ public class DownloadService extends Service {
         return queryRet;
     }
 
-    private void CheckingXLEngineFlagWrite2DB(DownloadInfo info) {
-        if (1 == info.mXlTaskOpenMark) {
-            ContentValues values = new ContentValues();
-            values.put(DownloadManager.ExtraDownloads.COLUMN_XL_TASK_OPEN_MARK, info.mXlTaskOpenMark);
-            getContentResolver().update(info.getAllDownloadsUri(), values, null, null);
-        }
-    }
 }
