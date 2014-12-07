@@ -16,6 +16,7 @@
 
 package com.android.providers.downloads;
 
+import android.app.KeyguardManager;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -1256,6 +1257,11 @@ public class Helpers {
         }
 
         return false ;
+    }
+
+    public static boolean isScreenLocked(Context c) {
+        KeyguardManager mKeyguardManager = (KeyguardManager) c.getSystemService(c.KEYGUARD_SERVICE);
+        return mKeyguardManager.inKeyguardRestrictedInputMode();
     }
 
 }

@@ -180,7 +180,7 @@
                   android:theme="@miui:style/Theme.NoDisplay"/>
         <activity android:name=".PrivacyTipActivity"
                   android:exported="true"
-                  android:launchMode="singleInstance"
+                  android:launchMode="singleTask"
                   android:theme="@miui:style/Theme.NoDisplay"/>
     </application>
 </manifest>

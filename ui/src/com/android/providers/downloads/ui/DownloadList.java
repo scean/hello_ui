@@ -643,7 +643,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
         //android.app.ActionBar actionBar = getActionBar();
         boolean xunlei_usage = getXunleiUsagePermission();
         boolean isAppActived = DownloadUtils.isAppActived(this);
-
+        boolean isPrivacyTipShown = DownloadUtils.isPrivacyTipShown(this);
         boolean netStatus = DownloadUtils.isNetworkAvailable(getApplicationContext());
 
 		if (Build.IS_TABLET || miui.os.Build.IS_CTS_BUILD || miui.os.Build.IS_INTERNATIONAL_BUILD) 
@@ -672,7 +672,10 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             mImgXlSmall.setVisibility(View.VISIBLE);
         }
 
-        if (!DownloadUtils.isPrivacyTipShown(this)) {
+        // 如果引擎为开并且之前没有处理过隐私弹窗，那么弹出硬隐私弹窗
+        // 如果之前处理过隐私弹窗，并且当前有弹框存在，那么取消掉当前弹框
+        // 如果引擎为关闭并且之前没有处理过
+        if (!isPrivacyTipShown && xunlei_usage) {
             if (mPrivacyDialog == null) {
                 mPrivacyDialog = new AlertDialog.Builder(this)
                         .setTitle(R.string.privacy_tip_title)
@@ -711,7 +714,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
             }
             mPrivacyDialog.show();
         } else {
-            if (mPrivacyDialog != null && mPrivacyDialog.isShowing()) {
+            if (isPrivacyTipShown && mPrivacyDialog != null && mPrivacyDialog.isShowing()) {
                 mPrivacyDialog.dismiss();
                 mPrivacyDialog = null;
             }

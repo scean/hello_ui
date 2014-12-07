@@ -614,6 +614,7 @@ public final class DownloadProvider extends ContentProvider {
         Context context = getContext();
         boolean isPrivacyTipShown = Helpers.isPrivacyTipShown(context);
         boolean isXunleiEngineOn = Helpers.getXunleiUsagePermission(context);
+        boolean isScreenLocked = Helpers.isScreenLocked(context);
 
         // note we disallow inserting into ALL_DOWNLOADS
         int match = sURIMatcher.match(uri);
@@ -776,7 +777,8 @@ public final class DownloadProvider extends ContentProvider {
         // Set whether use xunlei engine mask.
         boolean isRunningForeground = Helpers.isRunningForeground(context, pckg);
         // 如果没有弹过隐私弹窗，并且提交任务的app在后台，那么使用原生下载开始任务
-        if (!isRunningForeground && !isPrivacyTipShown) {
+        // 或者任务在前台，但是锁屏状态下
+        if ((!isRunningForeground && !isPrivacyTipShown) || (isRunningForeground && isScreenLocked && !isPrivacyTipShown)) {
             filteredValues.put(DownloadManager.ExtraDownloads.COLUMN_XL_TASK_OPEN_MARK, false);
         } else {
             filteredValues.put(DownloadManager.ExtraDownloads.COLUMN_XL_TASK_OPEN_MARK, Helpers.getXunleiUsagePermission(context));
@@ -791,7 +793,7 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         // 如果没有弹过隐私弹框，并且在前台，并且引擎为打开状态，那么弹出隐私弹框
-        if (isRunningForeground && !isPrivacyTipShown && isXunleiEngineOn) {
+        if (isRunningForeground && !isPrivacyTipShown && isXunleiEngineOn && !isScreenLocked) {
             Helpers.openPrivacyTipDialog(context);
         }
 
