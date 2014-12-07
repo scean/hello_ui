@@ -75,8 +75,6 @@ public class DownloadInfo {
             final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier, dm, pf);
             updateFromDatabase(info);
 
-            // if a new task, rewrite this flag
-            info.mXlTaskOpenMark = checkDownloadEngine(info.mPackage, info.mAppointName, xlEngineFlag);
             readRequestHeaders(info);
             XLConfig.LOGD("in newDownloadInfo " + info);
             return info;
@@ -837,42 +835,6 @@ public class DownloadInfo {
         default:
             return getAllDownloadsUri().toString();
         }
-    }
-
-    private static boolean isMusicOnline(String pkgName, String appointName) {
-        // When listen music online, must download temporary file in the order
-        // from the beginning to the end. So, download engine should not be used.
-        final String MiuiMusicPackage = "com.miui.player";
-        final String MiuiMusicTempSuffix = "tmp";
-        if(MiuiMusicPackage.equals(pkgName) && appointName != null) {
-            int lastDotPos = appointName.lastIndexOf(".");
-            if(lastDotPos != -1) {
-                String suffix = appointName.substring(lastDotPos+1);
-                if(suffix.equals(MiuiMusicTempSuffix)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static int checkDownloadEngine(String pkgName, String appointName, boolean xlEngineFlag) {
-        XLConfig.LOGD("(checkDownloadEngine) ---> pkgName=" + pkgName +
-                      ", appointName=" + appointName + ", xlEngineFlag=" + xlEngineFlag);
-        int xlTaskOpenMark = 1;
-        if (xlEngineFlag) {
-            if (pkgName != null && appointName != null) {
-                int index = appointName.lastIndexOf("/");
-                String name = appointName.substring(index + 1);
-                if (isMusicOnline(pkgName, name)) {
-                    xlTaskOpenMark = 0;
-                }
-            }
-        } else {
-            xlTaskOpenMark = 0;
-        }
-        XLConfig.LOGD("(checkDownloadEngine) ---> after check, xlTaskOpenMark=" + xlTaskOpenMark);
-        return xlTaskOpenMark;
     }
 
     @Override

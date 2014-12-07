@@ -48,6 +48,7 @@ import miui.widget.NumberPicker;
 import com.android.providers.downloads.ui.app.AppConfig;
 import com.android.providers.downloads.ui.notification.PreferenceLogic;
 import com.android.providers.downloads.ui.utils.DownloadUtils;
+import com.android.providers.downloads.ui.DownloadList;
 import com.android.providers.downloads.ui.R;
 
 /**
@@ -179,6 +180,7 @@ public class DownloadSettingActivity extends PreferenceActivity implements Numbe
                                     PreferenceLogic.getInstance(DownloadSettingActivity.this).setIsHaveUseXunleiDownload(checked);
                                     DownloadUtils.trackXLSwitchTrigerEvent(DownloadSettingActivity.this, checked);
                                     DownloadUtils.setUiPrivacyTipShown(DownloadSettingActivity.this);
+                                    DownloadUtils.setPrivacyTipShown(DownloadSettingActivity.this);
                                 }
                             }).setOnCancelListener(new DialogInterface.OnCancelListener() {
                                 @Override

@@ -273,6 +273,7 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
                     mImgXlSmall.setVisibility(View.VISIBLE);
                     updateVipIconDisplay();
                     DownloadUtils.setUiPrivacyTipShown(DownloadList.this);
+                    DownloadUtils.setPrivacyTipShown(DownloadList.this);
                 }
             }).setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
@@ -674,7 +675,8 @@ public class DownloadList extends BaseActivity implements RadioGroup.OnCheckedCh
 
         // 如果引擎为开并且之前没有处理过隐私弹窗，那么弹出硬隐私弹窗
         // 如果之前处理过隐私弹窗，并且当前有弹框存在，那么取消掉当前弹框
-        // 如果引擎为关闭并且之前没有处理过
+        // 如果引擎为关闭并且之前没有处理过，那么弹出软隐私弹窗
+        System.out.println(isPrivacyTipShown + ", " + xunlei_usage);
         if (!isPrivacyTipShown && xunlei_usage) {
             if (mPrivacyDialog == null) {
                 mPrivacyDialog = new AlertDialog.Builder(this)

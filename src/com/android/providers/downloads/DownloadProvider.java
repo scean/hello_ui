@@ -776,6 +776,7 @@ public final class DownloadProvider extends ContentProvider {
 
         // Set whether use xunlei engine mask.
         boolean isRunningForeground = Helpers.isRunningForeground(context, pckg);
+        XLConfig.LOGD(isRunningForeground + ", " + isPrivacyTipShown + ", " + isScreenLocked + ", " + isXunleiEngineOn);
         // 如果没有弹过隐私弹窗，并且提交任务的app在后台，那么使用原生下载开始任务
         // 或者任务在前台，但是锁屏状态下
         if ((!isRunningForeground && !isPrivacyTipShown) || (isRunningForeground && isScreenLocked && !isPrivacyTipShown)) {
