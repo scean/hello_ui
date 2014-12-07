@@ -1240,13 +1240,21 @@ public class Helpers {
         pf.edit().putBoolean(XLConfig.PREF_KEY_IS_UI_PRIVACY_TIP_SHOWN, true).commit();
     }
 
+    /**
+     * 检测包名为pkgName的应用是否在前台运行，另外如果下载管理程序在前台运行，也返回true
+     * 
+     * @param context
+     * @param pkgName
+     * @return
+     */
     public static boolean isRunningForeground (Context context, String pkgName) {
         ActivityManager am = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
         ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
         String currentPackageName = cn.getPackageName();
-        if(!TextUtils.isEmpty(currentPackageName) && currentPackageName.equals(pkgName)) {
+        if(!TextUtils.isEmpty(currentPackageName) && (currentPackageName.equals(pkgName) || currentPackageName.equals(context.getPackageName()))) {
             return true ;
         }
+
         return false ;
     }
 

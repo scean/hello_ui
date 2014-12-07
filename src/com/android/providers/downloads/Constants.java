@@ -65,6 +65,7 @@ public class Constants {
     /** the intent that gets sent when deleting the notification of a completed download */
     public static final String ACTION_HIDE = "android.intent.action.DOWNLOAD_HIDE";
 
+    // 操作过隐私弹窗后通知开始下载
     public static final String ACTION_PRIVACY_ACCEPT = "com.android.providers.downloads.PRIVACY_ACCEPT";
 
     /** The default base name for downloaded files if we can't get one at the HTTP level */

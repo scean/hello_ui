@@ -15,6 +15,7 @@ public class AppConfig {
 
     public static final boolean DEBUG = new File(LOG_DIR, ".log").exists();
 
+    // 操作过隐私弹窗后通知开始下载
     public static final String ACTION_PRIVACY_ACCEPT = "com.android.providers.downloads.PRIVACY_ACCEPT";
 
     public static final String PREF_NAME = "download_pref";

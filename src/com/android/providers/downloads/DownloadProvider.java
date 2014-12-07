@@ -610,7 +610,7 @@ public final class DownloadProvider extends ContentProvider {
     public Uri insert(final Uri uri, final ContentValues values) {
         checkInsertPermissions(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        
+
         Context context = getContext();
         boolean isPrivacyTipShown = Helpers.isPrivacyTipShown(context);
         boolean isXunleiEngineOn = Helpers.getXunleiUsagePermission(context);
@@ -790,8 +790,8 @@ public final class DownloadProvider extends ContentProvider {
             return null;
         }
 
-        // 如果没有弹过隐私弹狂，并且在前台，那么弹出隐私弹框
-        if (isRunningForeground && !isPrivacyTipShown) {
+        // 如果没有弹过隐私弹框，并且在前台，并且引擎为打开状态，那么弹出隐私弹框
+        if (isRunningForeground && !isPrivacyTipShown && isXunleiEngineOn) {
             Helpers.openPrivacyTipDialog(context);
         }
 
@@ -1598,7 +1598,4 @@ public final class DownloadProvider extends ContentProvider {
         }
     }
 
-    private void checkPrivacyTip(String pkgName) {
-        
-    }
 }
