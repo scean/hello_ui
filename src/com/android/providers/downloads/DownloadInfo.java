@@ -465,7 +465,7 @@ public class DownloadInfo {
         switch (mStatus) {
         case 0: // status hasn't been initialized yet, this is a new download
         case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
-            // 如果弹过隐私弹框或者是原生下载，那么不阻塞，否则要阻塞任务，知道确认了隐私弹框
+            // 如果弹过隐私弹框或者是原生下载，那么不阻塞，否则要阻塞任务，直到确认了隐私弹框
             return Helpers.isPrivacyTipShown(mContext) || mXlTaskOpenMark == 0;
         case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
             // running, without a chance to update the database

@@ -70,6 +70,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.webkit.MimeTypeMap;
 import android.net.http.AndroidHttpClient;
+import android.app.DownloadManager;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.Header;
@@ -260,6 +261,15 @@ public class DownloadThread implements Runnable {
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         try {
+            // 如果没有确认过隐私弹窗，但是任务开始的时候引擎还是打开的，那么此条任务强制使用原生下载
+            // 当然断点续传中间切换引擎会有问题，所以如果是断点续传就不切换
+            if (!Helpers.isPrivacyTipShown(mContext) && mInfo.mXlTaskOpenMark == 1 && mInfo.mCurrentBytes <= 0) {
+                ContentValues values = new ContentValues();
+                values.put(DownloadManager.ExtraDownloads.COLUMN_XL_TASK_OPEN_MARK, 0);
+                mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+                mInfo.mXlTaskOpenMark = 0;
+            }
+
             runInternal();
         } finally {
             mNotifier.notifyDownloadSpeed(mInfo.mId, 0);
