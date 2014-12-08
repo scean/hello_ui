@@ -9,6 +9,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4 android-support-v13 miuisdk_st
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res $(LOCAL_PATH)/miui_res
 LOCAL_AAPT_FLAGS := --auto-add-overlay
 LOCAL_PACKAGE_NAME := DownloadProvider
 LOCAL_CERTIFICATE := media
